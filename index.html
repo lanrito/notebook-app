@@ -503,6 +503,11 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 #pop .ls .duo.mvd button{min-height:46px;background:var(--accent);border-color:var(--accent);color:#fff;font-size:15.5px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
 #pop .ls .duo.mvd button:hover,#pop .ls .duo.mvd button:active{background:#2a62c6}
 #pop .ls .duo.mvd button:only-child{flex:1}
+/* every two-up action in a menu: blue with white text. Choices (.pz) stay light, so the one picked shows in blue */
+#pop .ls .duo:not(.pz):not(.mvd) button{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+#pop .ls .duo:not(.pz):not(.mvd) button:hover,#pop .ls .duo:not(.pz):not(.mvd) button:active{background:#2a62c6}
+#pop .ls .duo:not(.pz):not(.mvd) button .pgv{color:rgba(255,255,255,.85)}
+#pop .ls .duo:not(.pz):not(.mvd) button:disabled{opacity:.45}
 #pop .ls>.duo.mvd+.hd{margin-top:2px}
 
 /* the main menu: a button at the top left of every page; a short list, with the rest one step in */
@@ -654,7 +659,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124010853';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124171601';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
