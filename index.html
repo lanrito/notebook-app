@@ -299,6 +299,11 @@ table.sl{border-collapse:collapse;width:100%;min-width:1140px;font-size:14px;col
 .dvtools{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e4e3df;padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .fmt{display:flex;gap:4px;flex-wrap:wrap}.fmt .fgap{width:6px}.fmt .fi{font-family:Georgia,'Times New Roman',serif;font-size:16px}.fmt .fca{font-weight:700;line-height:1.05;padding:0 3px 1px;border-bottom:3px solid var(--tc,#d0342c)}.fmt .ftx{font-weight:600}.fmt .ftx sub{font-size:.68em;font-weight:700;vertical-align:-.2em;margin-left:.5px}
 .fmt button.on{background:#2f6fde;border-color:#2f6fde;color:#fff}.fmt .ffb{min-width:158px;justify-content:space-between;font-weight:550}
+.fmt .fal{display:inline-flex}.dpop button svg{flex:none}.dpop .ck{font-size:14px;flex:none}
+#nbView .dvtools .fmt{flex:0 0 100%}
+.rt font[size="1"],.rt font[size="2"]{font-size:12.75px}.rt font[size="3"],.rt font[size="4"]{font-size:15px}.rt font[size="5"]{font-size:19.5px}.rt font[size="6"],.rt font[size="7"]{font-size:25.5px}
+.rt [data-al="c"]{text-align:center}.rt [data-al="r"]{text-align:right}.rt li[data-al]{list-style-position:inside}
+.rt [data-in="1"]{margin-left:1.5em}.rt [data-in="2"]{margin-left:3em}.rt [data-in="3"]{margin-left:4.5em}.rt [data-in="4"]{margin-left:6em}.rt [data-in="5"]{margin-left:7.5em}.rt [data-in="6"]{margin-left:9em}
 .rt font[face="Helvetica"]{font-family:Helvetica,Arial,sans-serif}.rt font[face="Times New Roman"]{font-family:"Times New Roman",Times,serif}.rt font[face="Courier New"]{font-family:"Courier New",Courier,monospace}
 .dpop .sw{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}.fmt button{min-width:40px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dad8d2;border-radius:8px;background:#f6f5f1;font-size:14px;color:#1c1c1e;white-space:nowrap}
 .stl{font-size:12.5px;font-weight:650;color:#6b6b70;margin-left:8px}
@@ -673,7 +678,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124210205';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124222722';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -6471,12 +6476,16 @@ function rtHex(v){v=String(v||'').trim().toLowerCase();let m=/^#([0-9a-f]{3})$/.
 const rtCol=v=>{const h=rtHex(v);return RT_CSET.has(h)?h:'';};   /* any other color is no color: only the six are kept */
 const RT_FONTS=[['','Sans Serif',''],['h','Helvetica',"Helvetica,Arial,sans-serif"],['t','Times New Roman',"'Times New Roman',Times,serif"],['c','Courier New',"'Courier New',Courier,monospace"]],RT_FNAME={h:'Helvetica',t:'Times New Roman',c:'Courier New'};
 const rtFace=v=>{const n=String(v||'').split(',')[0].replace(/["']/g,'').trim().toLowerCase();return n==='helvetica'?'h':n==='times new roman'?'t':n==='courier new'?'c':'';};   /* any other face is the app's own Sans Serif */
-const rtSame=(L,x)=>!L.u===!x.u&&!L.s===!x.s&&(L.c||'')===(x.c||'')&&(L.f||'')===(x.f||'');
+const RT_SIZES=[['s','Small','2',12.75],['','Normal','3',15],['l','Large','5',19.5],['h','Huge','6',25.5]],RT_ZN={s:'2',l:'5',h:'6'},RT_ZOF={'1':'s','2':'s','5':'l','6':'h','7':'h'},RT_Z={s:.85,l:1.3,h:1.7},RT_IN=1.5,RT_INMAX=6;
+const rtSame=(L,x)=>!L.u===!x.u&&!L.s===!x.s&&(L.c||'')===(x.c||'')&&(L.f||'')===(x.f||'')&&(L.z||'')===(x.z||'');
+/* a paragraph's or list item's own marks: alignment and indent, read only from what the app itself writes */
+const rtBlk=n=>{const o={},a=n.getAttribute('data-al'),d=Math.min(RT_INMAX,+n.getAttribute('data-in')||0)|0;if(a==='c'||a==='r')o.a=a;if(d>0)o.d=d;return o;};
+const rtBlkAttr=b=>`${b.a?` data-al="${b.a}"`:''}${b.d?` data-in="${b.d}"`:''}`;
 const RT_BLOCK=new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TABLE','TBODY','THEAD','TFOOT','TR','TD','TH','BLOCKQUOTE','PRE','SECTION','ARTICLE','HEADER','FOOTER','DL','DT','DD','FIGURE']);
 function rtNorm(bl){
  const out=[];let pn=0,pk='';
  for(const b of bl){
-  let r=(b.r||[]).filter(x=>x.t!=='').map(x=>{const o={t:String(x.t).replace(/[\u00A0\s]+/g,' '),b:x.b?1:0,i:x.i?1:0};if(x.u)o.u=1;if(x.s)o.s=1;if(x.c&&RT_CSET.has(x.c))o.c=x.c;if(x.f&&RT_FNAME[x.f])o.f=x.f;return o;});
+  let r=(b.r||[]).filter(x=>x.t!=='').map(x=>{const o={t:String(x.t).replace(/[\u00A0\s]+/g,' '),b:x.b?1:0,i:x.i?1:0};if(x.u)o.u=1;if(x.s)o.s=1;if(x.c&&RT_CSET.has(x.c))o.c=x.c;if(x.f&&RT_FNAME[x.f])o.f=x.f;if(x.z&&RT_Z[x.z])o.z=x.z;return o;});
   for(let i=1;i<r.length;i++)if(/ $/.test(r[i-1].t)&&/^ /.test(r[i].t))r[i].t=r[i].t.slice(1);
   if(r.length){r[0].t=r[0].t.replace(/^ +/,'');r[r.length-1].t=r[r.length-1].t.replace(/ +$/,'');}
   r=r.filter(x=>x.t!=='');const m=[];for(const x of r){const L=m[m.length-1];if(L&&L.b===x.b&&L.i===x.i&&rtSame(L,x))L.t+=x.t;else m.push(x);}
@@ -6486,7 +6495,8 @@ function rtNorm(bl){
    else{g=/^(\d{1,2})[.)]\s+/.exec(t0);if(g&&(t0.length>g[0].length||m.length>1)){k='ol';n=+g[1];m[0].t=t0.slice(g[0].length);}}
    if(m.length&&!m[0].t)m.shift();if(m.length)m[0].t=m[0].t.replace(/^ +/,'');}
   if(k==='ol'){if(pk==='ol'&&(!n||n===pn+1)){pn++;n=0;}else pn=n||1;}
-  pk=k;out.push(n&&n!==1?{k,r:m,n}:{k,r:m});
+  const o=n&&n!==1?{k,r:m,n}:{k,r:m};if(b.a==='c'||b.a==='r')o.a=b.a;if(b.d>0)o.d=Math.min(RT_INMAX,b.d|0);
+  pk=k;out.push(o);
  }
  return out;
 }
@@ -6495,7 +6505,7 @@ function rtParse(html){
  const root=document.createElement('div');root.innerHTML=String(html);
  const out=[];let cur=null,inLi='';
  const flush=()=>{if(cur){out.push(cur);cur=null;}};
- const add=(t,st)=>{if(cur&&cur.brk){if(!t.trim())return;const k=cur.k;flush();cur={k,r:[]};}if(!cur){if(!t.trim())return;cur={k:inLi||'p',r:[]};}cur.r.push({t,b:st.b,i:st.i,u:st.u,s:st.s,c:st.c,f:st.f});};
+ const add=(t,st)=>{if(cur&&cur.brk){if(!t.trim())return;const k=cur.k,a=cur.a,d=cur.d;flush();cur={k,r:[]};if(a)cur.a=a;if(d)cur.d=d;}if(!cur){if(!t.trim())return;cur={k:inLi||'p',r:[]};}cur.r.push({t,b:st.b,i:st.i,u:st.u,s:st.s,c:st.c,f:st.f,z:st.z});};
  const kids=(n,st)=>{for(const c of n.childNodes)walk(c,st);};
  const walk=(n,st)=>{
   if(n.nodeType===3){add(n.nodeValue,st);return;}
@@ -6511,26 +6521,27 @@ function rtParse(html){
   if(!a&&(tag==='U'||/underline/i.test(tdv)))u=1;if(tag==='S'||tag==='STRIKE'||tag==='DEL'||/line-through/i.test(tdv))sk=1;
   const cm=/(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(sty),fc=tag==='FONT'?n.getAttribute('color'):null;if(cm)c=rtCol(cm[1]);else if(fc)c=rtCol(fc);
   const ff=tag==='FONT'?n.getAttribute('face'):null;let f=st.f;if(ff)f=rtFace(ff);
-  const ns={b,i,u,s:sk,c,a,f};
+  const fz=tag==='FONT'?n.getAttribute('size'):null;let z=st.z;if(fz)z=RT_ZOF[String(fz).trim()]||'';
+  const ns={b,i,u,s:sk,c,a,f,z};
   if(tag==='UL'||tag==='OL'){const k=tag==='UL'?'ul':'ol';let first=true;const start=+(n.getAttribute('start')||0);
-   const was=inLi;for(const c of n.childNodes){if(c.nodeType===1&&c.tagName==='LI'){flush();cur={k,r:[]};if(first&&start>1)cur.n=start;first=false;inLi=k;kids(c,ns);flush();inLi=was;}else if(c.nodeType===1)walk(c,ns);}
+   const was=inLi;for(const c of n.childNodes){if(c.nodeType===1&&c.tagName==='LI'){flush();cur=Object.assign({k,r:[]},rtBlk(c));if(first&&start>1)cur.n=start;first=false;inLi=k;kids(c,ns);flush();inLi=was;}else if(c.nodeType===1)walk(c,ns);}
    return;}
   if(tag==='P'&&(/MsoList/i.test(n.className||'')||/mso-list/i.test(sty))){
    const mk=n.querySelector('[style*="mso-list"]'),mt=mk?mk.textContent.replace(/[\u00A0\s]+/g,''):'';
    flush();cur={k:/^\(?(\d+|[a-zA-Z])[.)]$/.test(mt)&&mt!=='o'?'ol':'ul',r:[]};kids(n,ns);flush();return;}
-  if(RT_BLOCK.has(tag)){if(inLi){if(cur&&cur.r.some(x=>x.t.trim())){flush();cur={k:inLi,r:[]};}else if(!cur)cur={k:inLi,r:[]};kids(n,ns);return;}flush();cur={k:tag==='LI'?'ul':'p',r:[]};kids(n,ns);flush();return;}
+  if(RT_BLOCK.has(tag)){if(inLi){if(cur&&cur.r.some(x=>x.t.trim())){flush();cur={k:inLi,r:[]};}else if(!cur)cur={k:inLi,r:[]};kids(n,ns);return;}flush();cur=Object.assign({k:tag==='LI'?'ul':'p',r:[]},rtBlk(n));kids(n,ns);flush();return;}
   kids(n,ns);
  };
- kids(root,{b:0,i:0,u:0,s:0,c:'',a:0,f:''});flush();
+ kids(root,{b:0,i:0,u:0,s:0,c:'',a:0,f:'',z:''});flush();
  return rtNorm(out);
 }
 function rtFromText(t){return rtNorm(String(t||'').split(/\r?\n/).map(l=>{const g=/^\s*[-*–]\s+(.*)$/.exec(l);return g?{k:'ul',r:[{t:g[1]}]}:{k:'p',r:[{t:l}]};}).filter(b=>b.r[0].t.trim()));}
-const rtRuns=b=>b.r.map(r=>{let t=esc(r.t);if(r.s)t=`<s>${t}</s>`;if(r.u)t=`<u>${t}</u>`;if(r.i)t=`<i>${t}</i>`;if(r.b)t=`<b>${t}</b>`;if(r.c||r.f)t=`<font${r.c?` color="${r.c}"`:''}${r.f?` face="${RT_FNAME[r.f]}"`:''}>${t}</font>`;return t;}).join('');
+const rtRuns=b=>b.r.map(r=>{let t=esc(r.t);if(r.s)t=`<s>${t}</s>`;if(r.u)t=`<u>${t}</u>`;if(r.i)t=`<i>${t}</i>`;if(r.b)t=`<b>${t}</b>`;if(r.c||r.f||r.z)t=`<font${r.c?` color="${r.c}"`:''}${r.f?` face="${RT_FNAME[r.f]}"`:''}${r.z?` size="${RT_ZN[r.z]}"`:''}>${t}</font>`;return t;}).join('');
 function rtHTML(bl){
  let h='',open='';const end=()=>{if(open){h+=`</${open}>`;open='';}};
  for(const b of bl){const inner=rtRuns(b)||'<br>',tail=b.r.length&&b.r[b.r.length-1].b?'&nbsp;':'';
-  if(b.k==='p'){end();h+=`<p>${inner}${tail}</p>`;}
-  else{if(open!==b.k||b.n){end();open=b.k;h+=`<${b.k}${b.n&&b.n!==1?` start="${b.n}"`:''}>`;}h+=`<li>${inner}${tail}</li>`;}}
+  if(b.k==='p'){end();h+=`<p${rtBlkAttr(b)}>${inner}${tail}</p>`;}
+  else{if(open!==b.k||b.n){end();open=b.k;h+=`<${b.k}${b.n&&b.n!==1?` start="${b.n}"`:''}>`;}h+=`<li${rtBlkAttr(b)}>${inner}${tail}</li>`;}}
  end();return h||RT_P;
 }
 const rtClean=html=>rtHTML(rtParse(html));
@@ -6630,7 +6641,28 @@ document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s||!
 /* B, I, U and S light up when the words under the cursor already have that format */
 function fmtState(){const bs=document.querySelectorAll('.fmt button[data-st]');if(!bs.length)return;const s=getSelection(),n=s&&s.rangeCount?s.anchorNode:null,el=n&&(n.nodeType===1?n:n.parentElement),inRT=!!(el&&el.closest&&el.closest('.rt'));
  for(const b of bs){let on=false;if(inRT){try{on=!!document.queryCommandState(b.dataset.f);}catch(e){}}b.classList.toggle('on',on);}
- const k=inRT?rtFontAt(el):'',nm=(RT_FONTS.find(x=>x[0]===k)||RT_FONTS[0])[1];for(const n of document.querySelectorAll('.fmt .ffn'))if(n.textContent!==nm)n.textContent=nm;}
+ const k=inRT?rtFontAt(el):'',nm=(RT_FONTS.find(x=>x[0]===k)||RT_FONTS[0])[1];for(const n of document.querySelectorAll('.fmt .ffn'))if(n.textContent!==nm)n.textContent=nm;
+ const bk=inRT?rtBlockOf(el):null,al=bk?(bk.getAttribute('data-al')||''):'';for(const n of document.querySelectorAll('.fmt .fal'))if(n.dataset.k!==al){n.dataset.k=al;n.innerHTML=alSvg(al);}}
+function rtSizeAt(el){for(let n=el;n&&!(n.classList&&n.classList.contains('rt'));n=n.parentElement){if(n.tagName==='FONT'&&n.getAttribute('size'))return RT_ZOF[n.getAttribute('size')]||'';}return '';}
+/* the paragraph or list item a place in the text belongs to */
+const RT_BSEL='p,li,div,h1,h2,h3,h4,h5,h6';
+function rtBlockOf(node){let n=node&&(node.nodeType===1?node:node.parentElement),b=null;for(;n&&!(n.classList&&n.classList.contains('rt'));n=n.parentElement)if(n.matches&&n.matches(RT_BSEL)&&!b)b=n;return b?(b.closest('li')&&b.tagName!=='LI'?b.closest('li'):b):null;}
+/* the paragraphs and list items the selection touches. One that the selection only reaches the very start of is left out,
+   which is how a triple-click on a paragraph selects it. */
+function rtBlocks(el){const s=getSelection();if(!s||!s.rangeCount)return [];const rg=s.getRangeAt(0);if(!el.contains(rg.startContainer))return [];
+ if(rg.collapsed){let b=rtBlockOf(rg.startContainer);if(!b){try{document.execCommand('formatBlock',false,'p');}catch(e){}const g=getSelection();b=g.rangeCount?rtBlockOf(g.getRangeAt(0).startContainer):null;}return b?[b]:[];}
+ const out=[];for(const b of el.querySelectorAll(RT_BSEL)){if(b.querySelector(RT_BSEL+',ul,ol'))continue;const r2=document.createRange();r2.selectNodeContents(b);
+  if(rg.compareBoundaryPoints(Range.START_TO_END,r2)>0&&rg.compareBoundaryPoints(Range.END_TO_START,r2)<0){const x=b.closest('li')&&b.tagName!=='LI'?b.closest('li'):b;if(!out.includes(x))out.push(x);}}
+ if(!out.length){const b=rtBlockOf(rg.startContainer);if(b)out.push(b);}return out;}
+function rtAlign(a){const el=rtFocus();if(!el){toast('Tap into a box first, then use the button.');return;}for(const b of rtBlocks(el)){if(a)b.setAttribute('data-al',a);else b.removeAttribute('data-al');}rtStore(el);fmtState();}
+function rtIndent(dv){const el=rtFocus();if(!el){toast('Tap into a box first, then use the button.');return;}for(const b of rtBlocks(el)){const d=clamp((+b.getAttribute('data-in')||0)+dv,0,RT_INMAX);if(d)b.setAttribute('data-in',d);else b.removeAttribute('data-in');}rtStore(el);fmtState();}
+const AL_IC={'':'M4 6h16M4 12h10M4 18h14',c:'M4 6h16M7 12h10M5 18h14',r:'M4 6h16M10 12h10M6 18h14'},alSvg=k=>`<svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="${AL_IC[k]||AL_IC['']}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+function alignMenu(btn){const el=rtFocus();if(!el){toast('Tap into a box first, then use the button.');return;}
+ const s=getSelection(),b=s&&s.rangeCount?rtBlockOf(s.anchorNode):null,cur=b?(b.getAttribute('data-al')||''):'';
+ docPop(btn,[{hd:'Align'},...[['','Left'],['c','Center'],['r','Right']].map(([k,name])=>({label:name,ic:alSvg(k),on:k===cur,fn:()=>rtAlign(k)}))]);}
+function sizeMenu(btn){if(!rtFocus()){toast('Tap into a box first, then use the button.');return;}
+ const s=getSelection(),n=s&&s.rangeCount?s.anchorNode:null,cur=rtSizeAt(n&&(n.nodeType===1?n:n.parentElement));
+ docPop(btn,[{hd:'Size'},...RT_SIZES.map(([k,name,num,px])=>({label:name,fz:px,on:k===cur,fn:()=>rtCmd('fontSize',num)}))]);}
 /* the font of the words under the cursor: the nearest <font face> on the way up to the box */
 function rtFontAt(el){for(let n=el;n&&!(n.classList&&n.classList.contains('rt'));n=n.parentElement){if(n.tagName==='FONT'&&n.getAttribute('face'))return rtFace(n.getAttribute('face'));}return '';}
 function rtFocus(){if(!lastRT||!lastRT.isConnected)return null;lastRT.focus();if(lastRange&&lastRT.contains(lastRange.startContainer)){try{const s=getSelection();s.removeAllRanges();s.addRange(lastRange);}catch(e){}}return lastRT;}
@@ -6639,7 +6671,9 @@ function rtStore(el){const s=scene(),h=rtClean(el.innerHTML);
  else if(el.dataset.cut){const [o,id]=el.dataset.cut.split(':'),c0=txGet(o,'cut.'+id,false);if(!c0||c0.h===h)return;txEdit(o,'cut.'+id,c=>{c.h=h;});}}
 function rtCmd(cmd,val){const el=rtFocus();if(!el){toast('Tap into a box first, then use the button.');return;}
  if(cmd==='removeFormat'){const s=getSelection();if(!s||s.isCollapsed){toast('Select the words first, then clear their formatting.');return;}}
- try{if(cmd==='foreColor'||cmd==='fontName')document.execCommand('styleWithCSS',false,false);document.execCommand(cmd,false,val==null?null:val);}catch(e){}rtStore(el);fmtState();}
+ try{if(cmd==='foreColor'||cmd==='fontName'||cmd==='fontSize')document.execCommand('styleWithCSS',false,false);const isList=cmd==='insertUnorderedList'||cmd==='insertOrderedList',keep=isList?rtBlocks(el).map(b=>{const k=[b.getAttribute('data-al'),b.getAttribute('data-in')];b.removeAttribute('data-al');b.removeAttribute('data-in');return k;}):null;
+  document.execCommand(cmd,false,val==null?null:val);
+  if(keep&&keep.length)rtBlocks(el).forEach((b,i)=>{const k=keep[Math.min(i,keep.length-1)];if(k[0])b.setAttribute('data-al',k[0]);if(k[1])b.setAttribute('data-in',k[1]);});}catch(e){}rtStore(el);fmtState();}
 function fontMenu(btn){if(!rtFocus()){toast('Tap into a box first, then use the button.');return;}
  const s=getSelection(),n=s&&s.rangeCount?s.anchorNode:null,cur=rtFontAt(n&&(n.nodeType===1?n:n.parentElement));
  docPop(btn,[{hd:'Font'},...RT_FONTS.map(([k,name,ff])=>({label:name,ff,on:k===cur,fn:()=>rtCmd('fontName',k?name:getComputedStyle(lastRT).fontFamily)}))]);}
@@ -6651,7 +6685,7 @@ function caretEnd(node){try{const r=document.createRange();r.selectNodeContents(
 function focusCell(sel){const el=document.querySelector('.docv '+sel);if(!el)return;el.focus();caretEnd(el);el.scrollIntoView({block:'nearest'});}
 function closeDocPop(){if(dpop){dpop.remove();dpop=null;}}
 function docPop(anchor,items){closeDocPop();const d=document.createElement('div');d.className='dpop';
- d.innerHTML=items.map((it,i)=>it.hd?`<div class="hd">${esc(it.hd)}</div>`:`<button data-i="${i}"${it.ff?` style="font-family:${it.ff}"`:''}>${it.sw?`<i class="sw" style="background:${it.sw}"></i>`:''}${esc(it.label)}${it.on?'<span class="ck">✓</span>':''}</button>`).join('');document.body.appendChild(d);
+ d.innerHTML=items.map((it,i)=>it.hd?`<div class="hd">${esc(it.hd)}</div>`:`<button data-i="${i}"${it.ff||it.fz?` style="${it.ff?`font-family:${it.ff};`:''}${it.fz?`font-size:${it.fz}px`:''}"`:''}>${it.ic||''}${it.sw?`<i class="sw" style="background:${it.sw}"></i>`:''}${esc(it.label)}${it.on?'<span class="ck">✓</span>':''}</button>`).join('');document.body.appendChild(d);
  const r=anchor.getBoundingClientRect(),w=d.offsetWidth,h=d.offsetHeight;d.style.left=clamp(r.left,8,Math.max(8,innerWidth-w-8))+'px';d.style.top=(r.bottom+6+h>innerHeight-8?Math.max(8,r.top-h-6):r.bottom+6)+'px';
  d.addEventListener('pointerdown',e=>e.preventDefault());
  d.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const it=items[+b.dataset.i];closeDocPop();it.fn();});dpop=d;}
@@ -6682,7 +6716,7 @@ function docHead(s,kind){
  const D=prodOpts(s),T=kind==='nb'?[D.nbT,D.nbS]:[D.stT,D.stS];
  return `<div class="dvh"><div class="dvt"><div class="dvk">${esc(T[0]||'')}<i>${esc(T[1]||'')}</i></div><h2>${esc((s.number?'Sc. '+s.number+'  ':'')+(s.title||s.heading||'Untitled scene'))}</h2>${s.title&&s.heading?`<p>${esc(s.heading.toUpperCase())}</p>`:''}</div><div class="dvb">${kind==='nb'?'<button class="sm" data-d="docx">Import from Word…</button>':''}<button class="sm" data-d="todo">Checklist${(s.todo||[]).length?` · ${(s.todo||[]).filter(t=>!t.d).length} open`:''}</button><button class="sm" data-d="info">Scene info</button><button class="sm" data-d="pdf">Export PDF…</button></div></div>`;
 }
-const FMT_BAR='<div class="fmt"><button data-ff class="ffb" title="Font" aria-label="Font"><span class="ffn">Sans Serif</span>&nbsp;▾</button><span class="fgap"></span><button data-f="bold" data-st title="Bold (⌘B)"><b>B</b></button><button data-f="italic" data-st title="Italic (⌘I)" aria-label="Italic"><i class="fi">I</i></button><button data-f="underline" data-st title="Underline (⌘U)" aria-label="Underline"><u>U</u></button><button data-f="strikeThrough" data-st title="Strikethrough" aria-label="Strikethrough"><s>S</s></button><button data-fc title="Text color" aria-label="Text color"><span class="fca">A</span></button><button data-f="removeFormat" title="Remove formatting" aria-label="Remove formatting"><span class="ftx">T<sub>x</sub></span></button><span class="fgap"></span><button data-f="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.2" cy="6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="12" r="1.7" fill="currentColor"/><circle cx="4.2" cy="18" r="1.7" fill="currentColor"/></svg></button><button data-f="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g fill="currentColor" font-family="Inter,system-ui,sans-serif" font-size="6.6" font-weight="800" text-anchor="middle"><text x="4.2" y="8.4">1</text><text x="4.2" y="14.4">2</text><text x="4.2" y="20.4">3</text></g></svg></button></div>';
+const FMT_BAR='<div class="fmt"><button data-ff class="ffb" title="Font" aria-label="Font"><span class="ffn">Sans Serif</span>&nbsp;▾</button><button data-fz title="Size" aria-label="Size">Size&nbsp;▾</button><span class="fgap"></span><button data-f="bold" data-st title="Bold (⌘B)"><b>B</b></button><button data-f="italic" data-st title="Italic (⌘I)" aria-label="Italic"><i class="fi">I</i></button><button data-f="underline" data-st title="Underline (⌘U)" aria-label="Underline"><u>U</u></button><button data-f="strikeThrough" data-st title="Strikethrough" aria-label="Strikethrough"><s>S</s></button><button data-fc title="Text color" aria-label="Text color"><span class="fca">A</span></button><button data-f="removeFormat" title="Remove formatting" aria-label="Remove formatting"><span class="ftx">T<sub>x</sub></span></button><span class="fgap"></span><button data-fa title="Align" aria-label="Align"><span class="fal" data-k=""><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>&nbsp;▾</button><button data-f="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.2" cy="6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="12" r="1.7" fill="currentColor"/><circle cx="4.2" cy="18" r="1.7" fill="currentColor"/></svg></button><button data-f="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g fill="currentColor" font-family="Inter,system-ui,sans-serif" font-size="6.6" font-weight="800" text-anchor="middle"><text x="4.2" y="8.4">1</text><text x="4.2" y="14.4">2</text><text x="4.2" y="20.4">3</text></g></svg></button><button data-fi="-1" title="Indent less" aria-label="Indent less"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M11 6h9M11 12h9M11 18h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7.5 8.6v6.8L3 12z" fill="currentColor"/></svg></button><button data-fi="1" title="Indent more" aria-label="Indent more"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M11 6h9M11 12h9M11 18h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 8.6v6.8L7.5 12z" fill="currentColor"/></svg></button></div>';
 /* ---------- the breakdown's layout: which columns, in what order, called what, with which labels ----------
    The seven columns and their labels above are where everyone starts. A project can rename, hide, reorder, add and remove columns
    and labels; the layout is kept with the project (its top folder), the same way the shot list's columns are. */
@@ -6781,11 +6815,14 @@ function storyRename(id){const s=scene(),L=storiesFor(s),t=L.find(x=>x.id===id);
   card.querySelector('#ok').onclick=go;i.addEventListener('keydown',e=>{if(e.key==='Enter')go();});i.focus();i.select();},'numcard');}
 function docClick(e){
  if(stSwallow){stSwallow=false;if(e.target.closest('[data-story]'))return;}
- const t=e.target,b=t.closest('[data-f],[data-fc],[data-ff],[data-lab],[data-story],[data-stedit],[data-nbcols],[data-d],[data-sm],[data-cutm],[data-cutadd],#stAdd');if(!b)return;const d=b.dataset;
+ const t=e.target,b=t.closest('[data-f],[data-fc],[data-ff],[data-fz],[data-fa],[data-fi],[data-lab],[data-story],[data-stedit],[data-nbcols],[data-d],[data-sm],[data-cutm],[data-cutadd],#stAdd');if(!b)return;const d=b.dataset;
   if(d.nbcols){nbDialog();return;}
   if(d.stedit){storiesDialog(scene());return;}
  if(b.hasAttribute('data-fc'))colorMenu(b);
  else if(b.hasAttribute('data-ff'))fontMenu(b);
+ else if(b.hasAttribute('data-fz'))sizeMenu(b);
+ else if(b.hasAttribute('data-fa'))alignMenu(b);
+ else if(d.fi)rtIndent(+d.fi);
  else if(d.f)rtCmd(d.f);
  else if(d.lab)labelMenu(b,d.lab);
  else if(d.story){const s=scene(),now=Date.now();
@@ -6832,39 +6869,44 @@ function pdfKit(doc){
  return {font,w};
 }
 function rtLayout(K,bl,width,fs){
- const out=[],lh=fs*1.25;let num=0,prev='',first=true;
+ const out=[];let num=0,prev='',first=true;
  for(const b of bl){
   if(b.k==='ol')num=prev==='ol'&&!b.n?num+1:(b.n||1);
-  const list=b.k!=='p',ind=list?(b.k==='ol'?fs*1.55:fs*.95):0,W=Math.max(24,width-ind);
+  const list=b.k!=='p',dI=(b.d||0)*fs*RT_IN,li=list?(b.k==='ol'?fs*1.55:fs*.95):0,ind=li+dI,W=Math.max(24,width-ind);
   const gap=first?0:list&&prev!=='p'?fs*.22:rtIsLabel(b)?fs*.85:list?fs*.3:fs*.5;
   const words=[];let wd=null;
-  for(const r of b.r)for(const part of pdfStr(r.t).split(SYM_RE)){if(!part)continue;
-   if(/^\s+$/.test(part)){words.push({sp:1,t:' ',b:r.b,i:r.i,u:r.u,s:r.s,c:r.c,f:r.f});wd=null;continue;}
-   if(!wd){wd={p:[]};words.push(wd);}
-   if(PDF_SYM[part])wd.p.push({t:PDF_SYM[part],sym:1,u:r.u,s:r.s,c:r.c,f:r.f});else for(const q of part.match(/[^\/\-–—]+[\/\-–—]*|[\/\-–—]+/g))wd.p.push({t:q,b:r.b,i:r.i,u:r.u,s:r.s,c:r.c,f:r.f});}
+  for(const r of b.r){const z=fs*(RT_Z[r.z]||1),S={b:r.b,i:r.i,u:r.u,s:r.s,c:r.c,f:r.f,z};
+   for(const part of pdfStr(r.t).split(SYM_RE)){if(!part)continue;
+    if(/^\s+$/.test(part)){words.push(Object.assign({sp:1,t:' '},S));wd=null;continue;}
+    if(!wd){wd={p:[]};words.push(wd);}
+    if(PDF_SYM[part])wd.p.push(Object.assign({t:PDF_SYM[part],sym:1},S));else for(const q of part.match(/[^\/\-–—]+[\/\-–—]*|[\/\-–—]+/g))wd.p.push(Object.assign({t:q},S));}}
   let cur=[],cw=0;const n0=out.length;
-  const flush=()=>{while(cur.length&&cur[cur.length-1].sp)cw-=cur.pop().w;const segs=[];for(const t of cur){const L=segs[segs.length-1];if(L&&!t.sym&&!L.sym&&!!L.b===!!t.b&&!!L.i===!!t.i&&rtSame(L,t)){L.t+=t.t;L.w+=t.w;}else segs.push({t:t.t,b:t.b,i:t.i,sym:t.sym,w:t.w,u:t.u,s:t.s,c:t.c,f:t.f});}out.push({h:lh,gap:out.length===n0?gap:0,x:ind,segs});cur=[];cw=0;};
+  /* a line is as tall as its largest word, and never shorter than the page's own size; then it is placed by the block's alignment */
+  const flush=()=>{while(cur.length&&cur[cur.length-1].sp)cw-=cur.pop().w;const segs=[];let mz=fs;
+   for(const t of cur){if(t.z>mz)mz=t.z;const L=segs[segs.length-1];if(L&&!t.sym&&!L.sym&&!!L.b===!!t.b&&!!L.i===!!t.i&&rtSame(L,t)){L.t+=t.t;L.w+=t.w;}else segs.push({t:t.t,b:t.b,i:t.i,sym:t.sym,w:t.w,u:t.u,s:t.s,c:t.c,f:t.f,z:t.z});}
+   const off=b.a==='c'?Math.max(0,(W-cw)/2):b.a==='r'?Math.max(0,W-cw):0;
+   out.push({h:mz*1.25,mz,gap:out.length===n0?gap:0,x:ind+off,off,segs});cur=[];cw=0;};
   for(const x of words){
-   if(x.sp){x.w=K.w(' ',x.b,x.i,0,x.f)*fs;if(cur.length){cur.push(x);cw+=x.w;}continue;}
-   let ww=0;for(const q of x.p){q.w=K.w(q.t,q.b,q.i,q.sym,q.f)*fs;ww+=q.w;}
+   if(x.sp){x.w=K.w(' ',x.b,x.i,0,x.f)*x.z;if(cur.length){cur.push(x);cw+=x.w;}continue;}
+   let ww=0;for(const q of x.p){q.w=K.w(q.t,q.b,q.i,q.sym,q.f)*q.z;ww+=q.w;}
    if(cw+ww>W&&cur.length&&ww<=W)flush();
    for(const q of x.p){if(cw+q.w>W&&cur.length)flush();
-    if(q.w>W&&!q.sym){let t='';for(const ch of q.t){if(t&&K.w(t+ch,q.b,q.i,0,q.f)*fs>W){cur.push({t,b:q.b,i:q.i,u:q.u,s:q.s,c:q.c,f:q.f,w:K.w(t,q.b,q.i,0,q.f)*fs});flush();t='';}t+=ch;}q.t=t;q.w=K.w(t,q.b,q.i,0,q.f)*fs;}
+    if(q.w>W&&!q.sym){let t='';for(const ch of q.t){if(t&&K.w(t+ch,q.b,q.i,0,q.f)*q.z>W){cur.push(Object.assign({},q,{t,w:K.w(t,q.b,q.i,0,q.f)*q.z}));flush();t='';}t+=ch;}q.t=t;q.w=K.w(t,q.b,q.i,0,q.f)*q.z;}
     cur.push(q);cw+=q.w;}}
   if(cur.length)flush();
-  if(out.length>n0&&list){out[n0].bul=b.k==='ul'?'•':num+'.';out[n0].bx=b.k==='ul'?fs*.2:0;}
+  if(out.length>n0&&list){out[n0].bul=b.k==='ul'?'•':num+'.';out[n0].bx=dI+out[n0].off+(b.k==='ul'?fs*.2:0);}
   prev=b.k;first=false;
  }
  return out;
 }
 function rtDraw(doc,K,lines,x0,y0,fs){
  doc.setFontSize(fs);const ink=doc.getTextColor(),dc=doc.getDrawColor(),lw=doc.getLineWidth();let rule=false;
- for(const l of lines){const base=y0+l.y-l.h+fs*.93;
-  if(l.bul){K.font(0,0);doc.text(l.bul,x0+(l.bx||0),base);}
-  let x=x0+l.x;for(const g of l.segs){K.font(g.b,g.i,g.sym,g.f);if(g.c)doc.setTextColor(g.c);doc.text(g.t,x,base);
-   if(g.u||g.s){rule=true;doc.setDrawColor(g.c||ink);doc.setLineWidth(fs*(g.b?.075:.055));if(g.u)doc.line(x,base+fs*.14,x+g.w,base+fs*.14);if(g.s)doc.line(x,base-fs*.27,x+g.w,base-fs*.27);}
+ for(const l of lines){const base=y0+l.y-l.h+(l.mz||fs)*.93;
+  if(l.bul){doc.setFontSize(fs);K.font(0,0);doc.text(l.bul,x0+(l.bx||0),base);}
+  let x=x0+l.x;for(const g of l.segs){const z=g.z||fs;doc.setFontSize(z);K.font(g.b,g.i,g.sym,g.f);if(g.c)doc.setTextColor(g.c);doc.text(g.t,x,base);
+   if(g.u||g.s){rule=true;doc.setDrawColor(g.c||ink);doc.setLineWidth(z*(g.b?.075:.055));if(g.u)doc.line(x,base+z*.14,x+g.w,base+z*.14);if(g.s)doc.line(x,base-z*.27,x+g.w,base-z*.27);}
    if(g.c)doc.setTextColor(ink);x+=g.w;}}
- if(rule){doc.setDrawColor(dc);doc.setLineWidth(lw);}
+ doc.setFontSize(fs);if(rule){doc.setDrawColor(dc);doc.setLineWidth(lw);}
 }
 async function pdfTextPages(doc,s,o,np){
  const port=!!o.port,W=port?612:792,H=port?792:612,M=23,U=port?1275:1650,k=W/U,K=pdfKit(doc),pr=prodFor(s),D=prodNorm(pr),strips={},bot=H-27;let added=0;
