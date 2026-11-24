@@ -296,7 +296,7 @@ table.sl{border-collapse:collapse;width:100%;min-width:1140px;font-size:14px;col
 .dvk{font-size:12px;font-weight:800;letter-spacing:.2em;color:#2f6fde;text-transform:uppercase}
 .dvk i{font-style:italic;font-weight:400;letter-spacing:0;color:#5f6065;text-transform:none;font-size:14px;margin-left:8px}
 .dvtools{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e4e3df;padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.fmt{display:flex;gap:4px}.fmt button{min-width:40px;height:36px;padding:0 10px;border:1px solid #dad8d2;border-radius:8px;background:#f6f5f1;font-size:14px;color:#1c1c1e;white-space:nowrap}
+.fmt{display:flex;gap:4px}.fmt button{min-width:40px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dad8d2;border-radius:8px;background:#f6f5f1;font-size:14px;color:#1c1c1e;white-space:nowrap}
 .stl{font-size:12.5px;font-weight:650;color:#6b6b70;margin-left:8px}
 .stc{height:34px;padding:0 11px 0 8px;border-radius:17px;border:1px solid #dad8d2;background:#fff;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:650;color:#1c1c1e;white-space:nowrap}
 .stc i{width:13px;height:13px;border-radius:50%}.stc.on{border-color:#1c1c1e;box-shadow:0 0 0 1.5px #1c1c1e}
@@ -508,6 +508,16 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 #pop .ls .duo:not(.pz):not(.mvd) button:hover,#pop .ls .duo:not(.pz):not(.mvd) button:active{background:#2a62c6}
 #pop .ls .duo:not(.pz):not(.mvd) button .pgv{color:rgba(255,255,255,.85)}
 #pop .ls .duo:not(.pz):not(.mvd) button:disabled{opacity:.45}
+/* a label with two actions (Add a Pan, Add a Turn, Shooting Order): blue with white text too */
+#pop .ls .pr:not(.sw) button{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+#pop .ls .pr:not(.sw) button:hover,#pop .ls .pr:not(.sw) button:active{background:#2a62c6}
+/* a switch or a choice (Tilt, Boom, posture, roof): outlined in blue until it is picked, then solid, so the one that is on still stands out */
+#pop .ls .pr.sw button,#pop .ls .duo.pz button{background:light-dark(#fff,#23252b);border:1.5px solid var(--accent);color:light-dark(#2459c0,#a9c4ff)}
+#pop .ls .pr.sw button:hover,#pop .ls .duo.pz button:hover{background:light-dark(#eaf1fe,#2b3344)}
+#pop .ls .pr.sw button.on,#pop .ls .pr.sw button.on:hover,#pop .ls .duo.pz button.on,#pop .ls .duo.pz button.on:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+#pop .ls .pr.sw button.on::before{content:'\2713\00a0'}
+/* four posture words in a row: each gets the room its word needs */
+#pop .ls .duo.pz button{flex:1 1 auto;font-size:12.5px;padding:0 4px}
 #pop .ls>.duo.mvd+.hd{margin-top:2px}
 
 /* the main menu: a button at the top left of every page; a short list, with the rest one step in */
@@ -659,7 +669,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124171601';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124175622';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -3889,7 +3899,7 @@ function objPop(cx,cy){
  /* rows: B plain, R removes something (red, always last), ck a switch, duo two actions side by side, pr a label with two choices */
  const sec=(t,b)=>b?`<div class="hd">${t}</div>${b}`:'',B=(o,l)=>`<button data-o="${o}">${l}</button>`,R=(o,l)=>`<button data-o="${o}" class="dng">${l}</button>`,
   ck=(o,l,on)=>`<button data-o="${o}">${l}<span class="chk${on?' on':''}">${on?'✓':''}</span></button>`,
-  duo=(a,b)=>`<div class="duo">${a}${b}</div>`,mvd=(a,b)=>`<div class="duo mvd">${a}${b}</div>`,pb=(o,l,on)=>`<button data-o="${o}"${on?' class="on"':''}>${l}</button>`,pr=(l,a,b)=>`<div class="pr"><span>${l}</span>${a}${b}</div>`,end=b=>b?`<div class="dv"></div>${b}`:'';
+  duo=(a,b)=>`<div class="duo">${a}${b}</div>`,mvd=(a,b)=>`<div class="duo mvd">${a}${b}</div>`,pb=(o,l,on)=>`<button data-o="${o}"${on?' class="on"':''}>${l}</button>`,pr=(l,a,b,sw)=>`<div class="pr${sw?' sw':''}"><span>${l}</span>${a}${b}</div>`,end=b=>b?`<div class="dv"></div>${b}`:'';
  let title='',sub='',dot='',h='';
  if(sel.id==='__bg'){const b=s.bg;if(!b)return;title='Background Image';h=sec('Image',B('bgReplace','Replace Image…')+B('rotplan','Rotate Floor Plan…')+B('edit','Opacity…')+B('lock',b.locked?'Unlock':'Lock in Place'))+end(R('bgRemove','Remove the Image'));}
  else{const it=itemById(sel.id);if(!it)return;const lk=B('lock',it.locked?'Unlock':'Lock in Place'),pages=`<div class="hd">Pages</div><button data-o="pages">Pages<span class="pgv">${esc(pagesSummary(it,sel.mark||0))} ›</span></button>`;
@@ -3909,7 +3919,7 @@ function objPop(cx,cy){
   else if(it.type==='cam'&&(sel.pan?!!((it.marks[sel.mark||0]||{}).pans||[])[sel.pan-1]:!!sel.badge)){const m=it.marks[sel.mark||0],isPan=!!sel.pan,q=isPan?m.pans[sel.pan-1]:m,st=setupIn(s,it.setupId)||{},np=(m.pans||[]).length;
    title=`Camera ${esc(shotCode(s,it))}`;dot=st.color;sub=np?`View ${isPan?sel.pan+1:1} of ${np+1}`:'';
    h=sec('Pan',pr('Add a Pan',pb('pbefore','Before'),pb('pafter','After')))
-    +sec('Tilt & Boom',pr('Tilt',pb('tiltup','Up',q.tilt==='up'),pb('tiltdown','Down',q.tilt==='down'))+pr('Boom',pb('boomup','Up',q.boom==='up'),pb('boomdown','Down',q.boom==='down')))
+    +sec('Tilt & Boom',pr('Tilt',pb('tiltup','Up',q.tilt==='up'),pb('tiltdown','Down',q.tilt==='down'),1)+pr('Boom',pb('boomup','Up',q.boom==='up'),pb('boomdown','Down',q.boom==='down'),1))
     +(isPan&&animOn?sec('Timing',stB):'')+(isPan?end(R('pdel','Delete This Pan')):'');}
   else if(it.type==='cam'){const st=setupIn(s,it.setupId)||{num:'?'};title=`Camera ${esc(shotCode(s,it))}`;dot=st.color;
    const mi=clamp(sel.mark||0,0,it.marks.length-1),[ra,rb]=camRun(it,mi),va=it.marks[ra],nv=nVer(it);if(nv>1)sub=`Version ${verCode(s,verNum(it,mi))}`;
@@ -6352,7 +6362,7 @@ function docHead(s,kind){
  const D=prodOpts(s),T=kind==='nb'?[D.nbT,D.nbS]:[D.stT,D.stS];
  return `<div class="dvh"><div class="dvt"><div class="dvk">${esc(T[0]||'')}<i>${esc(T[1]||'')}</i></div><h2>${esc((s.number?'Sc. '+s.number+'  ':'')+(s.title||s.heading||'Untitled scene'))}</h2>${s.title&&s.heading?`<p>${esc(s.heading.toUpperCase())}</p>`:''}</div><div class="dvb">${kind==='nb'?'<button class="sm" data-d="docx">Import from Word…</button>':''}<button class="sm" data-d="todo">Checklist${(s.todo||[]).length?` · ${(s.todo||[]).filter(t=>!t.d).length} open`:''}</button><button class="sm" data-d="info">Scene info</button><button class="sm" data-d="pdf">Export PDF…</button></div></div>`;
 }
-const FMT_BAR='<div class="fmt"><button data-f="bold" title="Bold (⌘B)"><b>B</b></button><button data-f="insertUnorderedList" title="Bullets">• List</button><button data-f="insertOrderedList" title="Numbered list">1. List</button></div>';
+const FMT_BAR='<div class="fmt"><button data-f="bold" title="Bold (⌘B)"><b>B</b></button><button data-f="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.2" cy="6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="12" r="1.7" fill="currentColor"/><circle cx="4.2" cy="18" r="1.7" fill="currentColor"/></svg></button><button data-f="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g fill="currentColor" font-family="Inter,system-ui,sans-serif" font-size="6.6" font-weight="800" text-anchor="middle"><text x="4.2" y="8.4">1</text><text x="4.2" y="14.4">2</text><text x="4.2" y="20.4">3</text></g></svg></button></div>';
 /* ---------- the breakdown's layout: which columns, in what order, called what, with which labels ----------
    The seven columns and their labels above are where everyone starts. A project can rename, hide, reorder, add and remove columns
    and labels; the layout is kept with the project (its top folder), the same way the shot list's columns are. */
