@@ -298,7 +298,8 @@ table.sl{border-collapse:collapse;width:100%;min-width:1140px;font-size:14px;col
 .dvk i{font-style:italic;font-weight:400;letter-spacing:0;color:#5f6065;text-transform:none;font-size:14px;margin-left:8px}
 .dvtools{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e4e3df;padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .fmt{display:flex;gap:4px;flex-wrap:wrap}.fmt .fgap{width:6px}.fmt .fi{font-family:Georgia,'Times New Roman',serif;font-size:16px}.fmt .fca{font-weight:700;line-height:1.05;padding:0 3px 1px;border-bottom:3px solid var(--tc,#d0342c)}.fmt .ftx{font-weight:600}.fmt .ftx sub{font-size:.68em;font-weight:700;vertical-align:-.2em;margin-left:.5px}
-.fmt button.on{background:#2f6fde;border-color:#2f6fde;color:#fff}
+.fmt button.on{background:#2f6fde;border-color:#2f6fde;color:#fff}.fmt .ffb{min-width:158px;justify-content:space-between;font-weight:550}
+.rt font[face="Helvetica"]{font-family:Helvetica,Arial,sans-serif}.rt font[face="Times New Roman"]{font-family:"Times New Roman",Times,serif}.rt font[face="Courier New"]{font-family:"Courier New",Courier,monospace}
 .dpop .sw{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}.fmt button{min-width:40px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dad8d2;border-radius:8px;background:#f6f5f1;font-size:14px;color:#1c1c1e;white-space:nowrap}
 .stl{font-size:12.5px;font-weight:650;color:#6b6b70;margin-left:8px}
 .stc{height:34px;padding:0 11px 0 8px;border-radius:17px;border:1px solid #dad8d2;background:#fff;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:650;color:#1c1c1e;white-space:nowrap}
@@ -672,7 +673,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124201755';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124210205';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2438,7 +2439,7 @@ function accountDialog(){
  if(!fbAuth)return;
  if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p><b>${esc(fbUser.email||'')}</b> isn’t approved for sync yet. Sync is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email. Until then, your work is saved on this device.</p>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':lkSyncBit()}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':'<button id="apr">Approved people…</button>'}<button class="pri" data-x>Done</button></div>`,c=>{
   lkSyncBind(c);const ap=c.querySelector('#apr');if(ap)ap.onclick=()=>kidNext()||approvedDialog();const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
- modal(`<h3>Sign in to sync</h3><p class="mut">Use the same email and password on your Mac and your iPad. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div>`,c=>{
+ modal(`<h3>Sign in to sync</h3><p class="mut">Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
   const run=async f=>{err('');try{await f();closeModal();toast('Signed in. Syncing your scenes…');}catch(e){err(authMsg(e));}};
   c.querySelector('#si').onclick=()=>run(()=>{lkPwHold(pw());return fbAuth.signInWithEmailAndPassword(em(),pw());});
@@ -6468,12 +6469,14 @@ const RT_COLORS=[['Red','#d0342c'],['Orange','#c25e00'],['Green','#1b7f3b'],['Bl
 function rtHex(v){v=String(v||'').trim().toLowerCase();let m=/^#([0-9a-f]{3})$/.exec(v);if(m)return '#'+[...m[1]].map(x=>x+x).join('');if(/^#[0-9a-f]{6}$/.test(v))return v;
  m=/^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(v);return m?'#'+[1,2,3].map(i=>Math.min(255,+m[i]).toString(16).padStart(2,'0')).join(''):'';}
 const rtCol=v=>{const h=rtHex(v);return RT_CSET.has(h)?h:'';};   /* any other color is no color: only the six are kept */
-const rtSame=(L,x)=>!L.u===!x.u&&!L.s===!x.s&&(L.c||'')===(x.c||'');
+const RT_FONTS=[['','Sans Serif',''],['h','Helvetica',"Helvetica,Arial,sans-serif"],['t','Times New Roman',"'Times New Roman',Times,serif"],['c','Courier New',"'Courier New',Courier,monospace"]],RT_FNAME={h:'Helvetica',t:'Times New Roman',c:'Courier New'};
+const rtFace=v=>{const n=String(v||'').split(',')[0].replace(/["']/g,'').trim().toLowerCase();return n==='helvetica'?'h':n==='times new roman'?'t':n==='courier new'?'c':'';};   /* any other face is the app's own Sans Serif */
+const rtSame=(L,x)=>!L.u===!x.u&&!L.s===!x.s&&(L.c||'')===(x.c||'')&&(L.f||'')===(x.f||'');
 const RT_BLOCK=new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','TABLE','TBODY','THEAD','TFOOT','TR','TD','TH','BLOCKQUOTE','PRE','SECTION','ARTICLE','HEADER','FOOTER','DL','DT','DD','FIGURE']);
 function rtNorm(bl){
  const out=[];let pn=0,pk='';
  for(const b of bl){
-  let r=(b.r||[]).filter(x=>x.t!=='').map(x=>{const o={t:String(x.t).replace(/[\u00A0\s]+/g,' '),b:x.b?1:0,i:x.i?1:0};if(x.u)o.u=1;if(x.s)o.s=1;if(x.c&&RT_CSET.has(x.c))o.c=x.c;return o;});
+  let r=(b.r||[]).filter(x=>x.t!=='').map(x=>{const o={t:String(x.t).replace(/[\u00A0\s]+/g,' '),b:x.b?1:0,i:x.i?1:0};if(x.u)o.u=1;if(x.s)o.s=1;if(x.c&&RT_CSET.has(x.c))o.c=x.c;if(x.f&&RT_FNAME[x.f])o.f=x.f;return o;});
   for(let i=1;i<r.length;i++)if(/ $/.test(r[i-1].t)&&/^ /.test(r[i].t))r[i].t=r[i].t.slice(1);
   if(r.length){r[0].t=r[0].t.replace(/^ +/,'');r[r.length-1].t=r[r.length-1].t.replace(/ +$/,'');}
   r=r.filter(x=>x.t!=='');const m=[];for(const x of r){const L=m[m.length-1];if(L&&L.b===x.b&&L.i===x.i&&rtSame(L,x))L.t+=x.t;else m.push(x);}
@@ -6492,7 +6495,7 @@ function rtParse(html){
  const root=document.createElement('div');root.innerHTML=String(html);
  const out=[];let cur=null,inLi='';
  const flush=()=>{if(cur){out.push(cur);cur=null;}};
- const add=(t,st)=>{if(cur&&cur.brk){if(!t.trim())return;const k=cur.k;flush();cur={k,r:[]};}if(!cur){if(!t.trim())return;cur={k:inLi||'p',r:[]};}cur.r.push({t,b:st.b,i:st.i,u:st.u,s:st.s,c:st.c});};
+ const add=(t,st)=>{if(cur&&cur.brk){if(!t.trim())return;const k=cur.k;flush();cur={k,r:[]};}if(!cur){if(!t.trim())return;cur={k:inLi||'p',r:[]};}cur.r.push({t,b:st.b,i:st.i,u:st.u,s:st.s,c:st.c,f:st.f});};
  const kids=(n,st)=>{for(const c of n.childNodes)walk(c,st);};
  const walk=(n,st)=>{
   if(n.nodeType===3){add(n.nodeValue,st);return;}
@@ -6507,7 +6510,8 @@ function rtParse(html){
   let u=st.u,sk=st.s,c=st.c;const a=st.a||tag==='A'?1:0,td=/text-decoration(?:-line)?\s*:\s*([^;]+)/i.exec(sty),tdv=td?td[1]:'';   /* a pasted link's underline is not kept */
   if(!a&&(tag==='U'||/underline/i.test(tdv)))u=1;if(tag==='S'||tag==='STRIKE'||tag==='DEL'||/line-through/i.test(tdv))sk=1;
   const cm=/(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(sty),fc=tag==='FONT'?n.getAttribute('color'):null;if(cm)c=rtCol(cm[1]);else if(fc)c=rtCol(fc);
-  const ns={b,i,u,s:sk,c,a};
+  const ff=tag==='FONT'?n.getAttribute('face'):null;let f=st.f;if(ff)f=rtFace(ff);
+  const ns={b,i,u,s:sk,c,a,f};
   if(tag==='UL'||tag==='OL'){const k=tag==='UL'?'ul':'ol';let first=true;const start=+(n.getAttribute('start')||0);
    const was=inLi;for(const c of n.childNodes){if(c.nodeType===1&&c.tagName==='LI'){flush();cur={k,r:[]};if(first&&start>1)cur.n=start;first=false;inLi=k;kids(c,ns);flush();inLi=was;}else if(c.nodeType===1)walk(c,ns);}
    return;}
@@ -6517,11 +6521,11 @@ function rtParse(html){
   if(RT_BLOCK.has(tag)){if(inLi){if(cur&&cur.r.some(x=>x.t.trim())){flush();cur={k:inLi,r:[]};}else if(!cur)cur={k:inLi,r:[]};kids(n,ns);return;}flush();cur={k:tag==='LI'?'ul':'p',r:[]};kids(n,ns);flush();return;}
   kids(n,ns);
  };
- kids(root,{b:0,i:0,u:0,s:0,c:'',a:0});flush();
+ kids(root,{b:0,i:0,u:0,s:0,c:'',a:0,f:''});flush();
  return rtNorm(out);
 }
 function rtFromText(t){return rtNorm(String(t||'').split(/\r?\n/).map(l=>{const g=/^\s*[-*–]\s+(.*)$/.exec(l);return g?{k:'ul',r:[{t:g[1]}]}:{k:'p',r:[{t:l}]};}).filter(b=>b.r[0].t.trim()));}
-const rtRuns=b=>b.r.map(r=>{let t=esc(r.t);if(r.s)t=`<s>${t}</s>`;if(r.u)t=`<u>${t}</u>`;if(r.i)t=`<i>${t}</i>`;if(r.b)t=`<b>${t}</b>`;if(r.c)t=`<font color="${r.c}">${t}</font>`;return t;}).join('');
+const rtRuns=b=>b.r.map(r=>{let t=esc(r.t);if(r.s)t=`<s>${t}</s>`;if(r.u)t=`<u>${t}</u>`;if(r.i)t=`<i>${t}</i>`;if(r.b)t=`<b>${t}</b>`;if(r.c||r.f)t=`<font${r.c?` color="${r.c}"`:''}${r.f?` face="${RT_FNAME[r.f]}"`:''}>${t}</font>`;return t;}).join('');
 function rtHTML(bl){
  let h='',open='';const end=()=>{if(open){h+=`</${open}>`;open='';}};
  for(const b of bl){const inner=rtRuns(b)||'<br>',tail=b.r.length&&b.r[b.r.length-1].b?'&nbsp;':'';
@@ -6625,14 +6629,20 @@ let lastRT=null,lastRange=null,dpop=null;
 document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s||!s.rangeCount)return;const n=s.anchorNode,el=n&&(n.nodeType===1?n:n.parentElement),c=el&&el.closest&&el.closest('.rt');if(c){lastRT=c;lastRange=s.getRangeAt(0).cloneRange();}fmtState();});
 /* B, I, U and S light up when the words under the cursor already have that format */
 function fmtState(){const bs=document.querySelectorAll('.fmt button[data-st]');if(!bs.length)return;const s=getSelection(),n=s&&s.rangeCount?s.anchorNode:null,el=n&&(n.nodeType===1?n:n.parentElement),inRT=!!(el&&el.closest&&el.closest('.rt'));
- for(const b of bs){let on=false;if(inRT){try{on=!!document.queryCommandState(b.dataset.f);}catch(e){}}b.classList.toggle('on',on);}}
+ for(const b of bs){let on=false;if(inRT){try{on=!!document.queryCommandState(b.dataset.f);}catch(e){}}b.classList.toggle('on',on);}
+ const k=inRT?rtFontAt(el):'',nm=(RT_FONTS.find(x=>x[0]===k)||RT_FONTS[0])[1];for(const n of document.querySelectorAll('.fmt .ffn'))if(n.textContent!==nm)n.textContent=nm;}
+/* the font of the words under the cursor: the nearest <font face> on the way up to the box */
+function rtFontAt(el){for(let n=el;n&&!(n.classList&&n.classList.contains('rt'));n=n.parentElement){if(n.tagName==='FONT'&&n.getAttribute('face'))return rtFace(n.getAttribute('face'));}return '';}
 function rtFocus(){if(!lastRT||!lastRT.isConnected)return null;lastRT.focus();if(lastRange&&lastRT.contains(lastRange.startContainer)){try{const s=getSelection();s.removeAllRanges();s.addRange(lastRange);}catch(e){}}return lastRT;}
 function rtStore(el){const s=scene(),h=rtClean(el.innerHTML);
  if(el.dataset.cell){const c0=txGet(s.id,el.dataset.cell,false);if(c0&&c0.h===h&&!c0.del)return;txEdit(s.id,el.dataset.cell,c=>{c.h=h;delete c.del;});}
  else if(el.dataset.cut){const [o,id]=el.dataset.cut.split(':'),c0=txGet(o,'cut.'+id,false);if(!c0||c0.h===h)return;txEdit(o,'cut.'+id,c=>{c.h=h;});}}
 function rtCmd(cmd,val){const el=rtFocus();if(!el){toast('Tap into a box first, then use the button.');return;}
  if(cmd==='removeFormat'){const s=getSelection();if(!s||s.isCollapsed){toast('Select the words first, then clear their formatting.');return;}}
- try{if(cmd==='foreColor')document.execCommand('styleWithCSS',false,false);document.execCommand(cmd,false,val==null?null:val);}catch(e){}rtStore(el);fmtState();}
+ try{if(cmd==='foreColor'||cmd==='fontName')document.execCommand('styleWithCSS',false,false);document.execCommand(cmd,false,val==null?null:val);}catch(e){}rtStore(el);fmtState();}
+function fontMenu(btn){if(!rtFocus()){toast('Tap into a box first, then use the button.');return;}
+ const s=getSelection(),n=s&&s.rangeCount?s.anchorNode:null,cur=rtFontAt(n&&(n.nodeType===1?n:n.parentElement));
+ docPop(btn,[{hd:'Font'},...RT_FONTS.map(([k,name,ff])=>({label:name,ff,on:k===cur,fn:()=>rtCmd('fontName',k?name:getComputedStyle(lastRT).fontFamily)}))]);}
 let fmtTc='#d0342c';
 function colorMenu(btn){if(!rtFocus()){toast('Tap into a box first, then use the button.');return;}
  const pick=h=>()=>{if(h){fmtTc=h;for(const a of document.querySelectorAll('.fmt .fca'))a.style.setProperty('--tc',h);}rtCmd('foreColor',h||getComputedStyle(lastRT).color);};
@@ -6641,7 +6651,7 @@ function caretEnd(node){try{const r=document.createRange();r.selectNodeContents(
 function focusCell(sel){const el=document.querySelector('.docv '+sel);if(!el)return;el.focus();caretEnd(el);el.scrollIntoView({block:'nearest'});}
 function closeDocPop(){if(dpop){dpop.remove();dpop=null;}}
 function docPop(anchor,items){closeDocPop();const d=document.createElement('div');d.className='dpop';
- d.innerHTML=items.map((it,i)=>it.hd?`<div class="hd">${esc(it.hd)}</div>`:`<button data-i="${i}">${it.sw?`<i class="sw" style="background:${it.sw}"></i>`:''}${esc(it.label)}${it.on?'<span class="ck">✓</span>':''}</button>`).join('');document.body.appendChild(d);
+ d.innerHTML=items.map((it,i)=>it.hd?`<div class="hd">${esc(it.hd)}</div>`:`<button data-i="${i}"${it.ff?` style="font-family:${it.ff}"`:''}>${it.sw?`<i class="sw" style="background:${it.sw}"></i>`:''}${esc(it.label)}${it.on?'<span class="ck">✓</span>':''}</button>`).join('');document.body.appendChild(d);
  const r=anchor.getBoundingClientRect(),w=d.offsetWidth,h=d.offsetHeight;d.style.left=clamp(r.left,8,Math.max(8,innerWidth-w-8))+'px';d.style.top=(r.bottom+6+h>innerHeight-8?Math.max(8,r.top-h-6):r.bottom+6)+'px';
  d.addEventListener('pointerdown',e=>e.preventDefault());
  d.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const it=items[+b.dataset.i];closeDocPop();it.fn();});dpop=d;}
@@ -6672,7 +6682,7 @@ function docHead(s,kind){
  const D=prodOpts(s),T=kind==='nb'?[D.nbT,D.nbS]:[D.stT,D.stS];
  return `<div class="dvh"><div class="dvt"><div class="dvk">${esc(T[0]||'')}<i>${esc(T[1]||'')}</i></div><h2>${esc((s.number?'Sc. '+s.number+'  ':'')+(s.title||s.heading||'Untitled scene'))}</h2>${s.title&&s.heading?`<p>${esc(s.heading.toUpperCase())}</p>`:''}</div><div class="dvb">${kind==='nb'?'<button class="sm" data-d="docx">Import from Word…</button>':''}<button class="sm" data-d="todo">Checklist${(s.todo||[]).length?` · ${(s.todo||[]).filter(t=>!t.d).length} open`:''}</button><button class="sm" data-d="info">Scene info</button><button class="sm" data-d="pdf">Export PDF…</button></div></div>`;
 }
-const FMT_BAR='<div class="fmt"><button data-f="bold" data-st title="Bold (⌘B)"><b>B</b></button><button data-f="italic" data-st title="Italic (⌘I)" aria-label="Italic"><i class="fi">I</i></button><button data-f="underline" data-st title="Underline (⌘U)" aria-label="Underline"><u>U</u></button><button data-f="strikeThrough" data-st title="Strikethrough" aria-label="Strikethrough"><s>S</s></button><button data-fc title="Text color" aria-label="Text color"><span class="fca">A</span></button><button data-f="removeFormat" title="Remove formatting" aria-label="Remove formatting"><span class="ftx">T<sub>x</sub></span></button><span class="fgap"></span><button data-f="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.2" cy="6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="12" r="1.7" fill="currentColor"/><circle cx="4.2" cy="18" r="1.7" fill="currentColor"/></svg></button><button data-f="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g fill="currentColor" font-family="Inter,system-ui,sans-serif" font-size="6.6" font-weight="800" text-anchor="middle"><text x="4.2" y="8.4">1</text><text x="4.2" y="14.4">2</text><text x="4.2" y="20.4">3</text></g></svg></button></div>';
+const FMT_BAR='<div class="fmt"><button data-ff class="ffb" title="Font" aria-label="Font"><span class="ffn">Sans Serif</span>&nbsp;▾</button><span class="fgap"></span><button data-f="bold" data-st title="Bold (⌘B)"><b>B</b></button><button data-f="italic" data-st title="Italic (⌘I)" aria-label="Italic"><i class="fi">I</i></button><button data-f="underline" data-st title="Underline (⌘U)" aria-label="Underline"><u>U</u></button><button data-f="strikeThrough" data-st title="Strikethrough" aria-label="Strikethrough"><s>S</s></button><button data-fc title="Text color" aria-label="Text color"><span class="fca">A</span></button><button data-f="removeFormat" title="Remove formatting" aria-label="Remove formatting"><span class="ftx">T<sub>x</sub></span></button><span class="fgap"></span><button data-f="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="4.2" cy="6" r="1.7" fill="currentColor"/><circle cx="4.2" cy="12" r="1.7" fill="currentColor"/><circle cx="4.2" cy="18" r="1.7" fill="currentColor"/></svg></button><button data-f="insertOrderedList" title="Numbered list" aria-label="Numbered list"><svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true"><path d="M9.5 6h11M9.5 12h11M9.5 18h11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><g fill="currentColor" font-family="Inter,system-ui,sans-serif" font-size="6.6" font-weight="800" text-anchor="middle"><text x="4.2" y="8.4">1</text><text x="4.2" y="14.4">2</text><text x="4.2" y="20.4">3</text></g></svg></button></div>';
 /* ---------- the breakdown's layout: which columns, in what order, called what, with which labels ----------
    The seven columns and their labels above are where everyone starts. A project can rename, hide, reorder, add and remove columns
    and labels; the layout is kept with the project (its top folder), the same way the shot list's columns are. */
@@ -6771,10 +6781,11 @@ function storyRename(id){const s=scene(),L=storiesFor(s),t=L.find(x=>x.id===id);
   card.querySelector('#ok').onclick=go;i.addEventListener('keydown',e=>{if(e.key==='Enter')go();});i.focus();i.select();},'numcard');}
 function docClick(e){
  if(stSwallow){stSwallow=false;if(e.target.closest('[data-story]'))return;}
- const t=e.target,b=t.closest('[data-f],[data-fc],[data-lab],[data-story],[data-stedit],[data-nbcols],[data-d],[data-sm],[data-cutm],[data-cutadd],#stAdd');if(!b)return;const d=b.dataset;
+ const t=e.target,b=t.closest('[data-f],[data-fc],[data-ff],[data-lab],[data-story],[data-stedit],[data-nbcols],[data-d],[data-sm],[data-cutm],[data-cutadd],#stAdd');if(!b)return;const d=b.dataset;
   if(d.nbcols){nbDialog();return;}
   if(d.stedit){storiesDialog(scene());return;}
  if(b.hasAttribute('data-fc'))colorMenu(b);
+ else if(b.hasAttribute('data-ff'))fontMenu(b);
  else if(d.f)rtCmd(d.f);
  else if(d.lab)labelMenu(b,d.lab);
  else if(d.story){const s=scene(),now=Date.now();
@@ -6815,8 +6826,9 @@ const PDF_SYM={'→':'\xAE','←':'\xAC','↔':'\xAB','↑':'\xAD','↓':'\xAF',
 const SYM_RE=/([→←↔↑↓⇒⇐≠≤≥≈]|\s+)/,SYM_W={'\xAE':.987,'\xAC':.987,'\xAB':1.042,'\xAD':.603,'\xAF':.603,'\xDE':.987,'\xDC':.987,'\xB9':.549,'\xA3':.549,'\xB3':.549,'\xBB':.549};
 function pdfStr(t){let o='';for(const ch of String(t==null?'':t)){const c=ch.codePointAt(0);if(c<32){o+=' ';continue;}if((c<256&&!(c>=127&&c<160))||WIN_X.includes(ch)||PDF_SYM[ch]){o+=ch;continue;}if(ch in PDF_MAP){o+=PDF_MAP[ch];continue;}const n=ch.normalize('NFKD').replace(/[\u0300-\u036f]/g,'');if(n&&n!==ch&&[...n].every(x=>x.codePointAt(0)<127))o+=n;}return o;}
 function pdfKit(doc){
- const cache=new Map(),font=(b,i,sym)=>{if(sym)doc.setFont('symbol','normal');else doc.setFont('helvetica',b?(i?'bolditalic':'bold'):(i?'italic':'normal'));};
- const w=(t,b,i,sym)=>{if(sym)return SYM_W[t]||1;const k=(b?(i?'x':'b'):(i?'i':'n'))+t;let v=cache.get(k);if(v==null){font(b,i,sym);v=doc.getStringUnitWidth(t);cache.set(k,v);}return v;};
+ const FAM={h:'helvetica',t:'times',c:'courier'};   /* the PDF's own faces: the app's Sans Serif and Helvetica both print as Helvetica */
+ const cache=new Map(),font=(b,i,sym,f)=>{if(sym)doc.setFont('symbol','normal');else doc.setFont(FAM[f]||'helvetica',b?(i?'bolditalic':'bold'):(i?'italic':'normal'));};
+ const w=(t,b,i,sym,f)=>{if(sym)return SYM_W[t]||1;const k=(f==='t'||f==='c'?f:'')+(b?(i?'x':'b'):(i?'i':'n'))+t;let v=cache.get(k);if(v==null){font(b,i,sym,f);v=doc.getStringUnitWidth(t);cache.set(k,v);}return v;};
  return {font,w};
 }
 function rtLayout(K,bl,width,fs){
@@ -6827,17 +6839,17 @@ function rtLayout(K,bl,width,fs){
   const gap=first?0:list&&prev!=='p'?fs*.22:rtIsLabel(b)?fs*.85:list?fs*.3:fs*.5;
   const words=[];let wd=null;
   for(const r of b.r)for(const part of pdfStr(r.t).split(SYM_RE)){if(!part)continue;
-   if(/^\s+$/.test(part)){words.push({sp:1,t:' ',b:r.b,i:r.i,u:r.u,s:r.s,c:r.c});wd=null;continue;}
+   if(/^\s+$/.test(part)){words.push({sp:1,t:' ',b:r.b,i:r.i,u:r.u,s:r.s,c:r.c,f:r.f});wd=null;continue;}
    if(!wd){wd={p:[]};words.push(wd);}
-   if(PDF_SYM[part])wd.p.push({t:PDF_SYM[part],sym:1,u:r.u,s:r.s,c:r.c});else for(const q of part.match(/[^\/\-–—]+[\/\-–—]*|[\/\-–—]+/g))wd.p.push({t:q,b:r.b,i:r.i,u:r.u,s:r.s,c:r.c});}
+   if(PDF_SYM[part])wd.p.push({t:PDF_SYM[part],sym:1,u:r.u,s:r.s,c:r.c,f:r.f});else for(const q of part.match(/[^\/\-–—]+[\/\-–—]*|[\/\-–—]+/g))wd.p.push({t:q,b:r.b,i:r.i,u:r.u,s:r.s,c:r.c,f:r.f});}
   let cur=[],cw=0;const n0=out.length;
-  const flush=()=>{while(cur.length&&cur[cur.length-1].sp)cw-=cur.pop().w;const segs=[];for(const t of cur){const L=segs[segs.length-1];if(L&&!t.sym&&!L.sym&&!!L.b===!!t.b&&!!L.i===!!t.i&&rtSame(L,t)){L.t+=t.t;L.w+=t.w;}else segs.push({t:t.t,b:t.b,i:t.i,sym:t.sym,w:t.w,u:t.u,s:t.s,c:t.c});}out.push({h:lh,gap:out.length===n0?gap:0,x:ind,segs});cur=[];cw=0;};
+  const flush=()=>{while(cur.length&&cur[cur.length-1].sp)cw-=cur.pop().w;const segs=[];for(const t of cur){const L=segs[segs.length-1];if(L&&!t.sym&&!L.sym&&!!L.b===!!t.b&&!!L.i===!!t.i&&rtSame(L,t)){L.t+=t.t;L.w+=t.w;}else segs.push({t:t.t,b:t.b,i:t.i,sym:t.sym,w:t.w,u:t.u,s:t.s,c:t.c,f:t.f});}out.push({h:lh,gap:out.length===n0?gap:0,x:ind,segs});cur=[];cw=0;};
   for(const x of words){
-   if(x.sp){x.w=K.w(' ',x.b,x.i)*fs;if(cur.length){cur.push(x);cw+=x.w;}continue;}
-   let ww=0;for(const q of x.p){q.w=K.w(q.t,q.b,q.i,q.sym)*fs;ww+=q.w;}
+   if(x.sp){x.w=K.w(' ',x.b,x.i,0,x.f)*fs;if(cur.length){cur.push(x);cw+=x.w;}continue;}
+   let ww=0;for(const q of x.p){q.w=K.w(q.t,q.b,q.i,q.sym,q.f)*fs;ww+=q.w;}
    if(cw+ww>W&&cur.length&&ww<=W)flush();
    for(const q of x.p){if(cw+q.w>W&&cur.length)flush();
-    if(q.w>W&&!q.sym){let t='';for(const ch of q.t){if(t&&K.w(t+ch,q.b,q.i)*fs>W){cur.push({t,b:q.b,i:q.i,u:q.u,s:q.s,c:q.c,w:K.w(t,q.b,q.i)*fs});flush();t='';}t+=ch;}q.t=t;q.w=K.w(t,q.b,q.i)*fs;}
+    if(q.w>W&&!q.sym){let t='';for(const ch of q.t){if(t&&K.w(t+ch,q.b,q.i,0,q.f)*fs>W){cur.push({t,b:q.b,i:q.i,u:q.u,s:q.s,c:q.c,f:q.f,w:K.w(t,q.b,q.i,0,q.f)*fs});flush();t='';}t+=ch;}q.t=t;q.w=K.w(t,q.b,q.i,0,q.f)*fs;}
     cur.push(q);cw+=q.w;}}
   if(cur.length)flush();
   if(out.length>n0&&list){out[n0].bul=b.k==='ul'?'•':num+'.';out[n0].bx=b.k==='ul'?fs*.2:0;}
@@ -6849,7 +6861,7 @@ function rtDraw(doc,K,lines,x0,y0,fs){
  doc.setFontSize(fs);const ink=doc.getTextColor(),dc=doc.getDrawColor(),lw=doc.getLineWidth();let rule=false;
  for(const l of lines){const base=y0+l.y-l.h+fs*.93;
   if(l.bul){K.font(0,0);doc.text(l.bul,x0+(l.bx||0),base);}
-  let x=x0+l.x;for(const g of l.segs){K.font(g.b,g.i,g.sym);if(g.c)doc.setTextColor(g.c);doc.text(g.t,x,base);
+  let x=x0+l.x;for(const g of l.segs){K.font(g.b,g.i,g.sym,g.f);if(g.c)doc.setTextColor(g.c);doc.text(g.t,x,base);
    if(g.u||g.s){rule=true;doc.setDrawColor(g.c||ink);doc.setLineWidth(fs*(g.b?.075:.055));if(g.u)doc.line(x,base+fs*.14,x+g.w,base+fs*.14);if(g.s)doc.line(x,base-fs*.27,x+g.w,base-fs*.27);}
    if(g.c)doc.setTextColor(ink);x+=g.w;}}
  if(rule){doc.setDrawColor(dc);doc.setLineWidth(lw);}
