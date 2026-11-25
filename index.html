@@ -307,7 +307,8 @@ table.sl{border-collapse:collapse;width:100%;min-width:1140px;font-size:14px;col
 .rt [data-in="1"]{margin-left:1.5em}.rt [data-in="2"]{margin-left:3em}.rt [data-in="3"]{margin-left:4.5em}.rt [data-in="4"]{margin-left:6em}.rt [data-in="5"]{margin-left:7.5em}.rt [data-in="6"]{margin-left:9em}
 .rt font[face="Helvetica"]{font-family:Helvetica,Arial,sans-serif}.rt font[face="Times New Roman"]{font-family:"Times New Roman",Times,serif}.rt font[face="Courier New"]{font-family:"Courier New",Courier,monospace}
 .dpop .sw{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}.fmt button{min-width:40px;height:36px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dad8d2;border-radius:8px;background:#f6f5f1;font-size:14px;color:#1c1c1e;white-space:nowrap}
-.stl{font-size:12px;font-weight:800;letter-spacing:.2em;color:#2f6fde;text-transform:uppercase;margin:0 4px 0 2px}
+.stl{font-size:14px;font-weight:750;color:#1c1c1e;margin:0 4px 0 0}
+.stray{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;min-width:0;background:#f3f2ee;border:1px solid #e0ded7;border-radius:24px;padding:5px 6px 5px 16px}
 .stc{height:34px;padding:0 11px 0 8px;border-radius:17px;border:1px solid #dad8d2;background:#fff;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:650;color:#1c1c1e;white-space:nowrap}
 .stc i{width:13px;height:13px;border-radius:50%}.stc.on{border-color:#1c1c1e;box-shadow:0 0 0 1.5px #1c1c1e}
 .stc[style*="--sc"].on{border-color:var(--sc);box-shadow:0 0 0 1.5px var(--sc);background:#f4f4f2;background:color-mix(in srgb,var(--sc) 15%,#fff)}
@@ -689,7 +690,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125003703';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125013002';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -6807,7 +6808,7 @@ function renderNb(v){
  const s=scene(),x=txOf(s.id),st=storiesFor(s),cur=storyOf(s),q=!!uiOn('nbQ'),cols=nbShown(s),tint=cur?shade(cur.color,.86):'#fff';
  const live=k=>{const c=x&&x.nb&&x.nb[k];return c&&c.h!=null&&!c.del?c.h:null;},cellH=k=>{const h=live(k);if(h!=null)return h;if(k==='syn'&&s.synopsis)return `<p>${esc(s.synopsis)}</p>`;return nbTpl(cols.find(c=>c.k===k)||{k});};
  const hasQ=!q&&live('q')&&rtText(rtParse(live('q')));
- v.innerHTML=docHead(s,'nb')+`<div class="dvtools">${FMT_BAR}<span class="stl">Story</span>${st.map(t=>`<button class="stc${cur&&cur.id===t.id?' on':''}" data-story="${esc(t.id)}" style="--sc:${esc(t.color)}" title="Double-click (or press and hold) to rename"><i style="background:${esc(t.color)}"></i>${esc(t.name||t.id)}</button>`).join('')}<button class="stc sted" data-stedit="1" title="Name the stories">Edit…</button><button class="stc sted nbcb" data-nbcols="1" title="Choose, rename, reorder and add columns and their labels">Columns…</button><label class="dvq"><input type="checkbox" id="nbQ"${q?' checked':''}> Questions column${hasQ?' (has notes)':''}</label></div>
+ v.innerHTML=docHead(s,'nb')+`<div class="dvtools">${FMT_BAR}<div class="stray"><span class="stl">Story</span>${st.map(t=>`<button class="stc${cur&&cur.id===t.id?' on':''}" data-story="${esc(t.id)}" style="--sc:${esc(t.color)}" title="Double-click (or press and hold) to rename"><i style="background:${esc(t.color)}"></i>${esc(t.name||t.id)}</button>`).join('')}<button class="stc sted" data-stedit="1" title="Name the stories">Edit…</button></div><button class="stc sted nbcb" data-nbcols="1" title="Choose, rename, reorder and add columns and their labels">Columns…</button><label class="dvq"><input type="checkbox" id="nbQ"${q?' checked':''}> Questions column${hasQ?' (has notes)':''}</label></div>
  <div class="nbwrap" style="--n:${cols.length}">${cols.length?`<div class="nbgrid">${cols.map(({k,name:n})=>`<section class="nbc" style="background:${tint}"><header><b>${esc(n)}</b>${k==='syn'||k==='q'?'':`<button data-lab="${esc(k)}">+ Label</button>`}</header><div class="rt" contenteditable="true" spellcheck="true" data-cell="nb.${esc(k)}">${cellH(k)}</div></section>`).join('')}</div>`:'<div class="lv-empty">No columns are showing. Use Columns… above to choose what to show.</div>'}</div>`;
 }
 function renderSt(v){
