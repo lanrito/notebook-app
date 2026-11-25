@@ -307,7 +307,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <div class="keep"><h3 id="c2-checklist">Checklist</h3><p>A to-do list that belongs to one scene. Add items, tick them off, and clear the finished ones with <b>Remove Finished</b>.</p><div class="where"><b>Where:</b> Menu › This Scene › Checklist…, or the <b>Checklist</b> button on the Breakdown and Strategy tabs.</div></div>
 
 
-<div class="keep"><h3 id="c2-the-folder-s-overview">The folder’s Overview</h3><p>Shows the whole episode or film at once, in four views.</p><div class="where"><b>Where:</b> Menu › the line that names your folder, ending in <b>Overview &amp; Questions…</b>.</div><figure><div class="fr"><img alt="The Overview on its Scenes view: one row per scene with progress for Breakdown, Strategy, Floor Plan and Shot List." height="997" src="img/overview.jpg" width="1400"/></div><figcaption>Scenes: how far along each scene is on each tab.</figcaption></figure></div>
+<div class="keep"><h3 id="c2-the-folder-s-overview">The folder’s Overview</h3><p>Shows the whole episode or film at once, in five views.</p><div class="where"><b>Where:</b> Menu › the line that names your folder, ending in <b>Overview &amp; Questions…</b>.</div><figure><div class="fr"><img alt="The Overview on its Scenes view: one row per scene with progress for Breakdown, Strategy, Floor Plan and Shot List." height="997" src="img/overview.jpg" width="1400"/></div><figcaption>Scenes: how far along each scene is on each tab.</figcaption></figure></div>
 
 
 
@@ -316,9 +316,11 @@ h3.hit{animation:gshit 2.2s ease-out}
 <tr><td>Scenes</td><td>Each scene with its progress on the Breakdown, Strategy, Floor Plan and Shot List, and how many questions are open.</td></tr>
 <tr><td>Spine</td><td>The scenes as blocks in story order, sized by page count, setups or time estimate, with a band for day or night. Tap a scene to see what it is, or to start an act or a sequence there. Below it, where each story lives.</td></tr>
 <tr><td>Cuts</td><td>The last frame of each scene beside the first frame of the next, so you can judge every cut between scenes.</td></tr>
+<tr><td>Days</td><td>Each shoot day with its scenes, pages, setups and shots, and the estimated time of its shots against the hours the day has. It tells you how much is to spare, or how far over. <b>Call … · Wrap …</b> sets a day’s call, wrap and lunch.</td></tr>
 <tr><td>Questions</td><td>Everything written in the scenes’ Questions columns.</td></tr>
 </tbody></table>
-<p><b>Export PDF…</b> in the Overview prints the view you are on.</p>
+<ul><li>A scene belongs to the day typed under <b>Shoot day</b> in Scene info. Times come from the <b>Est. time</b> column of the shot list.</li><li>Cameras in one setup roll together, so their time is counted once, at the longest. Dropped shots are not counted.</li><li>Until you set them, a day runs from a 7:00 AM call to a 7:00 PM wrap, with an hour for lunch.</li></ul>
+<p><b>Export PDF…</b> in the Overview prints the view you are on. The Days view has no PDF yet.</p>
 </div>
 </section>
 <section class="chapter" id="ch3">
@@ -849,6 +851,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <div class="keep"><h3 id="c10-working-through-the-shots">Working through the shots</h3><table><thead><tr><th>Part of the panel</th><th>What it does</th></tr></thead><tbody>
 <tr><td>‹ and › at the top</td><td>Previous and next scene in the folder.</td></tr>
 <tr><td>The progress bar</td><td>How many shots are done, and how many were dropped.</td></tr>
+<tr><td>The day line</td><td>For the scene’s shoot day: how much is left to shoot, how long until wrap, and the difference, in hand or over. Lunch counts as still to come until six hours after call. <b>Change…</b> sets call and wrap. It appears once the scene has a shoot day and its shots have times.</td></tr>
 <tr><td>The shot card</td><td>The current shot: its number, size and type, description and storyboard frames.</td></tr>
 <tr><td>Planned, Ready, Shot, Dropped</td><td>The shot’s status. Tap one to set it.</td></tr>
 <tr><td>The note</td><td>A note for this shot, such as an insert you still need.</td></tr>
@@ -964,6 +967,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <div class="keep"><h3 id="c12-what-s-new">What’s new</h3><p>Added in November 2026:</p><ul>
 <li><b>A free account</b> opens more than one scene and one location scout on a device. <a href="#ch1">Chapter 1</a>.</li>
 <li><b>Delete Account…</b> removes your account from inside the app. <a href="#ch1">Chapter 1</a>.</li>
+<li><b>Days</b> in the folder’s Overview adds up each shoot day’s shots against its hours, and Set mode shows how the day is going. <a href="#ch2">Chapter 2</a> and <a href="#ch10">Chapter 10</a>.</li>
 <li><b>Clear Moves</b> starts the blocking over and keeps the set. <a href="#ch5">Chapter 5</a>.</li>
 <li><b>Draw the Walk</b> turns a freehand line into a move. <a href="#ch5">Chapter 5</a>.</li>
 <li><b>Draw a Building</b> makes a building with walls and a roof from its outline. <a href="#ch3">Chapter 3</a>.</li>
