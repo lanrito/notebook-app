@@ -690,7 +690,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125021321';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125024400';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2353,8 +2353,8 @@ function lkFreshDialog(){if(!fbUser)return;
 function lkPwDialog(){if(!fbUser)return;
  modal(`<h3>Change password</h3><p class="mut">This is your sign-in password on every device. Your other devices will ask you to sign in again.${lk.on?' Your locked work stays as it is; it opens with the new password from now on.':''}</p><label class="fld">Current password<input id="c0" type="password" autocomplete="current-password"></label><label class="fld">New password<input id="c1" type="password" autocomplete="new-password"></label><label class="fld">New password, again<input id="c2" type="password" autocomplete="new-password"></label><p id="cerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Back</button><button class="pri" id="cgo">Change Password</button></div>`,c=>{
   const go=c.querySelector('#cgo'),err=m=>{c.querySelector('#cerr').textContent=m;},v=i=>c.querySelector('#c'+i).value;
-  go.onclick=async()=>{err('');if(v(1).length<LOCK_MIN){err(lkErr({message:'short'}));return;}if(v(1)!==v(2)){err('The two new passwords are not the same.');return;}go.disabled=true;
-   try{await lkChangePw(v(0),v(1));closeModal();toast('Password changed.');}catch(e){go.disabled=false;err(lkErr(e));}};});}
+  go.onclick=async()=>{err('');if(!v(0)){err('Type your current password first.');return;}if(v(1).length<LOCK_MIN){err(lkErr({message:'short'}));return;}if(v(1)!==v(2)){err('The two new passwords are not the same.');return;}if(v(1)===v(0)){err('That is the password you have now. Choose a different one.');return;}go.disabled=true;
+   try{await lkChangePw(v(0),v(1));closeModal();toast('Password changed. Your other devices will ask for the new one.');}catch(e){go.disabled=false;err(lkErr(e));}};});}
 function lkNewCodeDialog(){if(!fbUser||!lk.on)return;
  modal(`<h3>New recovery code</h3><p>This makes a new code and the old one stops working. Use it if the old code is lost, or someone else may have seen it.</p><p id="nerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Back</button><button class="pri" id="ngo">Make a New Code</button></div>`,c=>{
   const go=c.querySelector('#ngo');go.onclick=async()=>{go.disabled=true;try{const code=await lkNewCode();lkCodeDialog(code,'');}catch(e){go.disabled=false;c.querySelector('#nerr').textContent=lkErr(e);}};});}
@@ -2364,7 +2364,7 @@ function lkSyncBit(){if(!fbUser)return '';
  if(lk.need==='conv')return `<p><b>Locking your synced work:</b> ${lk.prog[0]} of ${lk.prog[1]}. Keep the app open and online; your work on this device is safe meanwhile.</p>`;
  if(lk.need==='wait')return `<p class="warnbox">The lock is waiting for the internet. Everything is saved on this device.</p>`;
  if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` ${plural(lk.bad.size,'item')} could not be opened on this device.`:''}</p><div class="btns"><button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
- return lkCan()&&coll?`<div class="btns"><button id="lks">Lock My Synced Work…</button></div>`:'';}
+ return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock My Synced Work…</button>':''}</div>`;}
 function lkSyncBind(c){const b=(id,f)=>{const e=c.querySelector(id);if(e)e.onclick=()=>{mNext=accountDialog;f();};};b('#lku',lkUnlockDialog);b('#lkc',lkNewCodeDialog);b('#lkp',lkPwDialog);b('#lks',lkSetupDialog);}
 /* ---------- sync (private to the signed-in person, through their Claude account) ---------- */
 let coll=null,online='off',pushT=null,pushing=false,syncErr='',pendingRemote=null,dlNS=null,warnedBig=false;
