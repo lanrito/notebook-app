@@ -690,7 +690,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125121740';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125150405';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2375,7 +2375,7 @@ function initFirebase(){
   firebase.initializeApp(window.BB_FIREBASE);fbAuth=firebase.auth();const db=firebase.firestore();fbDb=db;
   db.enablePersistence({synchronizeTabs:true}).then(()=>{fbPersist=true;}).catch(()=>{});
   fbAuth.onAuthStateChanged(u=>{
-   fbUser=u;acct=u?u.uid:null;if(fbUnsub){fbUnsub();fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}lkStop();
+   fbUser=u;acct=u?u.uid:null;acctShut=false;if(fbUnsub){fbUnsub();fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}lkStop();
    if(!u){coll=null;online='off';updateStatus();return;}
    coll=null;online='connecting';syncErr='';updateStatus();
    const base=db.collection('users').doc(u.uid);
@@ -2472,15 +2472,56 @@ function acctDialog(){kidNext();
 async function acctCheck(){const u=fbUser;if(!u||!u.reload)return null;try{await u.reload();}catch(e){return null;}
  if(fbUser!==u)return null;if(!u.emailVerified)return false;lsSet(acctKey(),'ok');updateStatus();return true;}
 document.addEventListener('visibilitychange',()=>{if(document.hidden||!acctWait())return;acctCheck().then(ok=>{if(!ok)return;if(modalEl.querySelector('#acOk'))closeModal();toast('Email confirmed. Every scene is open on this device.');});});
+/* Delete Account... sits beside Change Password... when that row is there, in a row of its own when it is not */
+const acctBit=h=>{const b='<button id="acDel">Delete Account…</button>',i=h.lastIndexOf('</div>');return h.includes('id="lkp"')&&i>=0&&i===h.length-6?h.slice(0,i)+b+'</div>':h+'<div class="btns">'+b+'</div>';};
+/* ---------- deleting an account ---------- */
+let acctShut=false;   /* this account is closed (deleted, or part-way through being deleted): nothing syncs */
+const acctT=(pr,ms)=>Promise.race([pr,new Promise((_,no)=>setTimeout(()=>{const e=new Error('timeout');e.code='timeout';no(e);},ms||20000))]);
+function acctQuiet(){if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}clearTimeout(pushT);coll=null;online='off';}
+/* another device of this account closed it: stop here too. No sign-out: Firebase does that once the sign-in is gone, and if the job was left half done it can be finished from this device */
+function acctClosed(){if(acctShut)return;acctShut=true;acctQuiet();updateStatus();toast('This account was deleted from one of your devices. Your work stays saved on this device.');}
+async function acctDelete(pw){const u=fbUser;if(!u)throw new Error('signed-out');
+ if(lk.on||lk.need||lk.marker)throw new Error('locked');
+ await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw));
+ const base=fbDb.collection('users').doc(u.uid),dc=base.collection('docs'),SV={source:'server'};
+ let cloud=true;try{await acctT(dc.doc('meta').get(SV));}catch(e){if(e&&e.code==='permission-denied')cloud=false;else throw e;}
+ if(cloud){acctShut=true;acctQuiet();updateStatus();
+  await acctT(dc.doc('meta').set({closed:Date.now()}));
+  await new Promise(r=>setTimeout(r,1200));
+  const drop=async(c,ids)=>{for(let i=0;i<ids.length;i+=200){const part=ids.slice(i,i+200);if(fbDb.batch){const b=fbDb.batch();part.forEach(id=>b.delete(c.doc(id)));await acctT(b.commit(),60000);}else await acctT(Promise.all(part.map(id=>c.doc(id).delete())),60000);}};
+  const wipe=async(c,keep)=>{for(let pass=0;pass<4;pass++){const all=await acctT(c.get(SV),60000),ids=all.docs.map(d=>d.id).filter(i=>i!==keep);if(!ids.length)return;await drop(c,ids);}
+   throw Object.assign(new Error('left'),{code:'left'});};
+  /* first everything this device knows by name (no download needed, so pictures are not fetched just to be removed), then whatever the server still lists */
+  await drop(dc,[...new Set([...Object.keys(docs()).filter(k=>k!=='meta'),...Object.keys(images).map(k=>'img-'+k),...(sync.imgK||[]).map(k=>'img-'+k)])]);
+  await wipe(dc,'meta');
+  for(const n of ['vault','keys'])try{await wipe(base.collection(n));}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
+ await acctT(u.delete());
+ for(const k of ['blk.acct.','blk.apown.'])try{localStorage.removeItem(k+u.uid);}catch(e){}
+ return cloud;}
+function acctDeleteDialog(){if(!fbUser)return;const em=fbUser.email||'';
+ modal(`<h3>Delete your account</h3><p>This deletes the account for <b>${esc(em)}</b>, and its synced copy in the cloud if it has one. It cannot be undone.</p><p class="mut">Everything on this device stays. Without an account the app keeps what you have, and asks for an account before you add more.</p><label class="fld">Password<input id="dpw" type="password" autocomplete="current-password"></label><p id="derr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri danger" id="dgo">Delete Account</button></div>`,c=>{
+  const go=c.querySelector('#dgo'),pwb=c.querySelector('#dpw'),err=m=>{c.querySelector('#derr').textContent=m;};let busy=false;
+  go.onclick=async()=>{if(busy)return;const pw=pwb.value;err('');if(!pw){err('Type your password first.');return;}
+   busy=true;go.disabled=true;go.textContent='Deleting…';
+   try{await acctDelete(pw);closeModal();toast('Account deleted. Your work stays saved on this device.');}
+   catch(e){const k=(e&&e.code)||(e&&e.message)||'';
+    if(k==='auth/user-not-found'||k==='auth/user-token-expired'){try{await fbAuth.signOut();}catch(x){}closeModal();toast('That account is already gone. Your work stays saved on this device.');return;}
+    err(k==='locked'?'This account’s synced work is locked. To delete it, write to info@thedirectorsnotebook.com.':['auth/wrong-password','auth/invalid-credential','auth/invalid-login-credentials'].includes(k)?'That password isn’t right.':k==='auth/too-many-requests'?'Too many tries just now. Wait a few minutes, then try again.':acctShut?'Couldn’t finish: the internet dropped part-way. Nothing more will sync from this account. Connect, then tap Delete Account again.':'Couldn’t reach the internet. Connect, then try again.');
+    busy=false;go.disabled=false;go.textContent='Delete Account';}};
+  pwb.onkeydown=e=>{if(e.key==='Enter')go.click();};setTimeout(()=>pwb.focus(),60);});}
 function accountDialog(){
  if(!fbAuth)return;
- if(acctWait()){modal(`<h3>Confirm your email</h3><p>We sent a link to <b>${esc(fbUser.email||'')}</b>. Open it to finish your account, then come back and tap I’ve confirmed.</p><p class="mut">Nothing there? Look in your spam folder, or send it again.</p><p id="aerr" class="mut" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button class="danger" id="so">Sign out</button><button id="acRe">Send it again</button><button data-x>Not now</button><button class="pri" id="acOk">I’ve confirmed</button></div>`,c=>{
+ if(fbUser&&acctShut){modal(`<h3>Sync</h3><p>The account for <b>${esc(fbUser.email||'')}</b> was deleted from one of your devices. Nothing more will sync. Your work stays saved on this device.</p><p class="mut">If deleting it was interrupted, finish it here.</p><div class="btns"><button id="acDel">Finish Deleting…</button></div><div class="btns end"><button class="danger" id="so">Sign out</button><button class="pri" data-x>Done</button></div>`,c=>{
+  c.querySelector('#acDel').onclick=()=>{kidNext();acctDeleteDialog();};
+  c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
+ if(acctWait()){modal(`<h3>Confirm your email</h3><p>We sent a link to <b>${esc(fbUser.email||'')}</b>. Open it to finish your account, then come back and tap I’ve confirmed.</p><p class="mut">Nothing there? Look in your spam folder, or send it again.</p><p id="aerr" class="mut" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="acDel">Delete Account…</button></div><div class="btns end"><button class="danger" id="so">Sign out</button><button id="acRe">Send it again</button><button data-x>Not now</button><button class="pri" id="acOk">I’ve confirmed</button></div>`,c=>{
   const say=m=>{c.querySelector('#aerr').textContent=m;};
+  c.querySelector('#acDel').onclick=()=>{kidNext();acctDeleteDialog();};
   c.querySelector('#acRe').onclick=async()=>{say('');try{await fbUser.sendEmailVerification();say('Sent. It can take a minute to arrive.');}catch(e){say(e&&e.code==='auth/too-many-requests'?'Too many tries just now. Wait a few minutes, then send it again.':'Couldn’t send it. Check your connection and try again.');}};
   c.querySelector('#acOk').onclick=async()=>{say('Checking…');const ok=await acctCheck();if(ok){closeModal();toast('Email confirmed. Every scene is open on this device.');}else say(ok===false?'Not confirmed yet. Open the link in the email we sent, then tap I’ve confirmed.':'Couldn’t check. Connect to the internet and try again.');};
   c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
- if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Make as many scenes as you need. They are saved on this device.</p><p class="mut">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email.</p><div class="btns"><button id="lkp">Change Password…</button></div>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':lkSyncBit()}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
-  lkSyncBind(c);const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
+ if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Make as many scenes as you need. They are saved on this device.</p><p class="mut">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email.</p><div class="btns"><button id="lkp">Change Password…</button><button id="acDel">Delete Account…</button></div>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':acctBit(lkSyncBit())}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
+  lkSyncBind(c);{const ad=c.querySelector('#acDel');if(ad)ad.onclick=()=>{kidNext();acctDeleteDialog();};}const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
  modal(`<h3>Sign in</h3><p class="mut">A free account opens as many scenes as you need. Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div><p class="mut" id="prv" style="margin-top:12px;font-size:12.5px">We use your email only to sign you in. We do not sell it. <a href="https://thedirectorsnotebook.com/#privacy" target="_blank" rel="noopener">Privacy</a></p>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
   const run=async(f,msg)=>{err('');try{await f();closeModal();toast(msg||'Signed in.');}catch(e){err(authMsg(e));}};
@@ -2580,6 +2621,7 @@ async function initSync(){
  }catch(e){updateStatus();}
 }
 function applyRemote(snap){gMem.clear();
+ if(fbUser){const m=snap.docs.find(d=>d.id==='meta'),b=m&&m.data();if(b&&b.closed){acctClosed();return;}}
  if(fbUser&&!lk.on){const m=snap.docs.find(d=>d.id==='meta'),b=m&&m.data();if(lkMarker(b)){lkSwitch(null);return;}}
  try{detectChanges();}catch(e){}const preSnap=cur;
  let changed=false,meta=null;const sd={},td={},seen=new Set(),goneNow=[];
@@ -2681,6 +2723,7 @@ function updateStatus(){acctNote();
  if(!localOk){t='Not saving here. Back up from the menu';c='bad';}
  else if(pIn>0||imgIn>0||notePend()){t='Saving…';}
  else if(fbAuth&&!fbUser){t='Sign in to sync';c='warn';}
+ else if(acctShut){t='Account deleted · saved here';c='warn';}
  else if(fbUser&&lk.need==='pw'){t='Unlock to sync · saved here';c='warn';}
  else if(fbUser&&lk.need==='conv')t=`Locking ${lk.prog[0]} of ${lk.prog[1]}…`;
  else if(fbUser&&lk.need==='wait'){t='Lock waiting for internet · saved here';c='warn';}
