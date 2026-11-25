@@ -690,7 +690,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125013002';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125021321';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2405,16 +2405,20 @@ function syncListen(u,c){if(fbUser!==u)return;if(fbUnsub){try{fbUnsub();}catch(e
 let probeT=null;
 let fbDb=null,kicked=0;
 /* the live listener skips image documents; images listed in the shared list that this device lacks are fetched one by one */
-let imgViaMeta=false,imgFullDone=false;const imgTry={};let imgT=null,imgBusy=false;
+let imgViaMeta=false,imgFullDone=false;const imgTry={},imgProg={n:0,of:0,bulk:false};let imgT=null,imgBusy=false,imgRT=0;   /* imgProg: how far a download of pictures has got, for the status line */
 function imgWant(meta){if(!imgViaMeta||!coll||!meta)return;
- if(!Array.isArray(meta.imgs)){if(imgFullDone)return;imgFullDone=true;const FP=firebase.firestore.FieldPath;
-  coll.where(FP.documentId(),'>=','img-').where(FP.documentId(),'<','img.').get().then(q=>{let n=0;q.forEach(d=>{const b=d.data(),iid=d.id.slice(4);if(b&&b.data&&!images[iid]){images[iid]=b.data;n++;}});if(n){imgDirty=true;saveLocal();bgKey='';render();}}).catch(()=>{imgFullDone=false;});return;}
+ if(!Array.isArray(meta.imgs)){if(imgFullDone)return;imgFullDone=true;const FP=firebase.firestore.FieldPath;imgProg.bulk=true;updateStatus();
+  coll.where(FP.documentId(),'>=','img-').where(FP.documentId(),'<','img.').get().then(q=>{let n=0;q.forEach(d=>{const b=d.data(),iid=d.id.slice(4);if(b&&b.data&&!images[iid]){images[iid]=b.data;n++;}});if(n){imgDirty=true;saveLocal();bgKey='';render();}}).catch(()=>{imgFullDone=false;}).then(()=>{imgProg.bulk=false;updateStatus();});return;}
  for(const id of meta.imgs)if(!images[id]&&(imgTry[id]||0)<6)imgTry[id]=imgTry[id]||0;imgPull();}
 addEventListener('online',()=>{for(const id in imgTry)if(!images[id])imgTry[id]=0;try{imgPull();}catch(e){}});
 async function imgPull(){if(imgBusy||!coll)return;imgBusy=true;let got=0,left=false;
+ imgProg.n=0;imgProg.of=Object.keys(imgTry).filter(id=>!images[id]&&imgTry[id]<6).length;if(imgProg.of)updateStatus();
  try{for(const id of Object.keys(imgTry)){if(images[id]){delete imgTry[id];continue;}if(imgTry[id]>=6)continue;
-   try{const d=await coll.doc('img-'+id).get();const b=d.exists?d.data():null;if(b&&b.data){images[id]=b.data;got++;delete imgTry[id];}else{imgTry[id]++;left=true;}}catch(e){imgTry[id]++;left=true;}}}
- finally{imgBusy=false;}
+   try{const d=await coll.doc('img-'+id).get();const b=d.exists?d.data():null;if(b&&b.data){images[id]=b.data;got++;delete imgTry[id];
+     /* show it now, not when the last one lands; not in the middle of a drag or a pen stroke, and not more than about once a second */
+     imgProg.n++;updateStatus();if(Date.now()-imgRT>700&&!gesture&&!penT){imgRT=Date.now();imgDirty=true;bgKey='';try{render();}catch(e){}}}
+    else{imgTry[id]++;left=true;}}catch(e){imgTry[id]++;left=true;}}}
+ finally{imgBusy=false;imgProg.of=0;imgProg.n=0;updateStatus();}
  if(got){imgDirty=true;saveLocal();bgKey='';render();}
  if(left){clearTimeout(imgT);imgT=setTimeout(imgPull,20000);}}
 function syncProbe(){clearTimeout(probeT);if(!coll||!fbUser||online==='on')return;
@@ -2660,7 +2664,9 @@ function updateStatus(){
  else if(syncErr==='permission-denied'){t='Not approved for sync · saved here';c='warn';}
  else if(online==='error'||syncErr){t='Sync paused · saved here';c='warn';}
  else if(outdated){t='Update the app · saved here';c='warn';}
- else if(sync.dirty.length||unacked||bootPend)t='Syncing…';
+ else if(sync.dirty.length||unacked||bootPend){const n=sync.dirty.length+unacked,pics=sync.dirty.filter(k=>k.startsWith('img-')).length;t=!n?'Uploading…':pics&&pics===n?`Uploading ${plural(pics,'picture')}…`:`Uploading ${plural(n,'change')}…`;}
+ else if(imgProg.of>0)t=`Downloading pictures ${Math.min(imgProg.n+1,imgProg.of)} of ${imgProg.of}…`;
+ else if(imgProg.bulk)t='Downloading pictures…';
  else if(bigN()){t='Part too large to sync · saved here';c='warn';}
  else{t='Synced';c='ok';}
  el.textContent=t;el.className=c;el.title=t+(coll?' · last confirmed by the cloud '+whenTxt(lastSync):'');
