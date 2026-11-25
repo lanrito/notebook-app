@@ -690,7 +690,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125034043';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125121740';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2396,7 +2396,7 @@ function syncListen(u,c){if(fbUser!==u)return;if(fbUnsub){try{fbUnsub();}catch(e
     if(gesture||penT)pendingRemote=snap;else applyRemote(snap);
     updateStatus();schedulePush(400);
    },err=>{if(!full&&err&&['invalid-argument','failed-precondition','unimplemented'].includes(err.code)){if(fbUnsub)try{fbUnsub();}catch(e){}fbUnsub=listen(true);return;}clearTimeout(t);online='error';syncErr=(err&&err.code)||'error';updateStatus();
-    if(syncErr==='permission-denied')toast(`${u.email||'This account'} isn’t approved for sync yet. Your work is saved on this device.`);});};
+    });};
    try{fbUnsub=listen(false);}catch(e){fbUnsub=listen(true);}
    try{fbUnsubM=coll.doc('meta').onSnapshot({includeMetadataChanges:true},m=>{if(m.metadata.fromCache||online==='on'||online==='error')return;
      clearTimeout(t);clearTimeout(probeT);online='on';if(['resource-exhausted','unavailable','deadline-exceeded'].includes(syncErr))syncErr='';
@@ -2456,19 +2456,40 @@ function writeDoc(ref,data,k){const w=data?ref.set(data):ref.delete();if(!fbPers
 let wfT=null,imgReady=false;
 function authMsg(e){const c=(e&&e.code)||'';return ({'auth/invalid-credential':'That email and password don’t match. First time here? Tap Create account.','auth/invalid-login-credentials':'That email and password don’t match. First time here? Tap Create account.','auth/missing-email':'Type your email first.','auth/user-disabled':'This account has been switched off. Write to info@thedirectorsnotebook.com.','auth/admin-restricted-operation':'New accounts are switched off right now. Write to info@thedirectorsnotebook.com.','auth/web-storage-unsupported':'This browser is blocking saved data, so it can’t sign in. Turn off private browsing, or use another browser.','auth/internal-error':'The sign-in service had a problem. Try again in a minute.','auth/wrong-password':'That email and password don’t match.','auth/missing-password':'Type a password first.','auth/user-not-found':'No account with that email yet. Tap Create account.','auth/email-already-in-use':'There’s already an account with that email. Tap Sign in.','auth/weak-password':'Use at least 10 characters for the password.','auth/invalid-email':'That email address doesn’t look right.','auth/network-request-failed':'No connection. Sign in when you’re online; your work stays saved here.','auth/operation-not-allowed':'Email sign-in isn’t switched on in Firebase yet.','auth/too-many-requests':'Too many tries. Wait a minute and try again.'})[c]||('Something went wrong. Please try again.'+authWhy(e));}
 function authWhy(e){const c=String((e&&e.code)||'').replace(/^auth\//,''),m=c||String((e&&e.message)||'').replace(/\s+/g,' ').trim();return m?' Reason: '+m.slice(0,90)+(/[.!?]$/.test(m)?'':'.'):'';}
+/* ---------- the free account: without one, this device holds one scene and one location scout ---------- */
+const acctKey=()=>'blk.acct.'+fbUser.uid;
+/* an account counts once its email is confirmed, or once sync has connected for it (the people approved by hand). Remembered on the device so it holds offline */
+function acctNote(){if(!fbUser)return;const k=acctKey(),v=lsGet(k);
+ if(fbUser.emailVerified||online==='on'){if(v!=='ok')lsSet(k,'ok');}
+ else if(syncErr==='permission-denied'&&v!=='ok'&&v!=='no')lsSet(k,'no');}
+function acctOK(){if(!fbAuth)return true;if(!fbUser)return false;if(fbUser.emailVerified||online==='on')return true;return lsGet(acctKey())!=='no';}
+const acctWait=()=>!!fbUser&&!acctOK();   /* signed in, email not confirmed yet */
+/* would this take the device past one scene (or one scout) without an account? then say so, and stop */
+function acctWall(n,scout){if(acctOK())return false;const have=liveScenes().filter(x=>!!x.scout===!!scout).length;if(have+(n||1)<=1)return false;acctDialog();return true;}
+function acctDialog(){kidNext();
+ if(fbUser){accountDialog();return;}
+ modal(`<h3>A free account opens the rest</h3><p>Without an account, The Director’s Notebook keeps one scene and one location scout on this device. A free account gives you as many as you need.</p><p class="mut">It takes a minute: your email and a password. Everything you have made stays as it is.</p><div class="btns end"><button data-x>Not now</button><button class="pri" id="acGo">Create a free account</button></div>`,c=>{c.querySelector('#acGo').onclick=()=>{kidNext();accountDialog();};});}
+async function acctCheck(){const u=fbUser;if(!u||!u.reload)return null;try{await u.reload();}catch(e){return null;}
+ if(fbUser!==u)return null;if(!u.emailVerified)return false;lsSet(acctKey(),'ok');updateStatus();return true;}
+document.addEventListener('visibilitychange',()=>{if(document.hidden||!acctWait())return;acctCheck().then(ok=>{if(!ok)return;if(modalEl.querySelector('#acOk'))closeModal();toast('Email confirmed. Every scene is open on this device.');});});
 function accountDialog(){
  if(!fbAuth)return;
- if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p><b>${esc(fbUser.email||'')}</b> isn’t approved for sync yet. Sync is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email. Until then, your work is saved on this device.</p>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':lkSyncBit()}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
+ if(acctWait()){modal(`<h3>Confirm your email</h3><p>We sent a link to <b>${esc(fbUser.email||'')}</b>. Open it to finish your account, then come back and tap I’ve confirmed.</p><p class="mut">Nothing there? Look in your spam folder, or send it again.</p><p id="aerr" class="mut" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button class="danger" id="so">Sign out</button><button id="acRe">Send it again</button><button data-x>Not now</button><button class="pri" id="acOk">I’ve confirmed</button></div>`,c=>{
+  const say=m=>{c.querySelector('#aerr').textContent=m;};
+  c.querySelector('#acRe').onclick=async()=>{say('');try{await fbUser.sendEmailVerification();say('Sent. It can take a minute to arrive.');}catch(e){say(e&&e.code==='auth/too-many-requests'?'Too many tries just now. Wait a few minutes, then send it again.':'Couldn’t send it. Check your connection and try again.');}};
+  c.querySelector('#acOk').onclick=async()=>{say('Checking…');const ok=await acctCheck();if(ok){closeModal();toast('Email confirmed. Every scene is open on this device.');}else say(ok===false?'Not confirmed yet. Open the link in the email we sent, then tap I’ve confirmed.':'Couldn’t check. Connect to the internet and try again.');};
+  c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
+ if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Make as many scenes as you need. They are saved on this device.</p><p class="mut">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email.</p><div class="btns"><button id="lkp">Change Password…</button></div>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':lkSyncBit()}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
   lkSyncBind(c);const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
- modal(`<h3>Sign in to sync</h3><p class="mut">Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div>`,c=>{
+ modal(`<h3>Sign in</h3><p class="mut">A free account opens as many scenes as you need. Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div><p class="mut" id="prv" style="margin-top:12px;font-size:12.5px">We use your email only to sign you in. We do not sell it. <a href="https://thedirectorsnotebook.com/#privacy" target="_blank" rel="noopener">Privacy</a></p>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
-  const run=async f=>{err('');try{await f();closeModal();toast('Signed in. Syncing your scenes…');}catch(e){err(authMsg(e));}};
+  const run=async(f,msg)=>{err('');try{await f();closeModal();toast(msg||'Signed in.');}catch(e){err(authMsg(e));}};
   c.querySelector('#si').onclick=()=>run(()=>{lkPwHold(pw());return fbAuth.signInWithEmailAndPassword(em(),pw());});
   /* a new account types its password twice: the first tap on Create account opens the second box, the next one checks the two match */
   c.querySelector('#ca').onclick=()=>{const w=c.querySelector('#pw2w'),p2=c.querySelector('#pw2');
    if(w.hidden){err('');if(!em()){err('Type your email first.');return;}if(pw().length<LOCK_MIN){err(authMsg({code:'auth/weak-password'}));return;}w.hidden=false;p2.value='';c.querySelector('#ca').classList.add('pri');c.querySelector('#si').classList.remove('pri');p2.focus();return;}   /* Create account becomes the blue button while its second box is open */
    if(p2.value!==pw()){err('The two passwords are not the same.');p2.focus();return;}
-   run(()=>{if(pw().length<LOCK_MIN){const e=new Error('weak');e.code='auth/weak-password';throw e;}lkPwHold(pw());return fbAuth.createUserWithEmailAndPassword(em(),pw());});};
+   run(()=>{if(pw().length<LOCK_MIN){const e=new Error('weak');e.code='auth/weak-password';throw e;}lkPwHold(pw());const to=em();return fbAuth.createUserWithEmailAndPassword(to,pw()).then(async cr=>{try{await ((cr&&cr.user)||fbAuth.currentUser).sendEmailVerification();}catch(e){}});},'Account created. We sent a link to '+em()+' to confirm your email.');};
   c.querySelector('#pw2').addEventListener('keydown',e=>{if(e.key==='Enter')c.querySelector('#ca').click();});
   c.querySelector('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')c.querySelector('#si').click();});
   c.querySelector('#fp').onclick=async()=>{if(!em()){err('Type your email first.');return;}try{await fbAuth.sendPasswordResetEmail(em());err('If there’s an account for that email, a reset link is on its way. Nothing in a minute or two (check spam)? Then there’s no account yet: pick a password and tap Create account.');}catch(e){err(authMsg(e));}};
@@ -2655,7 +2676,7 @@ function syncNow(){if(!coll){toast(fbAuth?'Sign in first (Menu › Sync & Backup
  toast('Syncing…');const go=()=>{detectChanges();saveLocal();schedulePush(0);try{const m=docs().meta;if(m&&coll){for(const id of m.imgs)if(!images[id])imgTry[id]=0;imgPull();}}catch(e){}
   const t0=Date.now(),wait=()=>{if(!sync.dirty.length&&!pushing){if(fbDb&&fbDb.waitForPendingWrites)fbDb.waitForPendingWrites().then(()=>{if(sync.dirty.length||syncErr){toast('Not everything could be sent yet. Your work is saved here; it will keep trying.');return;}if(bigN()){toast('Sent, except what is too large to sync. Ready for Set shows which part.');return;}markSynced();toast('Sent. Everything made here is in the cloud; your other device gets it the next time it’s online.');}).catch(()=>toast('Couldn’t reach the cloud. Your work is saved here; try again in a moment.'));else{markSynced();toast('Synced.');}}else if(Date.now()-t0<20000)setTimeout(wait,500);else toast('Still sending. It will finish in the background.');};setTimeout(wait,400);};
  if(fbDb&&fbDb.disableNetwork){fbDb.disableNetwork().then(()=>fbDb.enableNetwork()).then(go,go);}else go();}
-function updateStatus(){
+function updateStatus(){acctNote();
  const el=$('#status');let t,c='';
  if(!localOk){t='Not saving here. Back up from the menu';c='bad';}
  else if(pIn>0||imgIn>0||notePend()){t='Saving…';}
@@ -2670,7 +2691,7 @@ function updateStatus(){
  else if(online==='quota'){t='Sync limit reached today · saved here';c='warn';}
  else if(online==='waiting'){t='Can’t reach sync · saved here';c='warn';}
  else if(online==='stuck'){t='Reconnecting sync…';c='warn';}
- else if(syncErr==='permission-denied'){t='Not approved for sync · saved here';c='warn';}
+ else if(syncErr==='permission-denied'){if(acctWait()){t='Confirm your email · saved here';c='warn';}else t='Saved on this device';}
  else if(online==='error'||syncErr){t='Sync paused · saved here';c='warn';}
  else if(outdated){t='Update the app · saved here';c='warn';}
  else if(sync.dirty.length||unacked||bootPend){const n=sync.dirty.length+unacked,pics=sync.dirty.filter(k=>k.startsWith('img-')).length;t=!n?'Uploading…':pics&&pics===n?`Uploading ${plural(pics,'picture')}…`:`Uploading ${plural(n,'change')}…`;}
@@ -2706,8 +2727,8 @@ $('#scoutPanel').addEventListener('click',e=>{const s=scene(),b=e.target.closest
  if(b.dataset.sr){const [id,vi]=b.dataset.sr.split('|');sel={id,mark:+vi};renderUI();renderScout();return;}
  if(b.dataset.go){P.ui.prevScene=b.dataset.go;setView('prep');toast('Prep mode.');return;}
  const k=b.dataset.sc;
- if(k==='create'){const v=(($('#scNew')||{}).value||'').trim();if(!v){$('#scNew').focus();toast('Name the location first.');return;}P.ui.prevScene=P.sceneId;newScout(v);toast('Scout started. Sketch the space, add photos and camera ideas.');}
- else if(k==='new')askText('New location scout','Location name','e.g. Jill’s apartment',v=>{if(v&&v.trim()){newScout(v.trim());}});
+ if(k==='create'){if(acctWall(1,true))return;const v=(($('#scNew')||{}).value||'').trim();if(!v){$('#scNew').focus();toast('Name the location first.');return;}P.ui.prevScene=P.sceneId;newScout(v);toast('Scout started. Sketch the space, add photos and camera ideas.');}
+ else if(k==='new'){if(!acctWall(1,true))askText('New location scout','Location name','e.g. Jill’s apartment',v=>{if(v&&v.trim()){newScout(v.trim());}});}
  else if(k==='pen')$('#bPen').click();else if(k==='add')$('#bAdd').click();else if(k==='cam')quickCam(s);else if(k==='link')scoutLinkDialog(s);});
 $('#scoutPanel').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='scNew'){e.preventDefault();const b=$('#scoutPanel [data-sc=create]');if(b)b.click();}});
 $('#scoutPanel').addEventListener('change',async e=>{const s=scene();
@@ -4660,7 +4681,7 @@ function libMenu(rect,kind,id,sub){closePop();closeDrop();const x=kind==='f'?fBy
  const d=document.createElement('div');d.id='drop';d.className='mm lm';d.innerHTML=h;document.body.appendChild(d);
  d.style.maxHeight=Math.max(200,innerHeight-16)+'px';d.style.left=Math.max(8,Math.min(innerWidth-d.offsetWidth-8,rect.left))+'px';d.style.top=Math.max(8,Math.min(innerHeight-d.offsetHeight-8,rect.bottom+4))+'px';
  const open1=fid=>{(P.ui.libOpen=P.ui.libOpen||{})[fid]=true;};
- const ACT={info:()=>sceneInfo(x),dup:()=>{const n=duplicateScene(x);commit();toast(`Made ${sceneLabel(n)}.`);},
+ const ACT={info:()=>sceneInfo(x),dup:()=>{if(acctWall(1,x.scout))return;const n=duplicateScene(x);commit();toast(`Made ${sceneLabel(n)}.`);},
   trash:()=>{trashScenes([x.id]);commit();fit();toast(`${sceneLabel(x)} moved to Trash. Trash is at the bottom of the Library.`);},
   fnew:()=>{open1(x.id);newScene(x.id);},fsub:()=>libName('New folder inside '+x.name,'','Create',v=>{P.folders.push({id:uid(),name:v,parent:x.id});open1(x.id);commit();},v=>fTaken(v,x.id)?fDupMsg(v):''),
   frename:()=>libName('Rename folder',x.name,'Save',v=>{x.name=v;commit();},v=>fTaken(v,fParent(x),x.id)?fDupMsg(v):''),foverview:()=>overviewDialog(x.id),
@@ -4732,7 +4753,7 @@ function sceneDrop(){const b=$('#sceneBtn'),was=document.querySelector('#drop.sc
  d.addEventListener('click',e=>{const x=e.target.closest('[data-sd]');if(x){closeDrop();libPick(x.dataset.sd);return;}
   if(e.target.closest('#sdLib')){closeDrop();if(setOn)openBrowser();else if(libOn())libSet(false);else{libSet(true);libReveal();}}});
  setTimeout(()=>addEventListener('pointerdown',dropOut,true),0);}
-function newScene(folder){if(folder===undefined)folder=sFolder(scene());const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
+function newScene(folder){if(acctWall())return;if(folder===undefined)folder=sFolder(scene());const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
 /* ---------- scene browser: folders, search, recent, trash ---------- */
 function natCmp(a,b){return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});}
 function liveScenes(){return P.scenes.filter(s=>!s.trashed&&!s.tpl);}
@@ -5324,7 +5345,7 @@ const scoutPins=sc=>(sc.items||[]).filter(i=>i.type==='prop'&&i.kind==='photopin
 function projScouts(s){const r=rootKey(s);return liveScenes().filter(x=>x.scout&&rootKey(x)===r);}
 function projName(s){const r=rootOf(s);return (r&&(P.folders.find(f=>f.id===r)||{}).name)||'This project';}
 function scoutLoc(sc){return sc&&sc.loc?locById(sc.loc):null;}
-function newScout(name){const cur=scene(),f=sFolder(cur),pg={id:uid(),name:'Page 1'};
+function newScout(name){if(acctWall(1,true))return;const cur=scene(),f=sFolder(cur),pg={id:uid(),name:'Page 1'};
  const sc={id:uid(),number:'',title:name,heading:'LOCATION SCOUT',synopsis:'',code:'',day:'',setups:[],items:[],pages:[pg],pageId:pg.id,bgId:null,bg:null,scout:1,at:Date.now()};if(f)sc.folder=f;
  P.scenes.push(sc);sUnique(sc);const L=locCreate(sc,name.toUpperCase());L.scout=sc.id;P.sceneId=sc.id;noteRecent(sc.id);sel=null;msel=null;inspOpen=false;commit();fit();return sc;}
 function quickCam(s){const nc=numCfg(s),num=nc.auto?(+nc.start||1)+s.setups.filter(x=>setupCams(s,x.id).length).length:s.setups.reduce((m,x)=>Math.max(m,parseInt(x.num,10)||0),0)+1;
@@ -5573,7 +5594,7 @@ function applyTemplate(t,target,replaceBg){
  if(c.bgId&&(!target.bgId||replaceBg)){target.bgId=c.bgId;target.bg=clone(c.bg);}
  target.tplApplied=[...(target.tplApplied||[]),t.id];
 }
-function sceneFromTemplate(t,folder){const n=cloneScene(t);n.pageId='all';if(n.pages.length===1)for(const i of n.items)if(i.pgs)i.pgs=null;delete n.tpl;delete n.loc;delete n.tplApplied;delete n.numbering;n.title='';n.tplApplied=[t.id];
+function sceneFromTemplate(t,folder){if(acctWall())return;const n=cloneScene(t);n.pageId='all';if(n.pages.length===1)for(const i of n.items)if(i.pgs)i.pgs=null;delete n.tpl;delete n.loc;delete n.tplApplied;delete n.numbering;n.title='';n.tplApplied=[t.id];
  if(folder&&fById(folder))n.folder=folder;else delete n.folder;n.number=String(fScenes(folder||null).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1);
  delete n.cat;delete n.factory;closeModal();castDialog(n,()=>{P.scenes.push(n);noteRecent(n.id);P.sceneId=n.id;sel=null;msel=null;inspOpen=false;endTool();closeModal();commit();fit();sceneInfo();});}
 function saveTemplateDialog(){const s=scene(),lk=locKey(s.heading),hasActors=s.items.some(i=>ACTOR(i.type));
@@ -5875,7 +5896,7 @@ function brClick(e){
   if(k==='trash'){brGo('__trash');return;}
   if(k==='tpls'){brGo('__tpl');return;}
   if(k==='savetpl'){kidNext();saveTemplateDialog();return;}
-  if(k==='newscene'){if(templates().length){br.sub={k:'newpick'};brRender();return;}closeModal();newScene(br.at);return;}
+  if(k==='newscene'){if(acctWall())return;if(templates().length){br.sub={k:'newpick'};brRender();return;}closeModal();newScene(br.at);return;}
   if(k==='import'){importScript();return;}
   if(k==='newfolder'){br.sub={k:'name',mode:'new',parent:br.at};brRender();return;}
   if(k==='pick'){br.pick=br.pick?null:new Set();brRender();return;}
@@ -5930,10 +5951,10 @@ function brSubAct(a,dest){
  if(u.k==='sact'){const s=P.scenes.find(x=>x.id===u.id);if(!s)return;
   if(a==='open'){openScene(s.id);return;}
   if(a==='info'){kidNext();sceneInfo(s,()=>openBrowser(br.at));return;}
-  if(a==='dup'){const n=duplicateScene(s);commit();br.sub=null;brRender();toast(`Made ${sceneLabel(n)}.`);return;}
+  if(a==='dup'){if(acctWall(1,s.scout))return;const n=duplicateScene(s);commit();br.sub=null;brRender();toast(`Made ${sceneLabel(n)}.`);return;}
   if(a==='move'){br.sub={k:'move',ids:[s.id],prev:u};brRender();return;}
   if(a==='trash'){trashScenes([s.id]);commit();br.sub=null;brRender();toast(`${sceneLabel(s)} moved to Trash.`);return;}
-  if(a==='restore'){restoreScenes([s.id]);commit();br.sub=null;brRender();toast(`${sceneLabel(s)} put back${sFolder(s)?' in '+fById(sFolder(s)).name:''}.`);return;}
+  if(a==='restore'){if(acctWall(1,s.scout))return;restoreScenes([s.id]);commit();br.sub=null;brRender();toast(`${sceneLabel(s)} put back${sFolder(s)?' in '+fById(sFolder(s)).name:''}.`);return;}
   if(a==='kill'){br.sub={k:'confirm',what:'kill',id:s.id,prev:u};brRender();return;}}
  if(u.k==='fact'){const f=fById(u.id);if(!f)return;
   if(a==='fopen'){brGo(f.id);return;}
@@ -6180,7 +6201,8 @@ function importReview(ps,chars,fname,into){
    if(b&&b.dataset.act==='g'){c.g=b.dataset.v;c.guess=false;}else c.on=!c.on;r.outerHTML=row(c,+r.dataset.i);});
   show();
   card.querySelector('#imGo').onclick=()=>{
-   if(mode==='rev'){revApply(fS.value,cS.value,revPlan(fS.value,ps),chars,card.querySelector('#imPl').checked,!!(card.querySelector('#imTp')||{}).checked,known());return;}
+   if(mode==='rev'){const pl=revPlan(fS.value,ps);if(pl.n.new&&acctWall(pl.n.new))return;revApply(fS.value,cS.value,pl,chars,card.querySelector('#imPl').checked,!!(card.querySelector('#imTp')||{}).checked,known());return;}
+   if(acctWall(ps.scenes.length))return;
    const name=card.querySelector('#imN').value.trim()||ps.title,par=sel.value||null,place=card.querySelector('#imPl').checked,useTpl=!!(card.querySelector('#imTp')||{}).checked;
    const fo={id:uid(),name:fFree(name,par),parent:par};P.folders.push(fo);
    const rootId=par?(fPath(par)[0]||{}).id||par:fo.id,usedC=rootColors(rootId);const ids={};let ci=0;for(const c of chars)if(c.on){ci++;const col=distinctColor(usedC);usedC.push(col);const ch={id:uid(),name:c.name,color:col,home:rootId};if(c.g)ch.g=c.g;P.characters.push(ch);ids[c.name]=ch.id;}
@@ -7130,7 +7152,7 @@ async function importDocx(file){
  if(!parsed.length){toast('No Director’s Notebook or Shooting Strategy pages were found in that file.');return;}
  const fid=sFolder(scene()),{matched,withText}=docxPlan(parsed,fid),add=parsed.length-matched,where=fid?`“${fById(fid).name}”`:'the top level (no folder)';
  modal(`<h3>Import from Word</h3><p><b>${parsed.length} scene${parsed.length===1?'':'s'}</b> found in ${esc(file.name)}.</p><p class="mut">${matched?`${matched} match${matched===1?'es a scene':' scenes'} already in ${esc(where)} by scene number and get${matched===1?'s':''} the text. `:''}${add?`${add} new scene${add===1?'':'s'} will be added to ${esc(where)}.`:''}</p>${withText?`<label class="imopt"><input type="checkbox" id="dxR"> Replace the notebook and strategy already written in ${withText} of them</label><p class="mut" style="margin-left:24px">Left unticked, those ${withText} keep what they have.</p>`:''}<div class="btns end"><button data-x>Cancel</button><button class="pri" id="ok">Import</button></div>`,card=>{
-  card.querySelector('#ok').onclick=()=>{const rep=!!(card.querySelector('#dxR')&&card.querySelector('#dxR').checked);closeModal();const r=docxApply(parsed,fid,rep);if(r.first){P.sceneId=r.first.s.id;noteRecent(P.sceneId);}sel=null;msel=null;commit();txFlush();if(mode!=='nb')setMode('nb');else renderDocs(true);
+  card.querySelector('#ok').onclick=()=>{if(add&&acctWall(add))return;const rep=!!(card.querySelector('#dxR')&&card.querySelector('#dxR').checked);closeModal();const r=docxApply(parsed,fid,rep);if(r.first){P.sceneId=r.first.s.id;noteRecent(P.sceneId);}sel=null;msel=null;commit();txFlush();if(mode!=='nb')setMode('nb');else renderDocs(true);
    toast(`Imported ${r.filled} scene${r.filled===1?'':'s'}`+(r.made?`, ${r.made} new`:'')+(r.ncuts?`, ${r.ncuts} cut${r.ncuts===1?'':'s'}`:'')+(r.skipped?`. ${r.skipped} kept their own text`:'')+'.');};
  },'numcard');
 }
