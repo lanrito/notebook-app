@@ -691,7 +691,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125154059';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125164824';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2436,10 +2436,17 @@ function syncProbe(){clearTimeout(probeT);if(!coll||!fbUser||online==='on')retur
    else set('waiting','http-'+r.status);
    again();})
   .catch(()=>{set('waiting','unreachable');again();});}
+/* the live connection stopped (refused before this account was approved, or dropped by the service): start it again */
+let reviveAt=0;
+function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncRevive();});
 function syncWhy(){if(!navigator.onLine)return 'This device has no internet connection right now.';
  if(online==='quota')return 'The sync service’s free daily limit for this app has been used up. Sync starts again by itself after midnight Pacific time. Until then everything is saved on this device, and it’s all sent once sync is back.';
  if(online==='stuck')return 'The sync service is answering, but the live connection got stuck. The app is reconnecting by itself; if this stays for more than a minute or two, reload the page. Everything is saved on this device meanwhile.';
- if(online==='waiting')return 'The internet is on, but the sync service isn’t answering from this network. Try another network (or turn off a VPN or content blocker). Everything is saved on this device and sent once it connects.';return '';}
+ if(online==='waiting')return 'The internet is on, but the sync service isn’t answering from this network. Try another network (or turn off a VPN or content blocker). Everything is saved on this device and sent once it connects.';
+ if((online==='error'||syncErr)&&syncErr!=='permission-denied'){const why={'resource-exhausted':'The sync service’s free daily limit for this app has been used up. Sync starts again by itself after midnight Pacific time.','unavailable':'The sync service did not answer.','deadline-exceeded':'The sync service took too long to answer.','unauthenticated':'This device’s sign-in has run out. Sign out, then sign in again.'}[syncErr]||(syncErr?'The sync service reported a problem.':'The live connection to the sync service stopped.');
+  return `Sync is paused. ${why} The app keeps trying by itself, and everything is saved on this device meanwhile. (Reason: ${syncErr||'connection stopped'})`;}
+ return '';}
 function tooBig(c){return c==='invalid-argument'||c==='invalid_argument';}
 function bigToast(k){if(warnedBig)return;warnedBig=true;toast(k&&k.startsWith('img-')?'An image is too large to sync. It is still saved on this device.':'Part of this project is too large to sync. It is still saved on this device. Ready for Set shows which part.');}
 function encFS(o,f){if(Array.isArray(o))return o.map(x=>{if(Array.isArray(x)){f.n=1;return {__a:encFS(x,f)};}return encFS(x,f);});if(o&&typeof o==='object'){const r={};for(const k in o)r[k]=encFS(o[k],f);return r;}return o;}
@@ -2460,7 +2467,10 @@ function authWhy(e){const c=String((e&&e.code)||'').replace(/^auth\//,''),m=c||S
 /* ---------- the free account: without one, this device holds one scene and one location scout ---------- */
 const acctKey=()=>'blk.acct.'+fbUser.uid;
 /* an account counts once its email is confirmed, or once sync has connected for it (the people approved by hand). Remembered on the device so it holds offline */
+let acctTell=false;   /* someone just signed in: if the account turns out not to be on the sync list, say so once */
 function acctNote(){if(!fbUser)return;const k=acctKey(),v=lsGet(k);
+ if(acctTell&&online==='on')acctTell=false;
+ if(acctTell&&syncErr==='permission-denied'){acctTell=false;if(fbUser.emailVerified||v==='ok')setTimeout(()=>toast('Signed in. Your work is saved on this device. Sync across devices is invitation only for now.'),700);}
  if(fbUser.emailVerified||online==='on'){if(v!=='ok')lsSet(k,'ok');}
  else if(syncErr==='permission-denied'&&v!=='ok'&&v!=='no')lsSet(k,'no');}
 function acctOK(){if(!fbAuth)return true;if(!fbUser)return false;if(fbUser.emailVerified||online==='on')return true;return lsGet(acctKey())!=='no';}
@@ -2526,7 +2536,7 @@ function accountDialog(){
  modal(`<h3>Sign in</h3><p class="mut">A free account opens as many scenes as you need. Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div><p class="mut" id="prv" style="margin-top:12px;font-size:12.5px">We use your email only to sign you in. We do not sell it. <a href="https://thedirectorsnotebook.com/#privacy" target="_blank" rel="noopener">Privacy</a></p>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
   const run=async(f,msg)=>{err('');try{await f();closeModal();toast(msg||'Signed in.');}catch(e){err(authMsg(e));}};
-  c.querySelector('#si').onclick=()=>run(()=>{lkPwHold(pw());return fbAuth.signInWithEmailAndPassword(em(),pw());});
+  c.querySelector('#si').onclick=()=>run(()=>{lkPwHold(pw());acctTell=true;return fbAuth.signInWithEmailAndPassword(em(),pw());});
   /* a new account types its password twice: the first tap on Create account opens the second box, the next one checks the two match */
   c.querySelector('#ca').onclick=()=>{const w=c.querySelector('#pw2w'),p2=c.querySelector('#pw2');
    if(w.hidden){err('');if(!em()){err('Type your email first.');return;}if(pw().length<LOCK_MIN){err(authMsg({code:'auth/weak-password'}));return;}w.hidden=false;p2.value='';c.querySelector('#ca').classList.add('pri');c.querySelector('#si').classList.remove('pri');p2.focus();return;}   /* Create account becomes the blue button while its second box is open */
@@ -2684,7 +2694,7 @@ async function push(){
  if(gesture&&pushDefer<8){pushDefer++;schedulePush(600);return;}pushDefer=0;
  detectChanges(); /* anything typed or moved since the last save is counted before sending */
  if(!sync.dirty.length){updateStatus();return;}
- pushing=true;let retry=false,again=false,err='';
+ pushing=true;let retry=false,again=false,err='',went=0;
  for(const k of sync.dirty.slice()){ /* one pass over what is waiting; never loops on itself. Each document succeeds or fails on its own */
   if(!sync.dirty.includes(k))continue;
   try{
@@ -2697,7 +2707,7 @@ async function push(){
    if(sync.big&&sync.big[k])continue;
    if(sent!==null&&lastJson[k]!==sent){again=true;continue;}
    if(sent===null&&!k.startsWith('img-')&&docs()[k]){again=true;continue;} /* changed while it was being sent: stays in line for the next pass */
-   sync.dirty=sync.dirty.filter(x=>x!==k);
+   sync.dirty=sync.dirty.filter(x=>x!==k);went++;
   }catch(e){
    const c=(e&&e.code)||'error';
    if(tooBig(c))bigMark(k);
@@ -2706,6 +2716,7 @@ async function push(){
  }
  if(!wfail.size)syncErr=err;
  pushing=false;saveLocal();updateStatus();
+ if(went&&!err)syncRevive();
  if(retry)setTimeout(()=>schedulePush(0),15000);else if(sync.dirty.length)schedulePush(again?900:300);else confirmSynced();
 }
 /* ---------- when the cloud last confirmed everything from this device ---------- */
@@ -2735,7 +2746,7 @@ function updateStatus(){acctNote();
  else if(online==='quota'){t='Sync limit reached today · saved here';c='warn';}
  else if(online==='waiting'){t='Can’t reach sync · saved here';c='warn';}
  else if(online==='stuck'){t='Reconnecting sync…';c='warn';}
- else if(syncErr==='permission-denied'){if(acctWait()){t='Confirm your email · saved here';c='warn';}else t='Saved on this device';}
+ else if(syncErr==='permission-denied'){if(acctWait()){t='Confirm your email · saved here';c='warn';}else t='Saved on this device · not synced';}
  else if(online==='error'||syncErr){t='Sync paused · saved here';c='warn';}
  else if(outdated){t='Update the app · saved here';c='warn';}
  else if(sync.dirty.length||unacked||bootPend){const n=sync.dirty.length+unacked,pics=sync.dirty.filter(k=>k.startsWith('img-')).length;t=!n?'Uploading…':pics&&pics===n?`Uploading ${plural(pics,'picture')}…`:`Uploading ${plural(n,'change')}…`;}
