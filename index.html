@@ -294,6 +294,7 @@ table.sl{border-collapse:collapse;width:100%;min-width:1140px;font-size:14px;col
 .dvh h2{margin:2px 0 0;font-size:24px;text-transform:uppercase}.dvh p{margin:2px 0;color:#55565b}
 .dvh .dvb{display:flex;gap:6px;flex-wrap:wrap}
 .docv .sm{background:#f1f0ec;border-color:#dad8d2;color:#1c1c1e}
+.docv .dvb .sm,.lvh .sm{background:#fff;border:1.5px solid #2f6fde;color:#2459c0}.docv .dvb .sm:hover,.lvh .sm:hover{background:#eef3fd}
 .dvk{font-size:12px;font-weight:800;letter-spacing:.2em;color:#2f6fde;text-transform:uppercase}
 .dvk i{font-style:italic;font-weight:400;letter-spacing:0;color:#5f6065;text-transform:none;font-size:14px;margin-left:8px}
 .dvtools{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid #e4e3df;padding:8px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -534,6 +535,15 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 #top #bMenu{flex:none;width:38px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;background:var(--chip);color:var(--ink)}
 #top #bMenu svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 #drop.mm{width:320px;max-width:calc(100vw - 16px);overflow:auto;-webkit-overflow-scrolling:touch}
+#drop.mm.scn{width:auto;max-width:min(480px,calc(100vw - 16px));display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+#drop.scn h4{flex:none;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:700;border-bottom:0;padding:12px 16px 4px;margin:0}
+#drop.scn .sdl{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+#drop.scn .sdr{align-items:baseline;gap:8px;min-height:42px;padding:9px 10px}#drop.scn .sdr b{flex:none;font-weight:700;white-space:nowrap}
+#drop.scn .sdr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut);font-size:13px;letter-spacing:.02em}
+#drop.scn .sdr.cur{background:light-dark(#e6edfb,#2a3550)}#drop.scn .sdr.cur span{color:var(--ink)}#drop.scn .sdk{margin-left:auto;padding-left:10px;font-style:normal;font-weight:800;color:light-dark(#2f6fde,#a9c4ff)}
+#drop.scn .sdf{flex:none;border-top:1px solid var(--line);padding:8px 0}
+#drop.scn #sdLib{justify-content:center;background:#2f6fde;color:#fff;font-weight:650;box-shadow:0 1px 2px rgba(0,0,0,.12)}#drop.scn #sdLib:hover{background:#2a62c6}
+#drop.scn .pnote{padding:8px 16px 10px;color:var(--mut);font-size:13.5px}
 #drop.mm h4{display:flex;align-items:center;gap:9px}
 #drop.mm button{display:flex;align-items:center;gap:10px;text-align:left}
 #drop.mm h4 .back{flex:none;width:auto;min-height:0;height:32px;margin:-5px 2px -5px -8px;padding:0 10px;border-radius:7px;background:var(--chip);font-size:14px}
@@ -616,7 +626,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
  <header id="top">
   <button id="bMenu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="brand"><img alt="" width="26" height="26" src="data:image/png;base64,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">The Director’s Notebook</div>
-  <button id="sceneBtn" aria-label="Library" title="Show or hide the Library (⌘O)"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#e9c46a" stroke="#b8902f" stroke-width="1.2"/></svg><span id="sceneBtnT"></span><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+  <button id="sceneBtn" aria-label="Scenes in this folder" aria-haspopup="menu" title="The scenes in this folder (⌘O shows the Library)"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#e9c46a" stroke="#b8902f" stroke-width="1.2"/></svg><span id="sceneBtnT"></span><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
   <div class="seg" id="tabs"><button id="mNb">Breakdown</button><button id="mSt">Strategy</button><button id="mDia" class="on">Floor Plan</button><button id="mList">Shot List</button></div>
   <span class="sp"></span>
   <div class="seg" id="mdSw" title="Prep: plan everything. Set: shots, blocking and notes on the day, nothing to bump by accident."><button data-md="prep" class="on">Prep</button><button data-md="scout">Scout</button><button data-md="set">Set</button></div>
@@ -679,7 +689,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261124235316';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125003703';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -4576,7 +4586,7 @@ function conflictDialog(){const s=scene(),c=(s.conflicts||[])[0];if(!c)return;co
   card.querySelector('#cfBoth').onclick=()=>{const nm='Other device · '+confWhen(c.at);(s.plans=s.plans||[]).push({id:uid(),name:nm,d:planTake(other)});done(`Kept both. The other device’s blocking is the plan “${nm}”.`);};
  },'cfcard');}
 function renderTop(){
- {const c=scene(),fp=c.tpl?'Template':pathTxt(sFolder(c));$('#sceneBtnT').innerHTML=(fp?`<small>${esc(c.tpl?'Template':fPath(sFolder(c)).slice(-1)[0].name)} ›</small> `:'')+esc(sceneLabel(c));$('#sceneBtn').title=(fp?fp+' › ':'')+sceneLabel(c)+'  (⌘O shows the Library)';}
+ {const c=scene(),fp=c.tpl?'Template':pathTxt(sFolder(c));$('#sceneBtnT').innerHTML=(fp?`<small>${esc(c.tpl?'Template':fPath(sFolder(c)).slice(-1)[0].name)} ›</small> `:'')+esc(sceneLabel(c));$('#sceneBtn').title=(fp?fp+' › ':'')+sceneLabel(c)+'  (tap for this folder’s scenes; ⌘O shows the Library)';}
  const s=scene();$('#chip').innerHTML=`<b>${esc((s.number?s.number+'  ':'')+(s.title||s.heading||'Untitled scene'))}</b><span>${esc(s.title&&s.heading?s.heading:'Tap to add scene info')}</span>`;
  $('#bFr').classList.toggle('on',frameOn());
 }
@@ -4693,7 +4703,19 @@ $('#lib').addEventListener('click',e=>{
  if(k==='new')newScene();else if(k==='newfolder')libNewFolder();else if(k==='org')openBrowser();else if(k==='tpls')openBrowser('__tpl');else if(k==='trash')openBrowser('__trash');});
 $('#lib').addEventListener('input',e=>{if(e.target.id==='libq'){libQ=e.target.value;renderLib();}});
 $('#lib').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.id==='libq'){if(libQ){libQ='';e.target.value='';renderLib();}else e.target.blur();e.stopPropagation();}});
-$('#sceneBtn').onclick=()=>{if(setOn){openBrowser();return;}if(!libOn()){libSet(true);libReveal();return;}if(libQ||!libCurSeen())libReveal();else libSet(false);};
+$('#sceneBtn').onclick=()=>sceneDrop();
+/* the scene button's list: the scenes of the folder you are in, and the way to the Library */
+function sceneDrop(){const b=$('#sceneBtn'),was=document.querySelector('#drop.scn');closePop();closeDrop();if(was)return;
+ const c=scene(),fid=sFolder(c),fo=fid?fById(fid):null,list=c.tpl?[]:fScenes(fid),on=libOn()&&!setOn;
+ const row=x=>{const top=x.number?'Sc. '+x.number:(x.scout?'Scout':''),name=(x.title||x.heading||'Untitled').toUpperCase(),me=x.id===c.id;
+  return `<button class="sdr${me?' cur':''}" data-sd="${x.id}"${me?' aria-current="true"':''} title="${esc(sceneLabel(x))}">${top?`<b>${esc(top)}</b>`:''}<span>${esc(name)}</span>${me?'<i class="sdk">✓</i>':''}</button>`;};
+ const d=document.createElement('div');d.id='drop';d.className='mm scn';
+ d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf"><button id="sdLib">${setOn?'All Scenes…':on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
+ document.body.appendChild(d);const r=b.getBoundingClientRect();d.style.top=(r.bottom+6)+'px';d.style.maxHeight=Math.max(200,innerHeight-r.bottom-16)+'px';d.style.minWidth=Math.min(Math.max(300,r.width),innerWidth-16)+'px';d.style.left=Math.max(8,Math.min(innerWidth-d.offsetWidth-8,r.left))+'px';
+ const me=d.querySelector('.sdr.cur');if(me)me.scrollIntoView({block:'nearest'});
+ d.addEventListener('click',e=>{const x=e.target.closest('[data-sd]');if(x){closeDrop();libPick(x.dataset.sd);return;}
+  if(e.target.closest('#sdLib')){closeDrop();if(setOn)openBrowser();else if(libOn())libSet(false);else{libSet(true);libReveal();}}});
+ setTimeout(()=>addEventListener('pointerdown',dropOut,true),0);}
 function newScene(folder){if(folder===undefined)folder=sFolder(scene());const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
 /* ---------- scene browser: folders, search, recent, trash ---------- */
 function natCmp(a,b){return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});}
@@ -7439,7 +7461,7 @@ function bindShotDrag(box,rowSel){
 }
 function dropMenu(btn,html,bind){closeDrop();const d=document.createElement('div');d.id='drop';d.innerHTML=html;document.body.appendChild(d);const r=btn.getBoundingClientRect();d.style.top=(r.bottom+6)+'px';d.style.left=Math.max(8,Math.min(innerWidth-d.offsetWidth-8,r.right-d.offsetWidth))+'px';
  d.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){closeDrop();bind(b.dataset.d);}});setTimeout(()=>addEventListener('pointerdown',dropOut,true),0);}
-function dropOut(e){const d=$('#drop');if(d&&!d.contains(e.target)&&!(d.classList.contains('main')&&e.target.closest&&e.target.closest('#bMenu')))closeDrop();}
+function dropOut(e){const d=$('#drop');if(d&&!d.contains(e.target)&&!(d.classList.contains('main')&&e.target.closest&&e.target.closest('#bMenu'))&&!(d.classList.contains('scn')&&e.target.closest&&e.target.closest('#sceneBtn')))closeDrop();}
 function closeDrop(){const d=$('#drop');if(d)d.remove();removeEventListener('pointerdown',dropOut,true);}
 function shotMenu(btn){dropMenu(btn,`<h4>Shot List</h4><button data-d="new">New Shot…</button><button data-d="cols">Columns…</button><button data-d="gear">Gear List…</button><button data-d="num">Shot Numbering…</button><button data-d="ren">Renumber…</button><button data-d="order">Suggest Shooting Order…</button>${mode==='list'?'':'<button data-d="full">Open Full Shot List</button>'}`,k=>({new:setupDialog,num:numberingDialog,ren:renumberDialog,cols:colDialog,gear:()=>gearDialog(),order:()=>turnDialog(),full:()=>setMode('list')})[k]());}
 /* one list of the gear named in the Gear column: by shot for a scene, by scene for its folder. Nothing extra to fill in */
