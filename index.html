@@ -691,7 +691,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261125225754';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126001503';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2162,7 +2162,7 @@ const LK=(()=>{
      users/<uid>/docs/meta   a marker {appV, locked}: it makes every older copy of the app stop sending and ask to be reloaded
    The rest of sync is unchanged: it talks to lkVault(), which looks like the collection it always used and seals on the way out, opens on the way in.
    On this device the key is kept beside the work (which is not locked here): blk.dk.<uid>; blk.lock.<uid> is 'legacy', 'conv' or 'vault'. */
-const LOCK_MODE='optin'; /* 'optin': locking starts only from Sync, on a copy opened once with ?lock in its address. 'required': every signed-in account is asked to lock */
+const LOCK_MODE='required'; /* 'required' (since 25 Nov 2026): every account that syncs is locked, by itself when the sign-in password is in hand, otherwise by asking for it once. 'optin' (before): only from Sync, on a copy opened once with ?lock */
 const LOCK_MIN=10;
 const lk={on:false,key:null,u:null,base:null,need:'',kd:null,pw:'',pwT:null,bad:new Set(),prog:[0,0],un:null,marker:false,job:null,busy:false,code:''};
 try{if(/[?&]lock(=|&|$)/.test(location.search))localStorage.setItem('blk.lockopt','1');}catch(e){}
@@ -2177,7 +2177,7 @@ const lkU=x=>x&&x.toUint8Array?x.toUint8Array():x;
 const lkKeysRef=()=>lk.base.collection('keys').doc('main');
 const lkMarker=b=>!!(b&&b.locked);
 const lkSig=b=>canonJ(b||null);
-function lkStop(){if(lk.un){try{lk.un();}catch(e){}lk.un=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;}
+function lkStop(){clearInterval(lk.askT);lk.askT=null;if(lk.un){try{lk.un();}catch(e){}lk.un=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;}
 /* run f once the internet is back, or in half a minute, if the same person is still signed in */
 function lkWhenOnline(f){const u=lk.u;let done=false;const go=()=>{if(done)return;done=true;removeEventListener('online',go);if(lk.u===u&&u)f();};addEventListener('online',go);setTimeout(go,30000);}
 /* is this account locked? Asks the server, never this device's saved copy. */
@@ -2212,7 +2212,18 @@ async function lkBegin(u,base){lk.u=u;lk.base=base;const uid=u.uid,dk=lkKeyOf(ui
  if(known==='vault'&&r.st!=='legacy'){lkNeed(null);return null;} /* locked before, its key is gone from this device, and the cloud can't be asked yet */
  if(r.st==='legacy')lkFlag(uid,'legacy');
  lkAsk();return base.collection('docs');}
-function lkAsk(){if(LOCK_MODE!=='required')return;const u=lk.u;setTimeout(()=>{if(lk.u===u&&!lk.on&&!lk.need&&modalEl.hidden&&coll&&online==='on')lkSetupDialog();},2500);}
+function lkAsk(){if(LOCK_MODE!=='required')return;const u=lk.u,t0=Date.now();clearInterval(lk.askT);
+ lk.askT=setInterval(async()=>{
+  if(lk.u!==u||lk.on||lk.need||Date.now()-t0>180000){clearInterval(lk.askT);lk.askT=null;return;}
+  if(!coll||online!=='on'||lk.auto)return; /* not syncing (yet): nothing in the cloud to lock */
+  const pw=lk.pw;
+  if(pw&&pw.length>=LOCK_MIN){lk.auto=true;clearInterval(lk.askT);lk.askT=null;
+   try{const r=await lkSetup(pw,'');lkPwDrop();lkCodeWhenFree(r.code);}
+   catch(e){if(lk.u===u&&!lk.on&&!lk.need&&modalEl.hidden&&(e&&e.message)!=='already')lkSetupDialog();}
+   finally{lk.auto=false;}return;}
+  if(modalEl.hidden){clearInterval(lk.askT);lk.askT=null;lkSetupDialog();}},2500);}
+/* the recovery code of a lock that was put on by itself: shown as soon as no other window is open */
+function lkCodeWhenFree(code){const u=lk.u;lk.code=code;const go=()=>{if(lk.u!==u||lk.code!==code)return;if(modalEl.hidden)lkCodeDialog(code,'');else setTimeout(go,1500);};go();}
 /* a copy still syncing the old way has just seen the marker: stop, and get let in */
 function lkSwitch(kd){if(lk.on||lk.need)return;if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}coll=null;lk.marker=true;lkNeed(kd||null);}
 /* the account is locked and this device has no key yet */
