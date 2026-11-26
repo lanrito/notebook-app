@@ -691,7 +691,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126033614';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126042042';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2184,7 +2184,7 @@ function lkStop(){clearInterval(lk.askT);lk.askT=null;clearTimeout(lk.rvT);if(lk
 function lkWhenOnline(f){const u=lk.u;let done=false;const go=()=>{if(done)return;done=true;removeEventListener('online',go);if(lk.u===u&&u)f();};addEventListener('online',go);setTimeout(go,30000);}
 /* is this account locked? Asks the server, never this device's saved copy. */
 async function lkPeek(base){try{const d=await base.collection('keys').doc('main').get({source:'server'});const kd=d.exists?d.data():null;return kd&&kd.pw?{st:'locked',kd}:{st:'legacy'};}
- catch(e){return {st:e&&e.code==='permission-denied'?'legacy':'offline'};}}
+ catch(e){return {st:e&&e.code==='permission-denied'?'denied':'offline'};}}
 /* the collection sync talks to once an account is locked: the same calls as before, sealed going out and opened coming in */
 function lkVault(base,uid,key){
  const raw=base.collection('vault'),seen=new Map(),name=id=>uid+'/'+id;
@@ -2232,6 +2232,7 @@ function lkSwitch(kd){if(lk.on||lk.need)return;if(fbUnsub){try{fbUnsub();}catch(
 async function lkNeed(kd){const u=lk.u;if(!u)return;lk.need='pw';coll=null;updateStatus();
  if(!kd){const r=await lkPeek(lk.base);if(lk.u!==u)return;
   if(r.st==='offline'){lk.need='wait';updateStatus();lkWhenOnline(()=>lkNeed(null));return;}
+  if(r.st==='denied'){lk.need='';lk.marker=false;syncListen(u,lk.base.collection('docs'));return;} /* the cloud will not say (not on the list, or email not confirmed): listen the plain way, which is refused too and says so; the marker brings this back once it is let in */
   if(r.st==='legacy'){ /* no sealed key in the cloud: it was started fresh elsewhere and not locked again yet. With the marker still up, wait; without it, this is an ordinary account */
    if(lk.marker){let m=null;try{const d=await lk.base.collection('docs').doc('meta').get({source:'server'});m=d.exists?d.data():null;}catch(e){}if(lk.u!==u)return;
     if(m&&m.closed){lk.need='';lk.marker=false;acctClosed();return;}
@@ -2282,6 +2283,7 @@ async function lkConvert(){const u=lk.u,uid=u.uid,src=lk.base.collection('docs')
 /* once syncing from the vault: does this device's key still fit the cloud, was the password reset, and is anything readable lying about? */
 async function lkAfter(){const u=lk.u;if(!u||!lk.on)return;const r=await lkPeek(lk.base);if(lk.u!==u||!lk.on)return;
  if(r.st==='offline'){lkWhenOnline(lkAfter);return;}
+ if(r.st==='denied')return; /* refused: keep the key, send nothing; syncRevive comes back here once the cloud answers */
  const mine=lsGet('blk.kid.'+u.uid)||'';
  if(r.st==='legacy'||(r.kd.kid||'')!==mine){ /* the cloud was started fresh from another device: this device's key no longer fits. Its own work stays and is sent again once it is let in */
   if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}
@@ -2478,7 +2480,7 @@ function syncProbe(){clearTimeout(probeT);if(!coll||!fbUser||online==='on')retur
   .catch(()=>{set('waiting','unreachable');again();});}
 /* the live connection stopped (refused before this account was approved, or dropped by the service): start it again */
 let reviveAt=0;
-function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);if(!coll.locked)lkAsk();}catch(e){}}
+function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);if(!coll.locked)lkAsk();else if(!lk.sure)lkAfter();}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncRevive();});
 function syncWhy(){if(!navigator.onLine)return 'This device has no internet connection right now.';
  if(online==='quota')return 'The sync service’s free daily limit for this app has been used up. Sync starts again by itself after midnight Pacific time. Until then everything is saved on this device, and it’s all sent once sync is back.';
@@ -2515,14 +2517,17 @@ function acctNote(){if(!fbUser)return;const k=acctKey(),v=lsGet(k);
  else if(syncErr==='permission-denied'&&v!=='ok'&&v!=='no')lsSet(k,'no');}
 function acctOK(){if(!fbAuth)return true;if(!fbUser)return false;if(fbUser.emailVerified||online==='on')return true;return lsGet(acctKey())!=='no';}
 const acctWait=()=>!!fbUser&&!acctOK();   /* signed in, email not confirmed yet */
+const acctUnc=()=>!!fbUser&&!fbUser.emailVerified&&syncErr==='permission-denied'&&!acctWait();   /* past the one-scene wall (it synced once), refused now, email never confirmed: sync asks for a confirmed email since the rules of 26 Nov 2026 */
 /* would this take the device past one scene (or one scout) without an account? then say so, and stop */
 function acctWall(n,scout){if(acctOK())return false;const have=liveScenes().filter(x=>!!x.scout===!!scout).length;if(have+(n||1)<=1)return false;acctDialog();return true;}
 function acctDialog(){kidNext();
  if(fbUser){accountDialog();return;}
  modal(`<h3>A free account opens the rest</h3><p>Without an account, The Director’s Notebook keeps one scene and one location scout on this device. A free account gives you as many as you need.</p><p class="mut">It takes a minute: your email and a password. Everything you have made stays as it is.</p><div class="btns end"><button data-x>Not now</button><button class="pri" id="acGo">Create a free account</button></div>`,c=>{c.querySelector('#acGo').onclick=()=>{kidNext();accountDialog();};});}
 async function acctCheck(){const u=fbUser;if(!u||!u.reload)return null;try{await u.reload();}catch(e){return null;}
- if(fbUser!==u)return null;if(!u.emailVerified)return false;lsSet(acctKey(),'ok');updateStatus();return true;}
-document.addEventListener('visibilitychange',()=>{if(document.hidden||!acctWait())return;acctCheck().then(ok=>{if(!ok)return;if(modalEl.querySelector('#acOk'))closeModal();toast('Email confirmed. Every scene is open on this device.');});});
+ if(fbUser!==u)return null;if(!u.emailVerified)return false;lsSet(acctKey(),'ok');
+ try{if(u.getIdToken)await u.getIdToken(true);}catch(e){} /* the cloud reads "confirmed" from the sign-in's token: get a fresh one, then try the live connection again */
+ if(fbUser===u&&online==='error'&&coll){reviveAt=0;syncRevive();}updateStatus();return true;}
+document.addEventListener('visibilitychange',()=>{const w=acctWait();if(document.hidden||!(w||acctUnc()))return;acctCheck().then(ok=>{if(!ok)return;if(modalEl.querySelector('#acOk'))closeModal();toast(w?'Email confirmed. Every scene is open on this device.':'Email confirmed.');});});
 /* Delete Account... sits beside Change Password... when that row is there, in a row of its own when it is not */
 const acctBit=h=>{const b='<button id="acDel">Delete Account…</button>',i=h.lastIndexOf('</div>');return h.includes('id="lkp"')&&i>=0&&i===h.length-6?h.slice(0,i)+b+'</div>':h+'<div class="btns">'+b+'</div>';};
 /* ---------- deleting an account ---------- */
@@ -2552,7 +2557,8 @@ async function acctDelete(pw){const u=fbUser;if(!u)throw new Error('signed-out')
   await wipe(dc,'meta');
   for(const n of ['vault','keys'])try{await wipe(base.collection(n));}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
  else{ /* the cloud will not list this person's own work (taken off the approved list, or never on it). What this device knows by name is removed all the same: the rules let anyone remove their own work. Older rules refuse, and then it goes on as before */
-  try{for(const c of [base.collection('vault'),dc])await drop(c,['meta',...known]);await drop(base.collection('keys'),['main']);}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
+  const rest=async c=>{if(typeof c.limit!=='function')return;for(let i=0;i<400;i++){const q=await acctT(c.limit(20).get(SV),60000),ids=q.docs.map(d=>d.id);if(!ids.length)return;await drop(c,ids);}}; /* whatever is left that this device did not know by name (another device sent it): a short page at a time, which the rules allow */
+  try{for(const c of [base.collection('vault'),dc]){await drop(c,['meta',...known]);try{await rest(c);}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}await drop(base.collection('keys'),['main']);}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
  await acctT(u.delete());
  for(const k of ['blk.acct.','blk.apown.','blk.shut.'])try{localStorage.removeItem(k+u.uid);}catch(e){}
  lkForget(u.uid); /* the lock's key for the account has nothing left to open */
@@ -2579,8 +2585,11 @@ function accountDialog(){
   c.querySelector('#acRe').onclick=async()=>{say('');try{await fbUser.sendEmailVerification();say('Sent. It can take a minute to arrive.');}catch(e){say(e&&e.code==='auth/too-many-requests'?'Too many tries just now. Wait a few minutes, then send it again.':'Couldn’t send it. Check your connection and try again.');}};
   c.querySelector('#acOk').onclick=async()=>{say('Checking…');const ok=await acctCheck();if(ok){closeModal();toast('Email confirmed. Every scene is open on this device.');}else say(ok===false?'Not confirmed yet. Open the link in the email we sent, then tap I’ve confirmed.':'Couldn’t check. Connect to the internet and try again.');};
   c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
- if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no?`<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Make as many scenes as you need. They are saved on this device.</p><p class="mut">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email.</p><div class="btns"><button id="lkp">Change Password…</button><button id="acDel">Delete Account…</button></div>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':acctBit(lkSyncBit())}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
-  lkSyncBind(c);{const ad=c.querySelector('#acDel');if(ad)ad.onclick=()=>{kidNext();acctDeleteDialog();};}const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
+ if(fbUser){const no=syncErr==='permission-denied';modal(`<h3>Sync</h3>${no&&acctUnc()?`<p class="warnbox">Sync needs a confirmed email. We can send a link to <b>${esc(fbUser.email||'')}</b>. Open it, then come back and tap I’ve Confirmed.</p><div class="btns"><button id="acRe">Send the Link</button><button id="acOk">I’ve Confirmed</button></div><p id="aerr" class="mut" style="min-height:1.3em;margin:6px 0 10px"></p>`:''}${no?`<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Make as many scenes as you need. They are saved on this device.</p><p class="mut">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>, and give this exact email.</p><div class="btns"><button id="lkp">Change Password…</button><button id="acDel">Delete Account…</button></div>`:`${syncWhy()?`<p class="warnbox">${esc(syncWhy())}</p>`:''}<p>Signed in as <b>${esc(fbUser.email||'')}</b>. Your scenes sync to every device where you sign in with this account, and anything you do offline is sent when you’re back online.</p><p>Last confirmed by the cloud: <b>${whenTxt(lastSync)}</b>${sync.dirty.length?` · ${plural(sync.dirty.length,'change')} waiting to send`:''}</p>`}${no?'':acctBit(lkSyncBit())}<div class="btns end"><button class="danger" id="so">Sign out</button>${no?'':'<button id="snow">Sync now</button>'}${no?'<button id="sre">Try Again</button>':`<button id="apr"${apOwn()?'':' hidden'}>Approved people…</button>`}<button class="pri" data-x>Done</button></div>`,c=>{
+  lkSyncBind(c);{const re=c.querySelector('#acRe'),okb=c.querySelector('#acOk'),say=m=>{const e=c.querySelector('#aerr');if(e)e.textContent=m;};
+   if(re)re.onclick=async()=>{say('');try{await fbUser.sendEmailVerification();say('Sent. It can take a minute to arrive.');}catch(e){say(e&&e.code==='auth/too-many-requests'?'Too many tries just now. Wait a few minutes, then send it again.':'Couldn’t send it. Check your connection and try again.');}};
+   if(okb)okb.onclick=async()=>{say('Checking…');const ok=await acctCheck();if(ok){closeModal();toast('Email confirmed. Sync is connecting.');}else say(ok===false?'Not confirmed yet. Open the link in the email we sent, then tap I’ve Confirmed.':'Couldn’t check. Connect to the internet and try again.');};}
+  {const ad=c.querySelector('#acDel');if(ad)ad.onclick=()=>{kidNext();acctDeleteDialog();};}const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
  modal(`<h3>Sign in</h3><p class="mut">A free account opens as many scenes as you need. Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div><p class="mut" id="prv" style="margin-top:12px;font-size:12.5px">We use your email only to sign you in. We do not sell it. <a href="https://thedirectorsnotebook.com/#privacy" target="_blank" rel="noopener">Privacy</a></p>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
   const run=async(f,msg)=>{err('');try{await f();closeModal();toast(msg||'Signed in.');}catch(e){err(authMsg(e));}};
@@ -2596,6 +2605,7 @@ function accountDialog(){
  });
 }
 /* ---------- approved people: only emails on your list can sync ---------- */
+const RULES_V='v3'; /* the version of the rules below. Change it whenever they change: Approved people then offers the new ones */
 function rulesText(owner){return `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -2606,17 +2616,21 @@ service cloud.firestore {
     function owner() {
       return signedIn() && request.auth.token.email.lower() == '${owner}';
     }
+    // Everyone else: on your list, with their email confirmed. Without that, someone could make the account
+    // for an address you approved before its owner does.
     function approved() {
-      return owner() || (signedIn()
+      return owner() || (signedIn() && request.auth.token.email_verified == true
         && exists(/databases/$(database)/documents/admin/approved)
         && request.auth.token.email.lower() in get(/databases/$(database)/documents/admin/approved).data.emails);
     }
     function me(uid) {
       return signedIn() && request.auth.uid == uid;
     }
-    // Each person's own corner. Seeing it needs approval. Removing your own work never does.
+    // Each person's own corner. Seeing it needs approval. Removing your own work never does:
+    // anyone may list their own work a short page at a time, which is how Delete Account finds all of it.
     match /users/{uid}/{rest=**} {
-      allow read: if me(uid) && approved();
+      allow get: if me(uid) && approved();
+      allow list: if me(uid) && (approved() || request.query.limit <= 300);
       allow delete: if me(uid);
     }
     // The lock's sealed key.
@@ -2637,6 +2651,10 @@ service cloud.firestore {
     match /admin/{doc} {
       allow read, write: if owner();
     }
+    // Lets the app see which version of these rules is in place.
+    match /rules/{v} {
+      allow get: if v == '${RULES_V}';
+    }
   }
 }
 `;}
@@ -2650,8 +2668,8 @@ async function apProbe(){const u=fbUser;if(!u)return null;let r=null;
  try{const d=await apDoc().get();if(!(d&&d.metadata&&d.metadata.fromCache&&!d.exists))r=true;}catch(e){if(e&&e.code==='permission-denied')r=false;}
  if(r!==null&&fbUser===u)apMark(r);return fbUser===u?r:null;}
 /* is approval on? the list can be written (so these rules, or none at all), and a stray path can't (so not wide open) */
-/* are the Firebase rules the ones from before the lock? Those let an approved person write anywhere under their own name; the current ones only where the app writes. true: older, false: current, null: could not tell */
-async function rulesOld(){try{const r=fbDb.collection('users').doc(fbUser.uid).collection('probe').doc('r');await r.set({t:Date.now()});try{await r.delete();}catch(e){}return true;}catch(e){return e&&e.code==='permission-denied'?false:null;}}
+/* are the Firebase rules older than the ones this app hands out? The current ones let anyone read rules/<their version>, and nothing older does. true: older, false: current, null: could not tell */
+async function rulesOld(){try{await fbDb.collection('rules').doc(RULES_V).get({source:'server'});return false;}catch(e){return e&&e.code==='permission-denied'?true:null;}}
 async function apCheck(list){const me=(fbUser.email||'').toLowerCase();
  try{await apDoc().set({emails:list,owner:me,at:Date.now()});}catch(e){return e&&e.code==='permission-denied'?'off':'offline';}
  try{const r=firebase.firestore().collection('probe').doc(fbUser.uid);await r.set({t:Date.now()});try{await r.delete();}catch(e){}return 'open';}catch(e){return e&&e.code==='permission-denied'?'on':'offline';}}
@@ -2664,7 +2682,7 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
    if(state==='checking'){box.innerHTML='<p class="mut">Checking…</p>';return;}
    if(state==='offline'){box.innerHTML='<p>Connect to the internet to manage who can sync.</p><div class="btns"><button id="apRe">Try again</button></div>';box.querySelector('#apRe').onclick=go;return;}
    if(state==='no'){box.innerHTML='<p>Only the person who runs this app manages who can sync. To ask about access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p>';return;}
-   if(state==='on'){box.innerHTML=`${old?`<div class="warnbox" style="margin-bottom:12px"><b>One update to make in Firebase.</b> Your rules are from before the lock. The new ones accept only locked work, and let someone you have removed delete their own copy from the cloud.
+   if(state==='on'){box.innerHTML=`${old?`<div class="warnbox" style="margin-bottom:12px"><b>One update to make in Firebase.</b> Your rules are older than this version of the app. The new ones accept only locked work, ask everyone but you for a confirmed email, and let someone you have removed delete all of their own copy from the cloud.
      <ol class="aps"><li>Open your Firebase rules: <a href="https://console.firebase.google.com/project/${esc(pid)}/firestore/rules" target="_blank" rel="noopener">Firebase › Firestore › Rules</a>.</li>
      <li>Tap <b>Copy Rules</b> below. In Firebase, select all the text in the rules box, paste over it, and press <b>Publish</b>.</li>
      <li>Come back here and tap <b>Check Again</b>.</li></ol>
@@ -2672,7 +2690,7 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
      <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(rulesText(me))}</textarea></details></div>`:''}<p class="mut">Approval is on. Only you and the people below can sync. Anyone else can still use the app, but their work stays on their own device.${old===false?' Your Firebase rules are the current ones.':''}</p>
      <div class="apl">${list.length?list.map((e,i)=>`<div class="apr"><span>${esc(e)}</span><button data-rm="${i}" aria-label="Remove ${esc(e)}">×</button></div>`).join(''):'<p class="mut" style="margin:6px 0">No one yet.</p>'}</div>
      <div class="apa"><input id="apE" type="email" placeholder="friend@example.com" autocapitalize="off" autocomplete="off"><button class="pri" id="apAdd">Add</button></div>
-     <p class="mut" style="font-size:12.5px">They tap Create account in the app using exactly this email. Removing someone stops their syncing; their scenes stay on their devices.</p>`;
+     <p class="mut" style="font-size:12.5px">They tap Create account in the app using exactly this email, then open the link we email them to confirm it. Removing someone stops their syncing; their scenes stay on their devices.</p>`;
     const add=async()=>{const i=box.querySelector('#apE'),v=i.value.trim().toLowerCase();if(!valid(v)){toast('That doesn’t look like an email address.');return;}if(v===me){toast('You’re always allowed.');return;}if(!list.includes(v)){list.push(v);list.sort();if(await save())toast(`${v} can sync now.`);}draw();};
     box.querySelector('#apAdd').onclick=add;box.querySelector('#apE').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
     box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const v=list[+b.dataset.rm];list.splice(+b.dataset.rm,1);if(await save())toast(`${v} removed.`);draw();});cpBind();return;}
@@ -2765,7 +2783,7 @@ function schedulePush(ms){if(!coll)return;clearTimeout(pushT);pushT=setTimeout(p
 let pushDefer=0;
 async function push(){
  if(!coll||pushing||outdated||copyPaused)return;
- if(lkHold()){if(!coll.locked&&online==='error'){syncRevive();clearTimeout(lk.rvT);lk.rvT=setTimeout(()=>schedulePush(0),15000);}updateStatus();return;} /* held, and the live connection was refused (not on the sync list yet): keep asking, as the refused sends used to */
+ if(lkHold()){if(online==='error'){syncRevive();clearTimeout(lk.rvT);lk.rvT=setTimeout(()=>schedulePush(0),15000);}updateStatus();return;} /* held, and the live connection was refused (not on the sync list yet): keep asking, as the refused sends used to */
  if(gesture&&pushDefer<8){pushDefer++;schedulePush(600);return;}pushDefer=0;
  detectChanges(); /* anything typed or moved since the last save is counted before sending */
  if(!sync.dirty.length){updateStatus();return;}
@@ -2823,7 +2841,7 @@ function updateStatus(){acctNote();
  else if(online==='quota'){t='Sync limit reached today · saved here';c='warn';}
  else if(online==='waiting'){t='Can’t reach sync · saved here';c='warn';}
  else if(online==='stuck'){t='Reconnecting sync…';c='warn';}
- else if(syncErr==='permission-denied'){if(acctWait()){t='Confirm your email · saved here';c='warn';}else t='Saved on this device · not synced';}
+ else if(syncErr==='permission-denied'){if(acctWait()||acctUnc()){t='Confirm your email · saved here';c='warn';}else t='Saved on this device · not synced';}
  else if(online==='error'||syncErr){t='Sync paused · saved here';c='warn';}
  else if(outdated){t='Update the app · saved here';c='warn';}
  else if(sync.dirty.length||unacked||bootPend){const n=sync.dirty.length+unacked,pics=sync.dirty.filter(k=>k.startsWith('img-')).length;t=!n?'Uploading…':pics&&pics===n?`Uploading ${plural(pics,'picture')}…`:`Uploading ${plural(n,'change')}…`;}
