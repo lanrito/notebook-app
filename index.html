@@ -758,7 +758,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126182512';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126202538';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2584,7 +2584,7 @@ const acctKey=()=>'blk.acct.'+fbUser.uid;
 let acctTell=false;   /* someone just signed in: if the account turns out not to be on the sync list, say so once */
 function acctNote(){if(!fbUser)return;const k=acctKey(),v=lsGet(k);
  if(acctTell&&online==='on')acctTell=false;
- if(acctTell&&syncErr==='permission-denied'){acctTell=false;if(fbUser.emailVerified||v==='ok')setTimeout(()=>toast('Signed in. Your work is saved on this device. Sync across devices is invitation only for now.'),700);}
+ if(acctTell&&syncErr==='permission-denied'){acctTell=false;if(fbUser.emailVerified||v==='ok')setTimeout(()=>toast('Signed in. Your work is saved on this device. Sync across devices is invitation only for now. To request access, write to info@thedirectorsnotebook.com.',9000),700);}
  if(fbUser.emailVerified||online==='on'){if(v!=='ok')lsSet(k,'ok');}
  else if(syncErr==='permission-denied'&&v!=='ok'&&v!=='no')lsSet(k,'no');}
 function acctOK(){if(!fbAuth)return true;if(!fbUser)return false;if(fbUser.emailVerified||online==='on')return true;return lsGet(acctKey())!=='no';}
@@ -4743,7 +4743,7 @@ function modalBack(){const p=mStack.pop();if(!p){closeModal();return;}if(typeof 
 function modalEsc(){const b=!modalEl.hidden&&modalEl.querySelector('[data-esc]');if(b){b.click();return;}modalBack();}
 modalEl.addEventListener('pointerdown',e=>{if(e.target===modalEl)modalEsc();});
 function confirmBox(title,msg,ok,fn){modal(`<h3>${esc(title)}</h3><p>${esc(msg)}</p><div class="btns end"><button data-x>Cancel</button><button class="pri danger" id="ok">${esc(ok)}</button></div>`,c=>{c.querySelector('#ok').onclick=()=>{closeModal();fn();};});}
-let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3400);}
+let toastT;function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms||3400);}
 function sceneInfo(s0,after){
  const s=s0||scene(),F=[['number','Scene number','7'],['title','Title','MAYA COMES BACK'],['heading','Scene heading','INT. LOCATION - DAY'],['code','Episode / code','e.g. Ep. 110'],['day','Shoot day','e.g. Shoot Day 8'],['date','Shoot date','e.g. April 17, 2026'],['pp','Script pages','e.g. 2 3/8'],['act','Act or sequence that starts at this scene','e.g. ACT TWO']];
  modal(`<h3>Scene info</h3>${F.map(([k,l,p])=>`<label class="fld">${l}<input data-k="${k}" value="${esc(s[k]||'')}" placeholder="${p}" autocomplete="off"></label>`).join('')}<label class="fld">Synopsis<textarea data-k="synopsis" rows="3">${esc(s.synopsis||'')}</textarea></label><p class="nmerr" id="nmErr" hidden></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="ok">Save</button></div>`,card=>{
