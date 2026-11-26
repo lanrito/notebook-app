@@ -240,6 +240,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <tr><td>Sync starts for your account</td><td>A window with your <b>recovery code</b>. If you made your account before you were given sync, the app asks for your password once first.</td></tr>
 <tr><td>You sign in on another device</td><td>Nothing extra. Signing in lets that device in.</td></tr>
 <tr><td>A device that was signed in before the lock</td><td>The status says <b>Unlock to sync</b>. Tap it and type your password once.</td></tr>
+<tr><td>You closed the lock window without locking</td><td>The status says <b>Lock to sync</b>. Your work stays on the device and nothing is sent until it is locked. Tap the status, then <b>Lock My Synced Work…</b>.</td></tr>
 </tbody></table></div>
 
 
@@ -335,7 +336,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <tr><td>Scenes</td><td>Each scene with its progress on the Breakdown, Strategy, Floor Plan and Shot List, and how many questions are open.</td></tr>
 <tr><td>Spine</td><td>The scenes as blocks in story order, sized by page count, setups or time estimate, with a band for day or night. Tap a scene to see what it is, or to start an act or a sequence there. Below it, where each story lives.</td></tr>
 <tr><td>Cuts</td><td>The last frame of each scene beside the first frame of the next, so you can judge every cut between scenes.</td></tr>
-<tr><td>Days</td><td>Each shoot day with its scenes, pages, setups and shots, and the estimated time of its shots against the hours the day has. It tells you how much is to spare, or how far over. <b>Call … · Wrap …</b> sets a day’s call, wrap and lunch.</td></tr>
+<tr><td>Days</td><td>Each shoot day with its scenes, pages, setups and shots, and the estimated time of its shots against the hours the day has. It tells you how much is to spare, or how far over. <b>Call … · Wrap …</b> sets a day’s call, wrap and lunch. <b>Export This Day…</b> makes one PDF of the day’s scenes: see <a href="#exportday">Export this day</a>.</td></tr>
 <tr><td>Questions</td><td>Everything written in the scenes’ Questions columns.</td></tr>
 </tbody></table>
 <ul><li>A scene belongs to the day typed under <b>Shoot day</b> in Scene info. Times come from the <b>Est. time</b> column of the shot list.</li><li>Cameras in one setup roll together, so their time is counted once, at the longest. Dropped shots are not counted.</li><li>Until you set them, a day runs from a 7:00 AM call to a 7:00 PM wrap, with an hour for lunch.</li></ul>
@@ -811,8 +812,9 @@ h3.hit{animation:gshit 2.2s ease-out}
 <div class="keep"><h3 id="c9-start-a-scout">Start a scout</h3><div class="where"><b>Where:</b> open the scene, then <b>Scout</b>, beside Prep and Set at the top.</div><ol class="steps"><li>Open a scene and tap <b>Scout</b>. The panel names the scene’s location, taken from its heading, and the scenes that share it.</li><li>Tap <b>Add a Place…</b> and name the place, such as “The lot behind the diner”.</li><li>The place opens on a blank plan of its own.</li></ol></div>
 
 
-<ul><li>Scenes with the same location share the same places. Scout from scene 10 or scene 15 of the parking lot and you see the same list.</li><li>While you are choosing a place, the scene’s own floor plan is put away, so nothing you draw in Scout can land in the scene.</li><li><b>‹ Places</b> goes back to the list. <b>Prep</b> or <b>Set</b> goes back to the scene you came from.</li><li>A scout made before places belonged to scenes is listed under <b>Not attached yet</b>. Open it and tap <b>Attach to…</b>, or delete it.</li></ul>
-<figure><div class="fr"><img alt="Scout mode for a location called Rosa’s Kitchen. The plan shows a room with a counter, an island, a round table, a photo pin and one camera. The panel at the right has the location name, notes, a photo, Sketch and Walls and furniture buttons, one camera idea and a Link scenes button." height="944" src="img/scout.jpg" width="1500"/></div><figcaption>A scout under way. The photo here is a stand-in drawing.</figcaption></figure>
+<figure style="max-width:360px"><div class="fr"><img alt="The Scout panel for a scene set in a kitchen: Scouting KITCHEN, For scene 3, a list of two places with their photo counts, and an Add a Place button." height="600" src="img/scoutplaces.jpg" width="720"/></div><figcaption>The places being considered for one location.</figcaption></figure>
+<ul><li>Scenes with the same location share the same places. Scout from scene 10 or scene 15 of the parking lot and you see the same list.</li><li>While you are choosing a place, the scene’s own floor plan is put away, so nothing you draw in Scout can land in the scene.</li><li><b>‹ Places</b> goes back to the list. <b>Prep</b> or <b>Set</b> goes back to the scene you came from.</li><li>In the Library and the scene menu a place is marked <b>Place</b>. Open it there and it opens in Scout.</li><li>A scout made before places belonged to scenes is listed under <b>Not attached yet</b>. Open it and tap <b>Attach to…</b>, or delete it.</li></ul>
+<figure><div class="fr"><img alt="Scout mode for a place called Rosa’s Kitchen. The plan shows a room with a counter, an island, a round table, a photo pin and one camera. The panel at the right has the place’s name, notes, a photo, Sketch and Walls and furniture buttons, and one camera idea. ‹ Places at the top goes back to the list." height="944" src="img/scout.jpg" width="1500"/></div><figcaption>A scout under way. The photo here is a stand-in drawing.</figcaption></figure>
 <p>The tabs and the shot list step aside, and the place’s panel takes the right side.</p>
 <div class="keep"><h3 id="c9-a-place-s-panel">A place’s panel</h3><table><thead><tr><th>Part</th><th>What it is for</th></tr></thead><tbody>
 <tr><td>Name of the place</td><td>Change it here.</td></tr>
@@ -824,7 +826,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <tr><td>Delete This Place…</td><td>Sends the place to the Trash. Scenes that already use its set keep it.</td></tr>
 </tbody></table></div>
 
-<div class="keep"><h3 id="c9-use-a-place">Use a place</h3><div class="where"><b>Where:</b> <b>Use This Place…</b> at the bottom of the place’s panel.</div><div class="two" style="grid-template-columns:minmax(0,380px) minmax(0,1fr)"><figure style="margin-top:14px"><div class="fr"><img alt="The Link scenes window: the folder’s four scenes with a tick box on each, a note beside those that already have a set, and a tick box to also copy the camera ideas." height="616" src="img/scoutlink.jpg" width="760"/></div></figure><div>
+<div class="keep"><h3 id="c9-use-a-place">Use a place</h3><div class="where"><b>Where:</b> <b>Use This Place…</b> at the bottom of the place’s panel.</div><div class="two" style="grid-template-columns:minmax(0,380px) minmax(0,1fr)"><figure style="margin-top:14px"><div class="fr"><img alt="The Use This Place window: the folder’s four scenes with a tick box on each, a note beside those that already have a set, and a tick box to also copy the camera ideas." height="617" src="img/scoutlink.jpg" width="760"/></div></figure><div>
 <ul>
 <li>The scenes of this location are ticked for you, unless they already have a set of their own. Tick or untick any scene.</li>
 <li>Those scenes get the place’s set: walls, furniture and sketches.</li>
@@ -918,6 +920,20 @@ h3.hit{animation:gshit 2.2s ease-out}
 <li><b>Storyboard sheet</b> prints every frame large, with its shot.</li>
 </ul>
 <p>Two other PDFs are made elsewhere. The folder’s Overview has its own <b>Export PDF…</b> for the view you are on, and the Gear List has <b>Save as PDF</b>.</p>
+<p>An exported PDF can be searched. The words on the shot list and the page headings can be found with your PDF reader’s search, and copied. Labels drawn on the floor plan itself are part of the picture.</p>
+<div class="keep"><h3 id="exportday">Export this day</h3><div class="where"><b>Where:</b> the folder’s Overview › <b>Days</b>, then <b>Export This Day…</b> on the day.</div><p>One PDF of a shoot day’s scenes, in the order the Days view lists them. A scene belongs to a day by its <b>Shoot day</b> in Scene Info.</p><table><thead><tr><th>Choice</th><th>What you get</th></tr></thead><tbody>
+<tr><td>Crew copy</td><td>Each scene’s floor plans, frames and shot list.</td></tr>
+<tr><td>Director’s copy</td><td>The same, with each scene’s Breakdown and Strategy added.</td></tr>
+<tr><td>Shot descriptions</td><td>Untick to leave the descriptions off the shot lists.</td></tr>
+</tbody></table></div>
+
+
+
+<ul>
+<li>The first page names the day and the copy, with the day’s call, wrap and lunch, its totals, and each scene’s pages, setups, shots and time.</li>
+<li>Storyboard frames print in the shot list when the scene’s Storyboard column is on. Otherwise that scene gets a storyboard sheet.</li>
+<li>Page orientation, layout and letterhead are the ones last set in the Export PDF window.</li>
+</ul>
 <div class="keep"><h3 id="c11-productions-letterheads">Productions &amp; Letterheads</h3><div class="where"><b>Where:</b> Menu › Export › Productions &amp; Letterheads…, or <b>Set up…</b> in the Export PDF window.</div><ul>
 <li>A production holds the logo, a note and the contact lines for the top of every exported page.</li>
 <li>Give each production its folders, and their scenes export with its letterhead.</li>
@@ -989,6 +1005,8 @@ h3.hit{animation:gshit 2.2s ease-out}
 
 <div class="keep"><h3 id="c12-what-s-new">What’s new</h3><p>Added in November 2026:</p><ul>
 <li><b>Your synced work is locked</b> with your password before it leaves your device. <a href="#ch1">Chapter 1</a>.</li>
+<li><b>Export This Day…</b> makes one PDF of a shoot day, as a crew copy or a director’s copy. <a href="#exportday">Export this day</a>.</li>
+<li><b>Exported PDFs can be searched.</b> The words on the shot list and the page headings can be found and copied.</li>
 <li><b>Scout</b> starts from a scene now: its location, and the places you are considering for it. <a href="#ch9">Chapter 9</a>.</li>
 <li><b>Set mode</b> keeps the shot’s number, status and Next at the top of the panel, shows every storyboard frame, and opens a frame large when you tap it. <a href="#ch10">Chapter 10</a>.</li>
 <li><b>A free account</b> opens more than one scene and one location scout on a device. <a href="#ch1">Chapter 1</a>.</li>

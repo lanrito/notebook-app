@@ -691,7 +691,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126020623';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126033614';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2164,7 +2164,9 @@ const LK=(()=>{
    On this device the key is kept beside the work (which is not locked here): blk.dk.<uid>; blk.lock.<uid> is 'legacy', 'conv' or 'vault'. */
 const LOCK_MODE='required'; /* 'required' (since 25 Nov 2026): every account that syncs is locked, by itself when the sign-in password is in hand, otherwise by asking for it once. 'optin' (before): only from Sync, on a copy opened once with ?lock */
 const LOCK_MIN=10;
-const lk={on:false,key:null,u:null,base:null,need:'',kd:null,pw:'',pwT:null,bad:new Set(),prog:[0,0],un:null,marker:false,job:null,busy:false,code:''};
+const lk={on:false,key:null,u:null,base:null,need:'',kd:null,pw:'',pwT:null,bad:new Set(),prog:[0,0],un:null,marker:false,job:null,busy:false,code:'',sure:false};
+/* what holds sending back. An account that is not locked yet sends nothing readable (the lock is required). A locked device sends nothing until the cloud has confirmed, this session, that the account is still there */
+const lkHold=()=>!!fbUser&&!!coll&&(coll.locked?!lk.sure:LOCK_MODE==='required');
 try{if(/[?&]lock(=|&|$)/.test(location.search))localStorage.setItem('blk.lockopt','1');}catch(e){}
 const lkCan=()=>LOCK_MODE==='required'||lsGet('blk.lockopt')==='1';
 const lkKeyOf=uid=>{try{const s=lsGet('blk.dk.'+uid);if(!s)return null;const u=LK.u8(s);return u.length===32?u:null;}catch(e){return null;}};
@@ -2177,7 +2179,7 @@ const lkU=x=>x&&x.toUint8Array?x.toUint8Array():x;
 const lkKeysRef=()=>lk.base.collection('keys').doc('main');
 const lkMarker=b=>!!(b&&b.locked);
 const lkSig=b=>canonJ(b||null);
-function lkStop(){clearInterval(lk.askT);lk.askT=null;if(lk.un){try{lk.un();}catch(e){}lk.un=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;}
+function lkStop(){clearInterval(lk.askT);lk.askT=null;clearTimeout(lk.rvT);if(lk.un){try{lk.un();}catch(e){}lk.un=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;lk.sure=false;}
 /* run f once the internet is back, or in half a minute, if the same person is still signed in */
 function lkWhenOnline(f){const u=lk.u;let done=false;const go=()=>{if(done)return;done=true;removeEventListener('online',go);if(lk.u===u&&u)f();};addEventListener('online',go);setTimeout(go,30000);}
 /* is this account locked? Asks the server, never this device's saved copy. */
@@ -2243,7 +2245,12 @@ async function lkNeed(kd){const u=lk.u;if(!u)return;lk.need='pw';coll=null;updat
 async function lkEnter(dk,kd){const u=lk.u;if(!u)return;lk.kd=null;lk.key=await LK.useKey(dk);lsSet('blk.dk.'+u.uid,LK.b64(dk));lsSet('blk.kid.'+u.uid,kd.kid||'');
  if(kd.conv!=='done'){lkFlag(u.uid,'conv');return lkFinish();}
  lkGo();}
-function lkGo(){const u=lk.u;lkFlag(u.uid,'vault');lk.need='';lk.on=true;lk.marker=false;updateStatus();syncListen(u,lkVault(lk.base,u.uid,lk.key));lkWatch();}
+function lkGo(){const u=lk.u;lkFlag(u.uid,'vault');lk.need='';lk.on=true;lk.marker=false;lk.sure=false;updateStatus();syncListen(u,lkVault(lk.base,u.uid,lk.key));lkSure();lkWatch();}
+/* the last check before a locked device may send: the account has not been deleted from another device. Asked of the server, once a session */
+async function lkSure(){const u=lk.u;if(!u||!lk.on||lk.sure)return;let m=null;
+ try{const d=await lk.base.collection('docs').doc('meta').get({source:'server'});m=d.exists?d.data():null;}catch(e){lkWhenOnline(lkSure);return;}
+ if(lk.u!==u||!lk.on)return;if(m&&m.closed){acctClosed();return;}
+ lk.sure=true;schedulePush(0);}
 /* seal everything, then sync. Safe to stop anywhere and start again. */
 function lkFinish(){const u=lk.u;if(lk.job)return lk.job;lk.need='conv';lk.prog=[0,0];updateStatus();
  const j=lk.job=lkConvert().then(()=>{if(lk.u!==u||lk.job!==j)return false;lk.job=null;lkGo();return true;},e=>{if(lk.u!==u||lk.job!==j)return false;lk.job=null;console.error(e);lk.need='wait';updateStatus();lkWhenOnline(()=>{if(lk.need==='wait')lkFinish();});return false;});return j;}
@@ -2278,9 +2285,9 @@ async function lkAfter(){const u=lk.u;if(!u||!lk.on)return;const r=await lkPeek(
  const mine=lsGet('blk.kid.'+u.uid)||'';
  if(r.st==='legacy'||(r.kd.kid||'')!==mine){ /* the cloud was started fresh from another device: this device's key no longer fits. Its own work stays and is sent again once it is let in */
   if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}
-  coll=null;lk.on=false;lk.key=null;lkForget(u.uid);lkFlag(u.uid,'vault');lk.marker=true;lkAll();lkNeed(r.st==='locked'?r.kd:null);return;}
+  coll=null;lk.on=false;lk.sure=false;lk.key=null;lkForget(u.uid);lkFlag(u.uid,'vault');lk.marker=true;lkAll();lkNeed(r.st==='locked'?r.kd:null);return;}
  if(lk.pw){const pw=lk.pw;lkPwDrop();try{await LK.unwrap(r.kd.pw,pw);}catch(e){if(e.message==='bad-secret'){try{await lkKeysRef().update({pw:await LK.wrapPw(lkKeyOf(u.uid),pw)});}catch(x){console.error(x);}}}} /* the password was reset by email: this device still holds the key, so it seals it again under the new one */
- lkWatch();}
+ lkSure();lkWatch();}
 /* everything on this device is to be sent again */
 function lkAll(){const now=Date.now(),d=docs();for(const k in d){sync.stamps[k]=Math.max(now,(sync.stamps[k]||0)+1);markDirty(k);}for(const k in images){sync.stamps['img-'+k]=Math.max(now,(sync.stamps['img-'+k]||0)+1);markDirty('img-'+k);}try{saveLocal();}catch(e){}}
 /* readable items that turn up after the change-over come from a copy of the app that had not updated yet. The marker is put back so it stops;
@@ -2333,7 +2340,7 @@ async function lkNewCode(){const u=lk.u,dk=u&&lk.on?lkKeyOf(u.uid):null;if(!dk)t
 /* ---- windows ---- */
 const lkErr=e=>{const c=(e&&(e.code||e.message))||'';return c==='auth/wrong-password'||c==='auth/invalid-credential'?'That is not this account’s password.':c==='short'?`Use at least ${LOCK_MIN} characters for the password.`:c==='already'?'This account is already locked. Close this window; the app will ask for your password.':c==='bad-code'?'That recovery code does not fit. Check each group of four.':c==='permission-denied'?'The sync service refused. This account may not be approved for sync yet.':c==='auth/network-request-failed'||c==='unavailable'?'No connection. Try again when you’re online.':c==='auth/too-many-requests'?'Too many tries. Wait a minute and try again.':c==='rewrap'?'Your password is changed, but the lock could not be updated yet. Keep the app open and online; it will finish by itself.':'Something went wrong. Nothing was changed. Please try again.';};
 function lkSetupDialog(){if(!fbUser)return;
- modal(`<h3>Lock your synced work</h3><p>Your scenes are sealed with your password on this device before they are sent. After that, no one else can read the copy in the cloud, not even the person who runs this app.</p><p class="mut">Your work on this device, and your Back Up Everything files, stay as they are.</p><label class="fld">Your password<input id="lp" type="password" autocomplete="current-password"></label><div id="lnew" hidden><p>Your password is shorter than ${LOCK_MIN} characters, which is too easy to guess. Choose a longer one. It becomes your sign-in password on every device, and your other devices will ask you to sign in again.</p><label class="fld">New password<input id="ln1" type="password" autocomplete="new-password"></label><label class="fld">New password, again<input id="ln2" type="password" autocomplete="new-password"></label></div><p id="lerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="lgo">Lock My Work</button></div>`,c=>{
+ modal(`<h3>Lock your synced work</h3><p>Your scenes are sealed with your password on this device before they are sent. After that, no one else can read the copy in the cloud, not even the person who runs this app.${LOCK_MODE==='required'?' Sync starts once this is done.':''}</p><p class="mut">Your work on this device, and your Back Up Everything files, stay as they are.</p><label class="fld">Your password<input id="lp" type="password" autocomplete="current-password"></label><div id="lnew" hidden><p>Your password is shorter than ${LOCK_MIN} characters, which is too easy to guess. Choose a longer one. It becomes your sign-in password on every device, and your other devices will ask you to sign in again.</p><label class="fld">New password<input id="ln1" type="password" autocomplete="new-password"></label><label class="fld">New password, again<input id="ln2" type="password" autocomplete="new-password"></label></div><p id="lerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="lgo">Lock My Work</button></div>`,c=>{
   const $q=s=>c.querySelector(s),err=m=>{$q('#lerr').textContent=m;},go=$q('#lgo');
   go.onclick=async()=>{const pw=$q('#lp').value,nw=$q('#lnew');err('');if(!pw){err('Type your password first.');return;}
    let np='';if(pw.length<LOCK_MIN){if(nw.hidden){go.disabled=true;try{await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(fbUser.email,pw));nw.hidden=false;$q('#ln1').focus();}catch(e){err(lkErr(e));}go.disabled=false;return;}
@@ -2396,6 +2403,7 @@ function lkSyncBit(){if(!fbUser)return '';
  if(lk.need==='conv')return `<p><b>Locking your synced work:</b> ${lk.prog[0]} of ${lk.prog[1]}. Keep the app open and online; your work on this device is safe meanwhile.</p>`;
  if(lk.need==='wait')return `<p class="warnbox">The lock is waiting for the internet. Everything is saved on this device.</p>`;
  if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` ${plural(lk.bad.size,'item')} could not be opened on this device.`:''}</p><div class="btns"><button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
+ if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so no one else can read the copy in the cloud. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock My Synced Work…</button><button id="lkp">Change Password…</button></div>`;
  return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock My Synced Work…</button>':''}</div>`;}
 function lkSyncBind(c){const b=(id,f)=>{const e=c.querySelector(id);if(e)e.onclick=()=>{mNext=accountDialog;f();};};b('#lku',lkUnlockDialog);b('#lkc',lkNewCodeDialog);b('#lkp',lkPwDialog);b('#lks',lkSetupDialog);}
 /* ---------- sync (private to the signed-in person, through their Claude account) ---------- */
@@ -2470,7 +2478,7 @@ function syncProbe(){clearTimeout(probeT);if(!coll||!fbUser||online==='on')retur
   .catch(()=>{set('waiting','unreachable');again();});}
 /* the live connection stopped (refused before this account was approved, or dropped by the service): start it again */
 let reviveAt=0;
-function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);}catch(e){}}
+function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);if(!coll.locked)lkAsk();}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncRevive();});
 function syncWhy(){if(!navigator.onLine)return 'This device has no internet connection right now.';
  if(online==='quota')return 'The sync service’s free daily limit for this app has been used up. Sync starts again by itself after midnight Pacific time. Until then everything is saved on this device, and it’s all sent once sync is back.';
@@ -2532,17 +2540,19 @@ async function acctDelete(pw){const u=fbUser;if(!u)throw new Error('signed-out')
  const base=fbDb.collection('users').doc(u.uid),dc=base.collection('docs'),SV={source:'server'};
  const locked=lk.on||!!lk.need||lk.marker; /* a locked account keeps its work sealed in vault/, with its sealed key in keys/ */
  let cloud=true;try{await acctT(dc.doc('meta').get(SV));}catch(e){if(e&&e.code==='permission-denied')cloud=false;else throw e;}
+ const drop=async(c,ids)=>{for(let i=0;i<ids.length;i+=200){const part=ids.slice(i,i+200);if(fbDb.batch){const b=fbDb.batch();part.forEach(id=>b.delete(c.doc(id)));await acctT(b.commit(),60000);}else await acctT(Promise.all(part.map(id=>c.doc(id).delete())),60000);}};
+ const known=[...new Set([...Object.keys(docs()).filter(k=>k!=='meta'),...Object.keys(images).map(k=>'img-'+k),...(sync.imgK||[]).map(k=>'img-'+k)])];
  if(cloud){acctShutSet();acctQuiet();updateStatus();
   await acctT(dc.doc('meta').set({closed:Date.now()}));
   await new Promise(r=>setTimeout(r,1200));
-  const drop=async(c,ids)=>{for(let i=0;i<ids.length;i+=200){const part=ids.slice(i,i+200);if(fbDb.batch){const b=fbDb.batch();part.forEach(id=>b.delete(c.doc(id)));await acctT(b.commit(),60000);}else await acctT(Promise.all(part.map(id=>c.doc(id).delete())),60000);}};
   const wipe=async(c,keep)=>{for(let pass=0;pass<4;pass++){const all=await acctT(c.get(SV),60000),ids=all.docs.map(d=>d.id).filter(i=>i!==keep);if(!ids.length)return;await drop(c,ids);}
    throw Object.assign(new Error('left'),{code:'left'});};
   /* first everything this device knows by name (no download needed, so pictures are not fetched just to be removed), then whatever the server still lists */
-  const known=[...new Set([...Object.keys(docs()).filter(k=>k!=='meta'),...Object.keys(images).map(k=>'img-'+k),...(sync.imgK||[]).map(k=>'img-'+k)])];
   if(locked)await drop(base.collection('vault'),['meta',...known]);else await drop(dc,known);
   await wipe(dc,'meta');
   for(const n of ['vault','keys'])try{await wipe(base.collection(n));}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
+ else{ /* the cloud will not list this person's own work (taken off the approved list, or never on it). What this device knows by name is removed all the same: the rules let anyone remove their own work. Older rules refuse, and then it goes on as before */
+  try{for(const c of [base.collection('vault'),dc])await drop(c,['meta',...known]);await drop(base.collection('keys'),['main']);}catch(e){if(!(e&&e.code==='permission-denied'))throw e;}}
  await acctT(u.delete());
  for(const k of ['blk.acct.','blk.apown.','blk.shut.'])try{localStorage.removeItem(k+u.uid);}catch(e){}
  lkForget(u.uid); /* the lock's key for the account has nothing left to open */
@@ -2601,9 +2611,27 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admin/approved)
         && request.auth.token.email.lower() in get(/databases/$(database)/documents/admin/approved).data.emails);
     }
-    // Each person's scenes: only they can see them, and only once they're approved.
+    function me(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    // Each person's own corner. Seeing it needs approval. Removing your own work never does.
     match /users/{uid}/{rest=**} {
-      allow read, write: if signedIn() && request.auth.uid == uid && approved();
+      allow read: if me(uid) && approved();
+      allow delete: if me(uid);
+    }
+    // The lock's sealed key.
+    match /users/{uid}/keys/{key} {
+      allow create, update: if me(uid) && approved();
+    }
+    // Synced work arrives sealed: three fields, and nothing else.
+    match /users/{uid}/vault/{item} {
+      allow create, update: if me(uid) && approved()
+        && request.resource.data.keys().hasOnly(['v', 'n', 'c']);
+    }
+    // Nothing readable is accepted. Only the small marker that says an account is locked, or closed.
+    match /users/{uid}/docs/{item} {
+      allow create, update: if me(uid) && approved() && item == 'meta'
+        && request.resource.data.keys().hasOnly(['appV', 'locked', 'updatedAt', 'closed']);
     }
     // The approved list: only you can see or change it.
     match /admin/{doc} {
@@ -2622,24 +2650,32 @@ async function apProbe(){const u=fbUser;if(!u)return null;let r=null;
  try{const d=await apDoc().get();if(!(d&&d.metadata&&d.metadata.fromCache&&!d.exists))r=true;}catch(e){if(e&&e.code==='permission-denied')r=false;}
  if(r!==null&&fbUser===u)apMark(r);return fbUser===u?r:null;}
 /* is approval on? the list can be written (so these rules, or none at all), and a stray path can't (so not wide open) */
+/* are the Firebase rules the ones from before the lock? Those let an approved person write anywhere under their own name; the current ones only where the app writes. true: older, false: current, null: could not tell */
+async function rulesOld(){try{const r=fbDb.collection('users').doc(fbUser.uid).collection('probe').doc('r');await r.set({t:Date.now()});try{await r.delete();}catch(e){}return true;}catch(e){return e&&e.code==='permission-denied'?false:null;}}
 async function apCheck(list){const me=(fbUser.email||'').toLowerCase();
  try{await apDoc().set({emails:list,owner:me,at:Date.now()});}catch(e){return e&&e.code==='permission-denied'?'off':'offline';}
  try{const r=firebase.firestore().collection('probe').doc(fbUser.uid);await r.set({t:Date.now()});try{await r.delete();}catch(e){}return 'open';}catch(e){return e&&e.code==='permission-denied'?'on':'offline';}}
-function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerCase(),pid=(window.BB_FIREBASE||{}).projectId||'';let list=[],state='checking';
+function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerCase(),pid=(window.BB_FIREBASE||{}).projectId||'';let list=[],state='checking',old=null;
  modal(`<h3>Approved people</h3><div id="apB"><p class="mut">Checking…</p></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,async c=>{
   const box=c.querySelector('#apB'),valid=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const save=async()=>{try{await apDoc().set({emails:list,owner:me,at:Date.now()});return true;}catch(e){toast('Couldn’t save the list. Check your connection and try again.');return false;}};
+  const cpBind=()=>{const b=box.querySelector('#apCp');if(b)b.onclick=()=>{const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};const r=box.querySelector('#apRe');if(r)r.onclick=go;};
   const draw=()=>{
    if(state==='checking'){box.innerHTML='<p class="mut">Checking…</p>';return;}
    if(state==='offline'){box.innerHTML='<p>Connect to the internet to manage who can sync.</p><div class="btns"><button id="apRe">Try again</button></div>';box.querySelector('#apRe').onclick=go;return;}
    if(state==='no'){box.innerHTML='<p>Only the person who runs this app manages who can sync. To ask about access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p>';return;}
-   if(state==='on'){box.innerHTML=`<p class="mut">Approval is on. Only you and the people below can sync. Anyone else can still use the app, but their work stays on their own device.</p>
+   if(state==='on'){box.innerHTML=`${old?`<div class="warnbox" style="margin-bottom:12px"><b>One update to make in Firebase.</b> Your rules are from before the lock. The new ones accept only locked work, and let someone you have removed delete their own copy from the cloud.
+     <ol class="aps"><li>Open your Firebase rules: <a href="https://console.firebase.google.com/project/${esc(pid)}/firestore/rules" target="_blank" rel="noopener">Firebase › Firestore › Rules</a>.</li>
+     <li>Tap <b>Copy Rules</b> below. In Firebase, select all the text in the rules box, paste over it, and press <b>Publish</b>.</li>
+     <li>Come back here and tap <b>Check Again</b>.</li></ol>
+     <div class="btns"><button id="apCp">Copy Rules</button><button class="pri" id="apRe">Check Again</button></div>
+     <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(rulesText(me))}</textarea></details></div>`:''}<p class="mut">Approval is on. Only you and the people below can sync. Anyone else can still use the app, but their work stays on their own device.${old===false?' Your Firebase rules are the current ones.':''}</p>
      <div class="apl">${list.length?list.map((e,i)=>`<div class="apr"><span>${esc(e)}</span><button data-rm="${i}" aria-label="Remove ${esc(e)}">×</button></div>`).join(''):'<p class="mut" style="margin:6px 0">No one yet.</p>'}</div>
      <div class="apa"><input id="apE" type="email" placeholder="friend@example.com" autocapitalize="off" autocomplete="off"><button class="pri" id="apAdd">Add</button></div>
      <p class="mut" style="font-size:12.5px">They tap Create account in the app using exactly this email. Removing someone stops their syncing; their scenes stay on their devices.</p>`;
     const add=async()=>{const i=box.querySelector('#apE'),v=i.value.trim().toLowerCase();if(!valid(v)){toast('That doesn’t look like an email address.');return;}if(v===me){toast('You’re always allowed.');return;}if(!list.includes(v)){list.push(v);list.sort();if(await save())toast(`${v} can sync now.`);}draw();};
     box.querySelector('#apAdd').onclick=add;box.querySelector('#apE').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
-    box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const v=list[+b.dataset.rm];list.splice(+b.dataset.rm,1);if(await save())toast(`${v} removed.`);draw();});return;}
+    box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const v=list[+b.dataset.rm];list.splice(+b.dataset.rm,1);if(await save())toast(`${v} removed.`);draw();});cpBind();return;}
    /* off (or wide open): the one-time setup */
    box.innerHTML=`<p>${state==='open'?'Right now <b>anyone</b> who signs in can sync.':'Approval isn’t on yet.'} To allow only the people you choose, do this once in Firebase:</p>
     <ol class="aps"><li>Open your Firebase rules: <a href="https://console.firebase.google.com/project/${esc(pid)}/firestore/rules" target="_blank" rel="noopener">Firebase › Firestore › Rules</a>. Sign in with the Google account you made it with.</li>
@@ -2650,7 +2686,7 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
     <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(rulesText(me))}</textarea></details>`;
    box.querySelector('#apCp').onclick=()=>{const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};
    box.querySelector('#apRe').onclick=go;};
-  const go=async()=>{state='checking';draw();let rerr=null;try{const d=await apDoc().get();if(d.exists)list=(d.data().emails||[]).slice();}catch(e){rerr=(e&&e.code)||'error';}state=!rerr?await apCheck(list):rerr==='permission-denied'?'off':'offline';if(state==='off'&&!apSetup())state='no';if(state!=='offline')apMark(state!=='no');draw();};
+  const go=async()=>{state='checking';draw();let rerr=null;try{const d=await apDoc().get();if(d.exists)list=(d.data().emails||[]).slice();}catch(e){rerr=(e&&e.code)||'error';}state=!rerr?await apCheck(list):rerr==='permission-denied'?'off':'offline';old=state==='on'?await rulesOld():null;if(state==='off'&&!apSetup())state='no';if(state!=='offline')apMark(state!=='no');draw();};
   go();});}
 async function initSync(){
  if(initFirebase()){updateStatus();return;}
@@ -2729,6 +2765,7 @@ function schedulePush(ms){if(!coll)return;clearTimeout(pushT);pushT=setTimeout(p
 let pushDefer=0;
 async function push(){
  if(!coll||pushing||outdated||copyPaused)return;
+ if(lkHold()){if(!coll.locked&&online==='error'){syncRevive();clearTimeout(lk.rvT);lk.rvT=setTimeout(()=>schedulePush(0),15000);}updateStatus();return;} /* held, and the live connection was refused (not on the sync list yet): keep asking, as the refused sends used to */
  if(gesture&&pushDefer<8){pushDefer++;schedulePush(600);return;}pushDefer=0;
  detectChanges(); /* anything typed or moved since the last save is counted before sending */
  if(!sync.dirty.length){updateStatus();return;}
@@ -2765,6 +2802,7 @@ function whenTxt(t){if(!t)return 'never';const d=new Date(t),now=new Date(),same
 function confirmSynced(){if(sync.dirty.length||outdated||bigN())return;if(fbDb&&fbDb.waitForPendingWrites){fbDb.waitForPendingWrites().then(()=>{if(!sync.dirty.length&&!bigN()&&!syncErr)markSynced();}).catch(()=>{});}else if(coll)markSynced();}
 function syncNow(){if(!coll){toast(fbAuth?'Sign in first (Menu › Sync & Backup).':'Sync isn’t set up in this copy of the app.');return;}
  if(!navigator.onLine){toast('No internet connection. Everything is saved on this device and will sync when you’re back online.');return;}
+ if(lkHold()&&!coll.locked){toast('Your work syncs once it is locked: tap the status at the top right, then Lock My Synced Work…');return;}
  toast('Syncing…');const go=()=>{detectChanges();saveLocal();schedulePush(0);try{const m=docs().meta;if(m&&coll){for(const id of m.imgs)if(!images[id])imgTry[id]=0;imgPull();}}catch(e){}
   const t0=Date.now(),wait=()=>{if(!sync.dirty.length&&!pushing){if(fbDb&&fbDb.waitForPendingWrites)fbDb.waitForPendingWrites().then(()=>{if(sync.dirty.length||syncErr){toast('Not everything could be sent yet. Your work is saved here; it will keep trying.');return;}if(bigN()){toast('Sent, except what is too large to sync. Ready for Set shows which part.');return;}markSynced();toast('Sent. Everything made here is in the cloud; your other device gets it the next time it’s online.');}).catch(()=>toast('Couldn’t reach the cloud. Your work is saved here; try again in a moment.'));else{markSynced();toast('Synced.');}}else if(Date.now()-t0<20000)setTimeout(wait,500);else toast('Still sending. It will finish in the background.');};setTimeout(wait,400);};
  if(fbDb&&fbDb.disableNetwork){fbDb.disableNetwork().then(()=>fbDb.enableNetwork()).then(go,go);}else go();}
@@ -2777,6 +2815,7 @@ function updateStatus(){acctNote();
  else if(fbUser&&lk.need==='pw'){t='Unlock to sync · saved here';c='warn';}
  else if(fbUser&&lk.need==='conv')t=`Locking ${lk.prog[0]} of ${lk.prog[1]}…`;
  else if(fbUser&&lk.need==='wait'){t='Lock waiting for internet · saved here';c='warn';}
+ else if(fbUser&&coll&&!coll.locked&&LOCK_MODE==='required'&&online==='on'&&!lk.auto&&!lk.pw){t='Lock to sync · saved here';c='warn';}
  else if(fbUser&&!coll&&online==='connecting')t='Connecting…';
  else if(!coll)t=location.protocol==='file:'?'Saved on this computer':'Saved on this device';
  else if(online==='connecting')t='Connecting…';
@@ -4734,7 +4773,7 @@ let libQ='',libHtml=null;
 function libSet(on,focus){P.ui.lib=!!on;saveLocal();renderLib();if(on&&focus){const i=$('#libq');if(i&&matchMedia('(pointer:fine)').matches){i.focus();i.select();}}}
 const libAuto=()=>new Set(fPath(sFolder(scene())).map(f=>f.id));
 function libIsOpen(id,auto){const o=(P.ui.libOpen||{})[id];return o!=null?!!o:auto.has(id);}
-function libRowS(s,depth,sub){const cur=s.id===P.sceneId,top=s.number?'Sc. '+s.number:(s.scout?'Scout':''),name=(s.title||s.heading||'Untitled').toUpperCase();
+function libRowS(s,depth,sub){const cur=s.id===P.sceneId,top=s.number?'Sc. '+s.number:(s.scout?'Place':''),name=(s.title||s.heading||'Untitled').toUpperCase();
  return `<div class="lbrow${cur?' curr':''}"><button class="lbs${cur?' cur':''}${top?'':' solo'}" data-ls="${s.id}" style="padding-left:${14+depth*16}px"${cur?' aria-current="true"':''} title="${esc(sceneLabel(s))}">${top?`<b>${esc(top)}</b>`:''}<span>${esc(name)}</span>${sub?`<small>${esc(sub)}</small>`:''}</button><button class="lbm" data-lm="s:${s.id}" aria-label="Options for ${esc(sceneLabel(s))}">•••</button></div>`;}
 function libTree(pid,depth,auto){let h='';for(const f of fKids(pid)){const open=libIsOpen(f.id,auto);
   h+=`<div class="lbrow"><button class="lbf" data-lf="${f.id}" aria-expanded="${open}" style="padding-left:${8+depth*16}px"><i class="lbc${open?' on':''}"></i>${BIC.fold}<span>${esc(f.name)}</span></button><button class="lbm" data-lm="f:${f.id}" aria-label="Options for ${esc(f.name)}">•••</button></div>`;
@@ -4842,7 +4881,7 @@ $('#sceneBtn').onclick=()=>sceneDrop();
 /* the scene button's list: the scenes of the folder you are in, and the way to the Library */
 function sceneDrop(){const b=$('#sceneBtn'),was=document.querySelector('#drop.scn');closePop();closeDrop();if(was)return;
  const c=scene(),fid=sFolder(c),fo=fid?fById(fid):null,list=(c.tpl?[]:fScenes(fid)).filter(x=>!setOn||!x.scout),on=libOn()&&!setOn;
- const row=x=>{const top=x.number?'Sc. '+x.number:(x.scout?'Scout':''),name=(x.title||x.heading||'Untitled').toUpperCase(),me=x.id===c.id;
+ const row=x=>{const top=x.number?'Sc. '+x.number:(x.scout?'Place':''),name=(x.title||x.heading||'Untitled').toUpperCase(),me=x.id===c.id;
   return `<button class="sdr${me?' cur':''}" data-sd="${x.id}"${me?' aria-current="true"':''} title="${esc(sceneLabel(x))}">${top?`<b>${esc(top)}</b>`:''}<span>${esc(name)}</span>${me?'<i class="sdk">✓</i>':''}</button>`;};
  const d=document.createElement('div');d.id='drop';d.className='mm scn';
  d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf"><button id="sdLib">${setOn?'All Scenes…':on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
@@ -5562,7 +5601,10 @@ function ensureLive(){
  if(!n){n=blankScene(1);if(f)n.folder=f;P.scenes.push(n);}
  P.sceneId=n.id;sel=null;
 }
-function openScene(id){if(!P.scenes.some(s=>s.id===id&&!s.trashed))return;stopPlay();anim.step=0;P.sceneId=id;noteRecent(id);sel=null;msel=null;inspOpen=false;endTool();closeModal();saveLocal();render();fit();}
+/* a place opened from anywhere but its own list (the Library, the scene menu, a folder window): the way back is a scene of its location */
+function scWay(t){const r=rootKey(t),ok=x=>!!x&&!x.scout&&!x.tpl&&!x.trashed&&rootKey(x)===r,fits=x=>ok(x)&&((!!t.sfor&&scKeyOf(x)===t.sfor)||(!!t.loc&&x.loc===t.loc));
+ const c=scene(),pv=P.scenes.find(x=>x.id===P.ui.prevScene),b=[c,pv].find(fits)||liveScenes().find(fits)||[c,pv].find(ok)||liveScenes().find(ok);if(b)P.ui.prevScene=b.id;}
+function openScene(id){const t=P.scenes.find(s=>s.id===id&&!s.trashed);if(!t)return;const place=!!t.scout&&!t.tpl;if(place)scWay(t);stopPlay();anim.step=0;P.sceneId=id;noteRecent(id);sel=null;msel=null;inspOpen=false;endTool();closeModal();saveLocal();if(place&&!scoutOn)setView('scout');else render();fit();}
 function trashScenes(ids){const now=Date.now();for(const s of P.scenes)if(ids.includes(s.id))s.trashed=now;msel=null;ensureLive();}
 function restoreScenes(ids){for(const s of P.scenes)if(ids.includes(s.id)){delete s.trashed;if(!sFolder(s))delete s.folder;sUnique(s);}}
 function killScenes(ids){P.scenes=P.scenes.filter(s=>!ids.includes(s.id));ensureLive();}
@@ -5824,11 +5866,38 @@ function dayDialog(rootId,key,name,after){const root=fById(rootId);if(!root)retu
   card.querySelector('#dyOk').onclick=()=>{const call=card.querySelector('#dyC').value,wrap=card.querySelector('#dyW').value,lunch=+card.querySelector('#dyL').value;
    if(!/^\d\d:\d\d$/.test(call)||!/^\d\d:\d\d$/.test(wrap)){card.querySelector('#dyE').textContent='Set both a call time and a wrap time.';return;}
    root.days=Object.assign({},root.days||{});root.days[key]={call,wrap,lunch};commit();modalBack();if(after)after();};});}
+/* ---------- Export this day: the day's scenes in one PDF. The crew copy has floor plans, frames and shot lists; the director's adds the Breakdown and Strategy ---------- */
+function dayExportDialog(root,f,d){const u=P.ui.dayx||{},cur={k:u.k==='dir'?'dir':'crew',desc:u.desc!==false};kidNext();
+ const radio=(v,l,sub)=>`<button class="rrow" data-v="${v}"><span><b>${l}</b><small>${sub}</small></span><i class="rad${cur.k===v?' on':''}"></i></button>`;
+ modal(`<h3>Export ${esc(d.name)}</h3><p class="mut">One PDF of this day’s ${plural(d.scenes.length,'scene')}, in the order shown here. Its first page has the day’s call, wrap and totals.</p>
+  <div class="rgrp" id="dxK">${radio('crew','Crew copy','Floor plans, frames and shot lists')}${radio('dir','Director’s copy','Adds each scene’s Breakdown and Strategy')}</div>
+  <label class="imopt"><input type="checkbox" id="dxD"${cur.desc?' checked':''}> Shot descriptions <span class="mut">· untick to leave them off</span></label>
+  <p class="mut" style="font-size:12.5px;margin:10px 0 0">Page orientation, layout and letterhead are the ones last set under Export PDF.</p>
+  <div class="btns end"><button data-x>Cancel</button><button class="pri" id="dxGo">Export PDF</button></div>`,card=>{
+  card.querySelector('#dxK').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(!b)return;cur.k=b.dataset.v;card.querySelectorAll('#dxK [data-v]').forEach(x=>x.querySelector('.rad').classList.toggle('on',x.dataset.v===cur.k));});
+  card.querySelector('#dxGo').onclick=()=>{cur.desc=card.querySelector('#dxD').checked;P.ui.dayx={k:cur.k,desc:cur.desc};saveLocal();const dir=cur.k==='dir';modalBack();
+   exportPDF({dayx:{name:d.name,list:d.scenes.map(o=>o.s),cfg:dayCfg(root,d.key),d,dir,folder:f.name},prod:undefined,nb:dir,st:dir,dia:true,list:true,sb:true,bd:'auto',nodesc:!cur.desc});};});}
+/* the day's first page, drawn like the other exported pages: the letterhead, the day's hours and totals, and its scenes */
+function dayCoverSVG(day,o){const port=!!o.port,W=port?1275:1650,H=port?1650:1275,M=48,TW=W-2*M,d=day.d,c=day.cfg,av=dayAvail(c),over=d.min-av,s0=day.list[0],acc=prodOpts(s0).accent||PROD_DEF.accent,out=[];
+ const ps={id:s0.id,folder:s0.folder,number:'',heading:day.name,title:'',code:'',day:'',date:''},copy=day.dir?'Director’s copy':'Crew copy';
+ const X=[0,.56,.68,.80,.90].map(q=>M+q*TW),RH=50,fitN=Math.max(12,Math.floor((X[1]-X[0]-150)/13.4));
+ const figs=[['CALL',dayClock(c.call)],['WRAP',dayClock(c.wrap)],['LUNCH',c.lunch?minTxt(c.lunch):'Not counted'],['SCENES',String(d.scenes.length)],['PAGES',d.pp?ppTxt(d.pp):'–'],['SETUPS',d.setups?String(d.setups):'–'],['SHOTS',d.shots?String(d.shots):'–']],cw=TW/figs.length;
+ const rows=d.scenes.slice();let first=true;
+ while(rows.length||first){const LH=letterhead(ps,'list',W,first?'':'continued',{T:copy,Q:day.dir?'Breakdown, strategy, floor plans, frames and shot lists':'Floor plans, frames and shot lists'});let y=LH.y+46,h=LH.h+pageFooter(ps,W,H,day.name+'  ·  '+copy);
+  if(first){figs.forEach(([l,v],i)=>{h+=`<text x="${M+i*cw}" y="${y}" class="x-lh">${esc(l)}</text><text x="${M+i*cw}" y="${y+40}" style="font-size:${port?26:31}px;font-weight:800;fill:#141414">${esc(v)}</text>`;});y+=40+40;
+   h+=`<text x="${M}" y="${y}" style="font-size:20px;fill:#2a2a2d">${d.min?`<tspan style="font-weight:700">${esc(minTxt(d.min))}</tspan> of shots in a day of <tspan style="font-weight:700">${esc(minTxt(av)||'0 min')}</tspan><tspan dx="14" style="font-weight:700;fill:${over>0?'#C0392B':'#2e7d4f'}">${esc(over>0?minTxt(over)+' over':over<0?minTxt(-over)+' to spare':'Exactly the day')}</tspan>${d.noEst?`<tspan dx="14" style="fill:#77777c">${esc(plural(d.noEst,'shot'))} with no estimate</tspan>`:''}`:'No times on this day’s shots yet.'}</text>`;y+=34;}
+  const top=y;h+=`<rect x="${M}" y="${y}" width="${TW}" height="42" fill="#2b3445"/>`+['SCENE','PAGES','SETUPS','SHOTS','TIME'].map((t,i)=>`<text x="${X[i]+10}" y="${y+27}" class="x-th">${t}</text>`).join('');y+=42;
+  while(rows.length&&y+RH<=H-58){const q=rows.shift(),x=q.s;let R=[];try{R=rowsOf(x).filter(r=>r.m.ss!=='drop');}catch(e){}
+   const nm=trunc(String(x.heading||x.title||'Untitled').toUpperCase(),fitN),e8=ppParse(x.pp);
+   h+=`<text x="${X[0]+10}" y="${y+32}" class="x-ls">${x.number?`<tspan style="fill:${acc}">SC. ${esc(x.number)}</tspan><tspan dx="12">`:'<tspan>'}${esc(nm)}</tspan></text>`+[e8?ppTxt(e8):'–',R.length?String(new Set(R.map(r=>r.st&&r.st.id)).size):'–',q.shots?String(q.shots):'–',q.min?minTxt(q.min):'–'].map((t,i)=>`<text x="${X[i+1]+10}" y="${y+32}" class="x-lt">${esc(t)}</text>`).join('')+`<line x1="${M}" x2="${W-M}" y1="${y+RH}" y2="${y+RH}" stroke="#d6d6d1"/>`;y+=RH;}
+  h+=X.slice(1).map(x=>`<line x1="${x}" x2="${x}" y1="${top}" y2="${y}" stroke="#e1e1dc"/>`).join('')+`<rect x="${M}" y="${top}" width="${TW}" height="${y-top}" fill="none" stroke="#c9c9c4"/>`;
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${RK_DEFS}<style>${SVG_CSS}${SHEET_CSS}</style><rect width="${W}" height="${H}" fill="#fff"/>${h}</svg>`);first=false;}
+ return out;}
 /* the Days view of the folder's Overview */
 function ovDays(f,S){const root=topFolder(f.id)||f,D=dayList(S.map(o=>o.s));if(!D.length)return `<div class="ovempty">No scenes in ${esc(f.name)} yet.</div>`;
  const any=D.some(d=>d.min>0);let h=any?'':`<div class="ovempty" style="padding-bottom:6px">No shot has a time yet.<br><small>Turn on Est. time under Shot list ▾ › Columns…, and give each shot a time.</small></div>`;
  for(const d of D){const c=dayCfg(root,d.key),av=dayAvail(c),over=d.min-av,pc=av?Math.min(100,Math.round(d.min/av*100)):0;
-  h+=`<section class="ovday"><div class="ovdh"><b>${d.key?esc(d.name):'No shoot day yet'}</b><span>${[plural(d.scenes.length,'scene'),d.pp?ppTxt(d.pp)+(d.pp===8?' page':' pages'):'',d.shots?`${plural(d.shots,'shot')} in ${plural(d.setups,'setup')}`:'No shots'].filter(Boolean).join(' · ')}</span>${d.key?`<button class="sm" data-dy="${esc(d.key)}" data-dn="${esc(d.name)}">Call ${dayClock(c.call)} · Wrap ${dayClock(c.wrap)}…</button>`:''}</div>`;
+  h+=`<section class="ovday"><div class="ovdh"><b>${d.key?esc(d.name):'No shoot day yet'}</b><span>${[plural(d.scenes.length,'scene'),d.pp?ppTxt(d.pp)+(d.pp===8?' page':' pages'):'',d.shots?`${plural(d.shots,'shot')} in ${plural(d.setups,'setup')}`:'No shots'].filter(Boolean).join(' · ')}</span>${d.key?`<button class="sm" data-dy="${esc(d.key)}" data-dn="${esc(d.name)}">Call ${dayClock(c.call)} · Wrap ${dayClock(c.wrap)}…</button><button class="sm" data-dx="${esc(d.key)}">Export This Day…</button>`:''}</div>`;
   if(!d.key)h+=`<p class="ovdn">Give a scene its shoot day in Scene info, and it is counted with that day.${d.min?` These scenes come to <b>${minTxt(d.min)}</b>.`:''}</p>`;
   else h+=`<div class="ovdb${over>0?' over':''}"><i style="width:${pc}%"></i></div><p class="ovdn">${d.min?`<b>${minTxt(d.min)}</b> of shots in a day of <b>${minTxt(av)||'0 min'}</b> · <span class="${over>0?'bad':'good'}">${over>0?minTxt(over)+' over':over<0?minTxt(-over)+' to spare':'exactly the day'}</span>`:'No times on this day’s shots yet.'}${d.min&&d.noEst?` <span class="mut">· ${plural(d.noEst,'shot')} with no estimate</span>`:''}</p>`;
   h+=`<div class="ovds">${d.scenes.map(o=>`<button data-os="${o.s.id}" data-om="list"><b>${esc(sceneLabel(o.s))}</b><small>${o.min?minTxt(o.min):o.shots?'no times yet':'no shots'}</small></button>`).join('')}</div></section>`;}
@@ -6002,7 +6071,8 @@ function overviewDialog(fid){const f=fById(fid);if(!f){toast('Put this scene in 
   let rdT=0;const redraw=()=>{clearTimeout(rdT);rdT=0;if(!card.isConnected)return;const L=card.querySelector('#ovL'),y=L.scrollTop;draw(card);L.scrollTop=y;};
   card.addEventListener('change',e=>{if(ovCutChange(e)){clearTimeout(rdT);rdT=setTimeout(redraw,e.target.dataset.spact!==undefined?220:0);}});
   card.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset&&e.target.dataset.spact!==undefined){e.preventDefault();e.target.blur();}});
-  card.addEventListener('click',e=>{const t=e.target.closest('[data-ovt],[data-ov],[data-os],[data-sp],[data-spz],[data-dy]');if(!t)return;
+  card.addEventListener('click',e=>{const t=e.target.closest('[data-ovt],[data-ov],[data-os],[data-sp],[data-spz],[data-dy],[data-dx]');if(!t)return;
+   if(t.dataset.dx!==undefined){const d=dayList(S.map(o=>o.s)).find(x=>x.key===t.dataset.dx);if(d)dayExportDialog(topFolder(fid)||f,f,d);return;}
    if(t.dataset.dy!==undefined){dayDialog((topFolder(fid)||f).id,t.dataset.dy,t.dataset.dn,redraw);return;}
    if(t.dataset.spz){uiSet('ovBy',t.dataset.spz);draw(card);return;}
    if(t.dataset.sp!==undefined&&!t.dataset.os){ovSpSel=t.dataset.sp&&ovSpSel!==t.dataset.sp?t.dataset.sp:null;const L=card.querySelector('#ovL'),y=L.scrollTop;draw(card);L.scrollTop=y;return;}
@@ -7351,11 +7421,11 @@ function topFolder(fid){let f=fById(fid),g=0;while(f&&f.parent&&fById(f.parent)&
 let expProd;
 function prodFor(s){return prodById(expProd!==undefined?expProd:folderProd(s));}
 function fitFs(str,max,min,avail,k){return Math.max(min,Math.min(max,avail/(Math.max(1,str.length)*(k||.64))));}
-function letterhead(s,kind,W,pageLbl){
+function letterhead(s,kind,W,pageLbl,ov){
  const pr=prodFor(s),o=prodNorm(pr),M=48,acc=o.accent||PROD_DEF.accent,top=M-8;let h='',ly=top,ry=top;
  // page title owns the top center; the show and the contacts sit smaller on either side
- const T=String(kind==='both'?[o.floorT,o.listT].filter(Boolean).join(' & '):kind==='floor'?o.floorT:kind==='nb'?o.nbT:kind==='st'?o.stT:kind==='board'?'Storyboards':o.listT||'').toUpperCase();
- const cont=pageLbl==='continued',Q=cont?'continued':(kind==='floor'||kind==='both'?o.floorS:kind==='list'?o.listS:kind==='nb'?o.nbS:kind==='st'?o.stS:'')||'',PL=pageLbl&&!cont?String(pageLbl).toUpperCase():'';
+ const T0=String(kind==='both'?[o.floorT,o.listT].filter(Boolean).join(' & '):kind==='floor'?o.floorT:kind==='nb'?o.nbT:kind==='st'?o.stT:kind==='board'?'Storyboards':o.listT||'').toUpperCase(),T=ov&&ov.T?String(ov.T).toUpperCase():T0;
+ const cont=pageLbl==='continued',Q0=cont?'continued':(kind==='floor'||kind==='both'?o.floorS:kind==='list'?o.listS:kind==='nb'?o.nbS:kind==='st'?o.stS:'')||'',Q=ov&&ov.Q&&!cont?String(ov.Q):Q0,PL=pageLbl&&!cont?String(pageLbl).toUpperCase():'';
  const side=(W-2*M)*.27;let lw=0,rw=0;
  if(pr&&pr.logo&&images[pr.logo]&&pr.lw){const r=Math.min(side/pr.lw,64/pr.lh),w=pr.lw*r,hh=pr.lh*r;h+=`<image href="${images[pr.logo]}" xlink:href="${images[pr.logo]}" x="${M}" y="${top}" width="${w}" height="${hh}" preserveAspectRatio="xMinYMin meet"/>`;ly=top+hh;lw=w;}
  else if(pr&&pr.name){const nm=pr.name.toUpperCase(),fs=fitFs(nm,24,15,side,.7);h+=`<text x="${M}" y="${top+fs}" style="font-size:${fs}px;font-weight:800;letter-spacing:.04em;fill:#3a3b40">${esc(nm)}</text>`;ly=top+fs+6;lw=nm.length*fs*.7;}
@@ -7394,7 +7464,7 @@ function sheetSVG(s,pid,port,full,opt){opt=opt||{};
  const lx=W-M-LW;let y=port?dy0+dH+26:dy0,sl=!sum?'':(port?`<line x1="${M}" x2="${W-M}" y1="${y}" y2="${y}" stroke="#1c1c1e" stroke-width="1.5"/><text x="${M}" y="${y+32}" style="font-size:14px;font-weight:800;letter-spacing:.24em;fill:${acc}">SHOTS</text>`:`<line x1="${lx-22}" x2="${lx-22}" y1="${dy0}" y2="${BOT}" stroke="#d2d2cd" stroke-width="1.5"/><text x="${lx}" y="${y+14}" style="font-size:14px;font-weight:800;letter-spacing:.24em;fill:${acc}">SHOTS</text>`);y+=port?46:28;if(sum)sl+=`<rect x="${lx}" y="${y}" width="${LW}" height="40" fill="#f1f1ef"/><text x="${lx+52}" y="${y+26}" class="x-lh">SHOT</text><text x="${lx+118}" y="${y+26}" class="x-lh">VER</text><text x="${lx+170}" y="${y+26}" class="x-lh">SIZE · TYPE</text>${port?`<text x="${lx+520}" y="${y+26}" class="x-lh">DESCRIPTION</text>`:''}`;y+=40;
  let prev=null;
  for(let ri=0;ri<(sum?R.length:0);ri++){const r=R[ri];if(y>BOT-92&&ri<R.length-1){sl+=`<text x="${lx+14}" y="${y+28}" class="x-lt">+ ${R.length-ri} more in the shot list</text>`;break;}if(y>BOT-46)break;if(prev&&prev!==r.st)sl+=`<line x1="${lx}" x2="${lx+LW}" y1="${y}" y2="${y}" stroke="#9a9a96" stroke-width="2"/>`;prev=r.st;
-  sl+=`<rect x="${lx+14}" y="${y+12}" width="22" height="22" rx="4" fill="${r.st.color}"/><text x="${lx+52}" y="${y+31}" class="x-ls">${esc(shotCode(s,r.it))}</text><text x="${lx+118}" y="${y+31}" class="x-lt">${verCode(s,r.vn)}</text><text x="${lx+170}" y="${y+31}" class="x-lt">${esc(trunc(vlabel(r.m),port?30:24))}</text>${port?`<text x="${lx+520}" y="${y+31}" class="x-lt">${esc(trunc(r.m.desc||'',58))}</text>`:''}<line x1="${lx}" x2="${lx+LW}" y1="${y+46}" y2="${y+46}" stroke="#e3e3df"/>`;y+=46;}
+  sl+=`<rect x="${lx+14}" y="${y+12}" width="22" height="22" rx="4" fill="${r.st.color}"/><text x="${lx+52}" y="${y+31}" class="x-ls">${esc(shotCode(s,r.it))}</text><text x="${lx+118}" y="${y+31}" class="x-lt">${verCode(s,r.vn)}</text><text x="${lx+170}" y="${y+31}" class="x-lt">${esc(trunc(vlabel(r.m),port?30:24))}</text>${port?`<text x="${lx+520}" y="${y+31}" class="x-lt">${esc(trunc(expNoDesc?'':r.m.desc||'',58))}</text>`:''}<line x1="${lx}" x2="${lx+LW}" y1="${y+46}" y2="${y+46}" stroke="#e3e3df"/>`;y+=46;}
  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${RK_DEFS}<style>${SVG_CSS}${SHEET_CSS}${layerCss(s,true)}</style><rect width="${W}" height="${H}" fill="#fff"/>${hd}<clipPath id="cp"><rect x="${dx0}" y="${dy0}" width="${dW}" height="${dH}"/></clipPath><g clip-path="url(#cp)"><g transform="translate(${tx},${ty}) scale(${k})">${bg}${itemsMarkup(s,pid)}</g></g>${sl}</svg>`;
 }
 const SBMAX=5;
@@ -7425,12 +7495,13 @@ function boardPagesSVG(s,o){o=o||{};const port=!!o.port,W=port?1275:1650,H=port?
    h+=`<rect x="${cx}" y="${y-17}" width="18" height="18" rx="3" fill="${r.st.color}"/><text x="${cx+26}" y="${y}" style="font-size:22px;font-weight:800;fill:#141414">${esc(code+ver)}</text>${fk?`<text x="${cx+PW}" y="${y}" text-anchor="end" style="font-size:15px;fill:#8a8b90">${fk}</text>`:''}`;
    const spec=[r.m.size,r.m.type,r.m.angle,r.m.move].map(x=>String(x||'').trim()).filter(Boolean).join('  ·  ');
    if(spec){y+=26;h+=`<text x="${cx}" y="${y}" style="font-size:16px;font-weight:600;fill:#3a3b40">${esc(trunc(spec,fitc+6))}</text>`;}
-   const d=wrapText(String(r.m.desc||'').trim(),fitc).slice(0,spec?2:3);if(d.length&&wrapText(String(r.m.desc||'').trim(),fitc).length>d.length)d[d.length-1]=trunc(d[d.length-1],fitc-1)+'…';
+   const d=wrapText(String(expNoDesc?'':r.m.desc||'').trim(),fitc).slice(0,spec?2:3);if(d.length&&wrapText(String(expNoDesc?'':r.m.desc||'').trim(),fitc).length>d.length)d[d.length-1]=trunc(d[d.length-1],fitc-1)+'…';
    d.forEach(l=>{y+=23;h+=`<text x="${cx}" y="${y}" style="font-size:16px;fill:#2a2a2d">${esc(l)}</text>`;});});
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${RK_DEFS}<style>${SVG_CSS}${SHEET_CSS}</style><rect width="${W}" height="${H}" fill="#fff"/>${h}</svg>`);}
  return out;}
+let expNoDesc=false; /* an export that leaves shot descriptions off */
 function listKit(s,o,W){
- const port=!!o.port,M=48,TW=W-2*M,on=colsOn(s),sb=o.sb!==false&&on.some(c=>c.k==='sb');
+ const port=!!o.port,M=48,TW=W-2*M,on=colsOn(s).filter(c=>!(expNoDesc&&c.k==='desc')),sb=o.sb!==false&&on.some(c=>c.k==='sb');
  const WL={sb:276,shot:92,ver:62,nick:140,size:150,type:150,angle:140,move:140,lens:90,gear:150,cast:160,props:160,time:84,pri:86,flag:66,vfx:62,sfx:62,ss:100,sn:180},WP={sb:204,shot:80,ver:54,nick:116,size:128,type:128,angle:118,move:118,lens:78,gear:126,cast:136,props:136,time:74,pri:76,flag:58,vfx:54,sfx:54,ss:86,sn:150};
  const base=Object.assign({},port?WP:WL),list=on.filter(c=>c.k!=='sb'||sb),wOf=c=>base[c.k]||(port?116:140),core=new Set(['sb','shot','ver','time','pri','flag','vfx','sfx','lens']),hasD=list.some(c=>c.k==='desc'),minD=hasD?(port?240:320):0;
  let fixed=0,scal=0;for(const c of list){if(c.k==='desc')continue;if(core.has(c.k))fixed+=wOf(c);else scal+=wOf(c);}
@@ -7490,6 +7561,23 @@ async function rasterize(svgStr,w,h,scale){
  try{const img=await loadImg(url),c=document.createElement('canvas');c.width=w*scale;c.height=h*scale;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);return c;}
  finally{URL.revokeObjectURL(url);}
 }
+/* the words of an exported page, laid invisibly over its picture so the PDF can be searched and its text copied */
+let svgTS=null;
+function svgTextLayer(doc,svg,W,pw){const k=pw/W;
+ if(!svgTS){svgTS={};for(const m of (SVG_CSS+SHEET_CSS).matchAll(/([^{}]+)\{([^}]*)\}/g)){const fs=/font-size:\s*([\d.]+)px/.exec(m[2]),an=/text-anchor:\s*(\w+)/.exec(m[2]);if(!fs&&!an)continue;
+   for(const sel of m[1].split(',')){const c=/^\s*(?:text)?\.([\w-]+)\s*$/.exec(sel);if(c)svgTS[c[1]]=Object.assign(svgTS[c[1]]||{},fs?{fs:+fs[1]}:{},an?{an:an[1]}:{});}}}
+ let d;try{d=new DOMParser().parseFromString(svg,'image/svg+xml');}catch(e){return 0;}let n=0;
+ doc.setFont('helvetica','normal');doc.setTextColor(0);
+ for(const t of d.querySelectorAll('text')){if(t.hasAttribute('transform')||t.closest('g[transform],defs,clipPath,pattern,symbol'))continue;
+  const str=(t.textContent||'').replace(/\s+/g,' ').trim();if(!str)continue;
+  let fs=16,an='start';for(const c of (t.getAttribute('class')||'').split(/\s+/)){const r=svgTS[c];if(r){if(r.fs)fs=r.fs;if(r.an)an=r.an;}}
+  const st=t.getAttribute('style')||'',m=/font-size:\s*([\d.]+)px/.exec(st),fa=parseFloat(t.getAttribute('font-size')),ta=t.getAttribute('text-anchor')||(/text-anchor:\s*(\w+)/.exec(st)||[])[1];
+  if(m)fs=+m[1];else if(fa)fs=fa;if(ta)an=ta;
+  const x=parseFloat(t.getAttribute('x')),y=parseFloat(t.getAttribute('y'));if(!isFinite(x)||!isFinite(y))continue;
+  /* straight quotes and plain dashes, so a search typed on a keyboard finds them; anything the PDF's plain font has no letter for becomes ? */
+  const plain=str.replace(/[\u2018\u2019\u2032]/g,"'").replace(/[\u201C\u201D\u2033]/g,'"').replace(/[\u2013\u2014\u2212]/g,'-').replace(/\u2026/g,'...').replace(/[^\x20-\x7E\xA0-\xFF]/g,'?');
+  try{doc.setFontSize(Math.max(2,fs*k));doc.text(plain,x*k,y*k,{renderingMode:'invisible',align:an==='end'?'right':an==='middle'?'center':'left'});n++;}catch(e){}}
+ return n;}
 let jspdfP=null;
 function loadJsPDF(){if(window.jspdf)return Promise.resolve(window.jspdf);if(!jspdfP)jspdfP=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=window.BB_JSPDF||(location.protocol==='file:'?'jspdf.umd.min.js':'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');sc.onload=()=>res(window.jspdf);sc.onerror=()=>{jspdfP=null;rej(new Error('load'));};document.head.appendChild(sc);});return jspdfP;}
 const fname=s=>(`Scene ${s.number||''} ${s.title||''}`).replace(/[^\w\- ]+/g,'').replace(/\s+/g,' ').trim()||'Scene';
@@ -7501,27 +7589,29 @@ function folderScenes(fid){const kids=P.folders.filter(f=>f.parent===fid).sort((
  return [...P.scenes.filter(x=>!x.trashed&&!x.tpl&&x.folder===fid).sort(sceneCmp),...kids.flatMap(f=>folderScenes(f.id))];}
 function expOpts(){const o=Object.assign({scope:'scene',nb:true,q:false,st:true,dia:true,list:true,sb:true,bd:false,port:false,master:true,split:true,zoom:false,layout:'full'},P.ui.exp||{});if(o.fa==null)o.fa=true;if(o.pf==null)o.pf=true;if(o.nl==null)o.nl=true;return o;}
 async function exportPDF(o){
- o=Object.assign(expOpts(),o||{});const cur=scene(),fid=sFolder(cur),folder=o.scope==='folder'&&fid;
- const list=folder?expList(fid):[cur],W=o.port?1275:1650,H=o.port?1650:1275;
+ o=Object.assign(expOpts(),o||{});const cur=scene(),fid=sFolder(cur),day=o.dayx||null,folder=day?true:o.scope==='folder'&&fid;
+ const list=day?day.list:folder?expList(fid):[cur],W=o.port?1275:1650,H=o.port?1650:1275;
  if(!o.dia&&!o.list&&!o.nb&&!o.st&&!o.bd){toast('Pick at least one thing to include.');return;}
  toast('Building PDF…');
  try{const {jsPDF}=await loadJsPDF(),doc=new jsPDF({orientation:o.port?'portrait':'landscape',unit:'pt',format:'letter'});let n=0,used=0;
-  expProd=o.prod===undefined?undefined:(o.prod||null);
-  const np=()=>{if(n++)doc.addPage('letter',o.port?'portrait':'landscape');};
+  expProd=o.prod===undefined?undefined:(o.prod||null);expNoDesc=!!o.nodesc;
+  const np=()=>{if(n++)doc.addPage('letter',o.port?'portrait':'landscape');};let cover=0;
+  if(day){for(const sv of dayCoverSVG(day,o)){const c=await rasterize(sv,W,H,1.4);np();doc.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,o.port?612:792,o.port?792:612);try{svgTextLayer(doc,sv,W,o.port?612:792);}catch(e){console.error(e);}}cover=n;}
   for(let si=0;si<list.length;si++){const sc=list[si],written=(o.nb||o.st)&&(txHas(sc)||(o.nb&&!!String(sc.synopsis||'').trim()));if(folder&&!sc.items.length&&!written)continue;
    let svgs=[],tp=0;if(written)tp=await pdfTextPages(doc,sc,o,np);const keep=P.sceneId,frK=frForce;P.sceneId=sc.id;frForce=o.pf!==false;nightForce=o.nl===false?false:null;
    try{if(!sc.items.length&&written){}else if(!o.dia&&!o.list){}else if(o.layout==='compact'){svgs=compactPagesSVG(sc,o);}else{if(o.dia){const n=sc.pages.length;if(n<2)svgs.push(sheetSVG(sc,sc.pages[0].id,o.port,o.list,{fa:o.fa}));else{
      const box=o.zoom?null:planBox(sc,'all',o.fa),master=o.master||!o.split;
      if(master)svgs.push(sheetSVG(sc,'all',o.port,o.list,{label:`Master  ·  every move, all ${n} pages`,fa:o.fa}));
-     if(o.split)sc.pages.forEach((pg,i)=>{const nm=String(pg.name||'').trim(),lbl=`Page ${i+1} of ${n}`+(nm&&!/^page\s*\d+$/i.test(nm)?`  ·  ${nm}`:'');svgs.push(sheetSVG(sc,pg.id,o.port,o.list,{label:lbl,box:box||planBox(sc,pg.id,o.fa),fa:o.fa}));});}}if(o.list)svgs.push(...listPagesSVG(sc,{port:o.port,sb:o.sb}));}if(o.bd)svgs.push(...boardPagesSVG(sc,{port:o.port}));}finally{P.sceneId=keep;frForce=frK;nightForce=null;}
+     if(o.split)sc.pages.forEach((pg,i)=>{const nm=String(pg.name||'').trim(),lbl=`Page ${i+1} of ${n}`+(nm&&!/^page\s*\d+$/i.test(nm)?`  ·  ${nm}`:'');svgs.push(sheetSVG(sc,pg.id,o.port,o.list,{label:lbl,box:box||planBox(sc,pg.id,o.fa),fa:o.fa}));});}}if(o.list)svgs.push(...listPagesSVG(sc,{port:o.port,sb:o.sb}));}if(o.bd==='auto'?!(o.list&&o.sb!==false&&colsOn(sc).some(c=>c.k==='sb')):o.bd)svgs.push(...boardPagesSVG(sc,{port:o.port}));}finally{P.sceneId=keep;frForce=frK;nightForce=null;}
    if(svgs.length||tp)used++;
-   for(const sv of svgs){const c=await rasterize(sv,W,H,1.4);np();doc.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,o.port?612:792,o.port?792:612);}
+   for(const sv of svgs){const c=await rasterize(sv,W,H,1.4);np();doc.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,o.port?612:792,o.port?792:612);try{svgTextLayer(doc,sv,W,o.port?612:792);}catch(e){console.error(e);}}
    if(folder&&list.length>2)toast(`Building PDF… scene ${si+1} of ${list.length}`);
   }
-  expProd=undefined;if(!n){toast(o.dia?'Nothing to export yet.':o.list?'No shots to put in the shot list yet.':o.bd?'No storyboard frames yet. Add them in the shot list.':'Nothing is written in the Breakdown or Strategy yet.');return;}
+  expProd=undefined;expNoDesc=false;if(day&&n===cover){toast('This day’s scenes have nothing to export yet.');return;}if(!n){toast(o.dia?'Nothing to export yet.':o.list?'No shots to put in the shot list yet.':o.bd?'No storyboard frames yet. Add them in the shot list.':'Nothing is written in the Breakdown or Strategy yet.');return;}
+  if(day){await save(`${day.folder||'Day'} - ${day.name} - ${day.dir?'Director copy':'Crew copy'}`.replace(/[^\w\- ]+/g,'').replace(/\s+/g,' ').trim()+'.pdf',doc.output('blob'));return;}
   const base=folder?(fById(fid).name||'Folder').replace(/[^\w\- ]+/g,'').trim()||'Folder':fname(cur);
   {const pk=[['nb','Breakdown'],['st','Strategy'],['dia','Floor Plan'],['list','Shot List'],['bd','Storyboards']].filter(([k])=>o[k]);await save(base+(pk.length===1?' - '+pk[0][1]:'')+'.pdf',doc.output('blob'));}
- }catch(e){toast('PDF export failed. Try the image instead.');}finally{expProd=undefined;}
+ }catch(e){console.error(e);toast('PDF export failed. Try the image instead.');}finally{expProd=undefined;expNoDesc=false;}
 }
 function prodSaved(){commit();detectChanges();saveLocal();schedulePush();}
 function folderPathName(f){const out=[];let x=f,g=0;while(x&&g++<40){out.unshift(x.name);x=x.parent?fById(x.parent):null;}return out.join(' › ');}
@@ -8590,7 +8680,7 @@ function render(opt){opt=opt||{};refreshLists();if((mode==='list'||mode==='split
 function stgFill(){const el=document.getElementById('stgTxt');if(!el||!navigator.storage||!navigator.storage.estimate)return;const f=n=>n>=1073741824?(n/1073741824).toFixed(n<10737418240?1:0)+' GB':n>=1048576?(n/1048576).toFixed(n<10485760?1:0)+' MB':Math.max(1,Math.round(n/1024))+' KB';
  navigator.storage.estimate().then(e=>{if(e&&e.quota&&document.body.contains(el))el.textContent=` Storage on this device: ${f(e.usage||0)} used of about ${f(e.quota)} the app can use.`;}).catch(()=>{});}
 let started=false;
-function start(big,bigSync){if(started)return;started=true;copyInit();load(big,bigSync);let nmFix=[];try{nmFix=fixNames();}catch(e){console.error(e);}setTimeout(keysDraw,0);if(ftInstall())saveLocal();cur=snapshot();if(P.ui.vm==='scout'){scoutOn=true;$('#app').classList.add('scout-on');document.querySelectorAll('#mdSw [data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md==='scout'));}else if(P.ui.setOn){setOn=true;$('#app').classList.add('set-on');document.querySelectorAll('#mdSw [data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md==='set'));}render();initImages();if(!setOn&&!scoutOn&&(P.ui.mode==='list'||P.ui.mode==='nb'||P.ui.mode==='st'))setMode(P.ui.mode);requestAnimationFrame(fit);initSync();try{const u=+sessionStorage.getItem('blk.updT')||0;sessionStorage.removeItem('blk.updT');if(u&&Date.now()-u<20000)setTimeout(()=>toast('Updated to the newest version.'),900);}catch(e){}if(nmFix.length){saveLocal();setTimeout(()=>toast(`${nmFix.length===1?'One name was':nmFix.length+' names were'} used twice in the same folder, so a number was added: ${nmFix.slice(0,3).map(n=>'“'+n+'”').join(', ')}${nmFix.length>3?' and '+(nmFix.length-3)+' more':''}.`),1500);}
+function start(big,bigSync){if(started)return;started=true;copyInit();load(big,bigSync);let nmFix=[];try{nmFix=fixNames();}catch(e){console.error(e);}setTimeout(keysDraw,0);if(ftInstall())saveLocal();cur=snapshot();if(P.ui.vm==='scout'||(!P.ui.setOn&&scene().scout&&!scene().tpl)){scoutOn=true;P.ui.vm='scout';try{if(scene().scout&&!scene().tpl&&!scBase())scWay(scene());}catch(e){}$('#app').classList.add('scout-on');document.querySelectorAll('#mdSw [data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md==='scout'));}else if(P.ui.setOn){setOn=true;$('#app').classList.add('set-on');document.querySelectorAll('#mdSw [data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md==='set'));}render();initImages();if(!setOn&&!scoutOn&&(P.ui.mode==='list'||P.ui.mode==='nb'||P.ui.mode==='st'))setMode(P.ui.mode);requestAnimationFrame(fit);initSync();try{const u=+sessionStorage.getItem('blk.updT')||0;sessionStorage.removeItem('blk.updT');if(u&&Date.now()-u<20000)setTimeout(()=>toast('Updated to the newest version.'),900);}catch(e){}if(nmFix.length){saveLocal();setTimeout(()=>toast(`${nmFix.length===1?'One name was':nmFix.length+' names were'} used twice in the same folder, so a number was added: ${nmFix.slice(0,3).map(n=>'“'+n+'”').join(', ')}${nmFix.length>3?' and '+(nmFix.length-3)+' more':''}.`),1500);}
  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}}
 /* the scenes are in the large store but it will not open: never start empty over them without being told to */
 /* ---------- one working copy per browser ----------
