@@ -621,6 +621,27 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 #libGhost{position:fixed;z-index:90;pointer-events:none;display:flex;align-items:center;gap:8px;max-width:260px;padding:8px 12px;border-radius:10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.22);font-size:13.5px;font-weight:600}
 #libGhost svg{flex:none;width:18px;height:18px}
 #libGhost span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* phone size: one thing at a time, and a row of buttons at the bottom to switch */
+#phSw{display:none}
+@media (max-width:640px){
+ #app,#app.side-off,#app.set-on,#app.set-on.side-off,#app.scout-on,#app.scout-on.side-off{grid-template-columns:minmax(0,1fr) 0;grid-template-rows:50px minmax(0,1fr) auto auto}
+ #top #tabs,#top .sp{display:none}
+ #top #sceneBtn{flex:1 1 0;max-width:none}
+ #phSw{display:flex;grid-column:1/-1;grid-row:4;margin:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+ #phSw[hidden]{display:none}
+ #phSw button{flex:1 1 0;height:42px;padding:0 4px;font-size:14.5px;font-weight:600}
+ #app.set-on #main,#app.scout-on #main{grid-row:2;grid-column:1}
+ #app.set-on #setPanel,#app.scout-on #scoutPanel{grid-row:2;grid-column:1;z-index:25;border:0} /* above everything on the plan underneath it (the message shown while choosing a place sits high) */
+ #app.scout-on.ph-plan:not(.scout-pick) #scoutPanel{display:none}
+ #app.set-on.ph-plan #setPanel{grid-row:3;overflow:visible;padding:8px 10px 0;gap:0;border-top:1px solid var(--line)}
+ #app.set-on.ph-plan #setPanel>:not(.setTop){display:none}
+ #app.set-on.ph-plan #setPanel .setTop{position:static;padding:8px 10px;gap:6px}
+ #app.set-on.ph-plan #setPanel .sst{display:none}
+ #app.scout-on #scoutPanel>[data-sc=back],#app.scout-on #scoutPanel>.setH{order:-3}
+ #app.scout-on #scoutPanel>.phf{order:-2}
+ #app.scout-pick #wrap::after{display:none} /* the list of places covers the plan here; its message is not needed */
+ .lvh{flex-wrap:wrap;gap:8px;padding:12px 12px 10px}.lvh>div:first-child{flex:1 1 100%!important}.lvh h2{font-size:20px}
+}
 </style>
 </head>
 <body>
@@ -680,6 +701,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
  </aside>
  <aside id="setPanel"></aside>
  <aside id="scoutPanel"></aside>
+  <nav id="phSw" class="seg" aria-label="What is on screen" hidden></nav>
 </div>
 <div id="modal" hidden></div>
 <div id="toast"></div>
@@ -691,7 +713,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126042042';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126051206';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2858,7 +2880,7 @@ $('#mdSw').addEventListener('click',e=>{const b=e.target.closest('[data-md]');if
 $('#setPanel').addEventListener('click',e=>{const s=scene();
  {const a=document.activeElement;if(a&&a.id==='setNote'&&e.target.closest('button'))a.blur();}
  const sf=e.target.closest('[data-sf]');if(sf){setFrameView(+sf.dataset.sf);return;}
- const v=e.target.closest('[data-sv]');if(v){const k=v.dataset.sv;if(k==='ready'){readyDialog();return;}if(k==='todo'){todoDialog();return;}if(k==='day'){const rt=topFolder(sFolder(s));if(rt)dayDialog(rt.id,dayKey(s),dayName(s),renderSet);return;}if(k==='prev')setGo(-1);else if(k==='next')setGo(1);else if(k==='play'){play();renderSet();}else if(k==='psc'||k==='nsc'){const sib=setSibs(s),i=sib.indexOf(s)+(k==='nsc'?1:-1);if(sib[i]){openScene(sib[i].id);const r=rowsOf(scene())[0];sel=r?{id:r.it.id,mark:r.vi}:null;render();}}return;}
+ const v=e.target.closest('[data-sv]');if(v){const k=v.dataset.sv;if(k==='play')phGo();if(k==='ready'){readyDialog();return;}if(k==='todo'){todoDialog();return;}if(k==='day'){const rt=topFolder(sFolder(s));if(rt)dayDialog(rt.id,dayKey(s),dayName(s),renderSet);return;}if(k==='prev')setGo(-1);else if(k==='next')setGo(1);else if(k==='play'){play();renderSet();}else if(k==='psc'||k==='nsc'){const sib=setSibs(s),i=sib.indexOf(s)+(k==='nsc'?1:-1);if(sib[i]){openScene(sib[i].id);const r=rowsOf(scene())[0];sel=r?{id:r.it.id,mark:r.vi}:null;render();}}return;}
  const q=e.target.closest('[data-ss]');if(q){const r=setRow(s);if(!r)return;if(q.dataset.ss==='plan')delete r.m.ss;else r.m.ss=q.dataset.ss;commit();return;}
  const w=e.target.closest('[data-sr]');if(w){const [id,vi]=w.dataset.sr.split('|');sel={id,mark:+vi};const it=itemById(id);if(it&&!vis(it,s)){s.pageId=(it.pgs&&it.pgs[0])||'all';saveLocal();render();}else{renderUI();renderSet();}}});
 $('#setPanel').addEventListener('input',e=>{if(e.target.id!=='setNote')return;const r=setRow(scene());if(!r)return;const v=e.target.value;if(v)r.m.sn=v;else delete r.m.sn;clearTimeout(setNoteT);setNoteT=setTimeout(()=>{setNoteT=null;commit({insp:false});},700);updateStatus();});
@@ -2884,7 +2906,7 @@ $('#scoutPanel').addEventListener('click',e=>{const s=scene(),b=e.target.closest
  else if(k==='back'){if(base){P.sceneId=base.id;sel=null;msel=null;endTool();saveLocal();render();}}
  else if(k==='attach'){if(base&&s.scout){s.sfor=scKeyOf(base);commit();toast('Attached to '+scName(base)+'.');}}
  else if(k==='del'){if(s.scout)confirmBox('Delete this place?','“'+(s.title||'This place')+'” goes to the Trash with its photos, sketch and notes. Scenes that already use its set keep it.','Delete',()=>{const id=s.id;if(base)P.sceneId=base.id;trashScenes([id]);sel=null;msel=null;commit();toast('Place deleted. It is in the Trash if you want it back.');});}
- else if(k==='pen')$('#bPen').click();else if(k==='add')$('#bAdd').click();else if(k==='cam')quickCam(s);else if(k==='link')scoutLinkDialog(s);});
+ else if(k==='pen'){phGo();$('#bPen').click();}else if(k==='add'){phGo();$('#bAdd').click();}else if(k==='cam'){phGo();quickCam(s);}else if(k==='link')scoutLinkDialog(s);});
 $('#scoutPanel').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='scNew'){e.preventDefault();const b=$('#scoutPanel [data-sc=create]');if(b)b.click();}});
 $('#scoutPanel').addEventListener('change',async e=>{const s=scene();
  if(e.target.id==='scPhoto'){const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
@@ -5538,7 +5560,7 @@ function scoutLinkDialog(s){const L=scoutLoc(s);if(!L)return;const r=rootKey(s),
   ${s.items.some(i=>i.type==='cam')?'<label class="imopt"><input type="checkbox" id="lkCam"> Also copy the camera ideas into them</label>':''}<div class="btns end"><button data-x>Cancel</button><button class="pri" id="lkOk">Link</button></div>`,card=>{
   card.querySelector('#lkOk').onclick=()=>{const cb=card.querySelector('#lkCam'),cc=cb&&cb.checked;let n=0,k=0;for(const b of card.querySelectorAll('[data-s]:checked')){const x=P.scenes.find(q=>q.id===b.dataset.s);if(!x)continue;if(x.loc&&x.loc!==L.id)locUnlink(x);locLink(x,L,true);n++;if(cc)k+=copyIdeas(s,x);}
    closeModal();if(!n)return;commit();toast(`Linked ${plural(n,'scene')} to ${L.name}${k?`, with ${plural(k,'camera idea')}`:''}. Undo takes it back.`);};});}
-function renderScout(){const el=$('#scoutPanel');if(!el)return;$('#app').classList.toggle('scout-pick',scoutOn&&!scene().scout);if(!scoutOn)return;const a=document.activeElement;if(a&&el.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type!=='file')))return;
+function renderScout(){const el=$('#scoutPanel');if(!el)return;$('#app').classList.toggle('scout-pick',scoutOn&&!scene().scout);try{phDraw();}catch(e){}if(!scoutOn)return;const a=document.activeElement;if(a&&el.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type!=='file')))return;
  const s=scene(),base=scBase(),row=x=>`<button data-sco="${x.id}"><b>${esc(x.title||'Place')}</b><span>${plural(scoutPins(x).length,'photo')}${base&&x.loc&&scScenes(base).some(y=>y.loc===x.loc)?' · in use':''}</span></button>`;
  if(!s.scout){ /* choosing: this scene's location and the places being considered for it */
   const sc=scScenes(s),pl=scPlaces(s),lo=scLoose(s),nums=sc.map(x=>x.number).filter(Boolean);
@@ -5551,8 +5573,8 @@ function renderScout(){const el=$('#scoutPanel');if(!el)return;$('#app').classLi
  el.innerHTML=`${base?'<button class="sm" data-sc="back" style="align-self:flex-start">‹ Places</button>':''}<div class="setH"><div><b>${esc(s.title||'Place')}</b><small>${esc(loose?'Not attached to a scene yet':forN?'A place for '+forN:projName(s))}</small></div></div>
  <label class="fld">Name of the place<input id="scName" value="${esc(s.title||'')}" autocomplete="off"></label>
  <label class="fld">Notes<textarea id="scNote" rows="4" placeholder="Access, parking, power, sound, light, restrictions…">${esc(s.snote||'')}</textarea></label>
- <div class="setSec">Photos</div><div class="scPh">${pins.map(p=>`<button data-ph="${p.id}" title="${esc(p.cap||'Photo')}">${images[p.img]?`<img alt="" src="${images[p.img]}">`:'<span class="mut">…</span>'}</button>`).join('')}<label class="scAdd">＋ Photo<input type="file" accept="image/*" id="scPhoto" hidden></label></div>
- <p class="sctip">Each photo drops a pin on the plan. Drag it to where you stood and turn it to face the way the camera pointed.</p>
+ <div class="setSec phf">Photos</div><div class="scPh phf">${pins.map(p=>`<button data-ph="${p.id}" title="${esc(p.cap||'Photo')}">${images[p.img]?`<img alt="" src="${images[p.img]}">`:'<span class="mut">…</span>'}</button>`).join('')}<label class="scAdd">＋ Photo<input type="file" accept="image/*" id="scPhoto" hidden></label></div>
+ <p class="sctip phf">Each photo drops a pin on the plan. Drag it to where you stood and turn it to face the way the camera pointed.</p>
  <div class="setSec">Sketch and set</div><p class="sctip">Draw the space with the pen, or build it with walls and furniture. Both become the place’s set.</p><div class="snav"><button data-sc="pen">Sketch</button><button data-sc="add">Walls and furniture</button></div>
  <div class="setSec">Camera ideas</div>${rows.length?`<div class="setList">${rows.map(r=>`<button data-sr="${r.it.id}|${r.vi}"${sel&&sel.id===r.it.id?' class="on"':''}><b>${esc(rowCode(s,r))}</b><span>${esc(r.m.desc||vlabel(r.m)||'Tap the camera on the plan to add a note')}</span></button>`).join('')}</div>`:''}<button class="sm" data-sc="cam" style="align-self:flex-start">＋ Camera idea</button>
  <div class="setSec">Scenes using this place</div>${linked.length?`<div class="setList">${linked.map(x=>`<button data-go="${x.id}"><b>${esc(x.number||'')}</b><span>${esc(x.title||x.heading||'')}</span></button>`).join('')}</div>`:'<p class="sctip">None yet.</p>'}
@@ -5562,7 +5584,7 @@ function renderScout(){const el=$('#scoutPanel');if(!el)return;$('#app').classLi
 function setView(v){const was=setOn?'set':scoutOn?'scout':'prep';
  if(v===was){render();return;}
  if(was==='scout'&&scene().scout&&P.ui.prevScene&&P.scenes.some(x=>x.id===P.ui.prevScene&&!x.trashed&&!x.scout)){P.sceneId=P.ui.prevScene;sel=null;}
- setOn=v==='set';scoutOn=v==='scout';if(setOn)P.ui.setOn=true;else delete P.ui.setOn;if(v==='prep')delete P.ui.vm;else P.ui.vm=v;
+ phPlan=false;setOn=v==='set';scoutOn=v==='scout';if(setOn)P.ui.setOn=true;else delete P.ui.setOn;if(v==='prep')delete P.ui.vm;else P.ui.vm=v;
  const A=$('#app');A.classList.toggle('set-on',setOn);A.classList.toggle('scout-on',scoutOn);document.querySelectorAll('#mdSw [data-md]').forEach(b=>b.classList.toggle('on',b.dataset.md===v));
  endTool();closePop();msel=null;if(v!=='prep'&&mode!=='diagram')setMode('diagram');
  if(scoutOn&&!scene().scout){P.ui.prevScene=P.sceneId;sel=null;}
@@ -5570,6 +5592,20 @@ function setView(v){const was=setOn?'set':scoutOn?'scout':'prep';
  if(setOn){inspOpen=false;if(scene().scout&&P.ui.prevScene&&P.scenes.some(x=>x.id===P.ui.prevScene&&!x.trashed)){P.sceneId=P.ui.prevScene;}
   if(scene().scout){const alt=liveScenes().find(x=>!x.scout&&!x.tpl&&rootKey(x)===rootKey(scene()));if(alt)P.sceneId=alt.id;} /* Set is for scenes, never a scout */const it=sel&&itemById(sel.id);if(!it||it.type!=='cam'){const r=rowsOf(scene())[0];sel=r?{id:r.it.id,mark:r.vi}:null;}}
  saveLocal();render();requestAnimationFrame(fit);}
+/* ---------- phone size: one thing at a time. The row of buttons at the bottom switches: Prep's four views; Place or Plan in Scout; Shot or Plan in Set ---------- */
+let phPlan=false,phSig='';
+const phOn=()=>{try{return matchMedia('(max-width:640px)').matches;}catch(e){return false;}};
+function phDraw(){const el=$('#phSw'),A=$('#app');if(!el)return;
+ const k=setOn?'set':scoutOn?(scene().scout?'scout':'pick'):'prep',cur=k==='prep'?(mode==='nb'?'nb':mode==='st'?'st':mode==='list'?'list':'dia'):(phPlan?'plan':'words');
+ A.classList.toggle('ph-plan',phPlan&&(k==='set'||k==='scout'));
+ const B=k==='prep'?[['nb','Breakdown'],['st','Strategy'],['dia','Plan'],['list','Shots']]:k==='set'?[['words','Shot'],['plan','Plan']]:k==='scout'?[['words','Place'],['plan','Plan']]:[];
+ const sig=k+'|'+cur;if(sig===phSig)return;phSig=sig;el.hidden=!B.length;
+ el.innerHTML=B.map(([v,l])=>`<button data-phv="${v}"${v===cur?' class="on" aria-current="true"':''}>${l}</button>`).join('');}
+/* a panel button that acts on the floor plan: on a phone, go to the plan first */
+function phGo(){if(!phOn()||phPlan||!(setOn||scoutOn))return;phPlan=true;phDraw();requestAnimationFrame(()=>{try{fit();}catch(e){}});}
+$('#phSw').addEventListener('click',e=>{const b=e.target.closest('[data-phv]');if(!b)return;const v=b.dataset.phv,tab={nb:'#mNb',st:'#mSt',dia:'#mDia',list:'#mList'}[v];
+ if(tab){$(tab).click();phDraw();return;}
+ phPlan=v==='plan';phDraw();requestAnimationFrame(()=>{try{fit();}catch(e){}});});
 function setSet(on){setView(on?'set':'prep');}
 function setRow(s,rows){rows=rows||rowsOf(s);const it=sel&&itemById(sel.id);if(it&&it.type==='cam'){const v=verStart(it,clamp(sel.mark||0,0,it.marks.length-1)),r=rows.find(q=>q.it.id===it.id&&q.vi===v);if(r)return r;}return rows[0]||null;}
 function setGo(d){const s=scene(),rows=rowsOf(s),r=setRow(s,rows);if(!r)return;const i=clamp(rows.indexOf(r)+d,0,rows.length-1);sel={id:rows[i].it.id,mark:rows[i].vi};renderUI();renderSet();}
@@ -8693,7 +8729,7 @@ addEventListener('keydown',e=>{
  else if((e.key==='Delete'||e.key==='Backspace')&&sel&&sel.id!=='__bg'&&!sel.lab){const it=itemById(sel.id);if(it&&!it.locked){e.preventDefault();if(it.type==='cam'&&sel.pan)objAct('pdel');else if(it.marks&&it.marks.length>1&&(it.type!=='cam'||nVer(it)>1))act('delMark',{dataset:{}});else deleteSel(true);}}
 });
 
-function render(opt){opt=opt||{};refreshLists();if((mode==='list'||mode==='split')&&opt.list!==false)renderList();renderDocs();renderTop();renderCanvas();renderPageBits();renderShots();if(opt.insp!==false)renderInsp();updateStatus();if(setOn)renderSet();if(scoutOn)renderScout();try{renderLib();}catch(e){console.error(e);}}
+function render(opt){opt=opt||{};refreshLists();if((mode==='list'||mode==='split')&&opt.list!==false)renderList();renderDocs();renderTop();renderCanvas();renderPageBits();renderShots();if(opt.insp!==false)renderInsp();updateStatus();if(setOn)renderSet();if(scoutOn)renderScout();try{phDraw();}catch(e){}try{renderLib();}catch(e){console.error(e);}}
 
 function stgFill(){const el=document.getElementById('stgTxt');if(!el||!navigator.storage||!navigator.storage.estimate)return;const f=n=>n>=1073741824?(n/1073741824).toFixed(n<10737418240?1:0)+' GB':n>=1048576?(n/1048576).toFixed(n<10485760?1:0)+' MB':Math.max(1,Math.round(n/1024))+' KB';
  navigator.storage.estimate().then(e=>{if(e&&e.quota&&document.body.contains(el))el.textContent=` Storage on this device: ${f(e.usage||0)} used of about ${f(e.quota)} the app can use.`;}).catch(()=>{});}
