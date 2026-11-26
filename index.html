@@ -641,6 +641,45 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
  #app.scout-on #scoutPanel>.phf{order:-2}
  #app.scout-pick #wrap::after{display:none} /* the list of places covers the plan here; its message is not needed */
  .lvh{flex-wrap:wrap;gap:8px;padding:12px 12px 10px}.lvh>div:first-child{flex:1 1 100%!important}.lvh h2{font-size:20px}
+ /* the shot list: the same table, a card per shot */
+ #listView .slw{overflow-x:visible!important}
+ #listView table.sl{display:block;min-width:0!important;width:auto}
+ #listView table.sl thead{display:none}
+ #listView table.sl tbody{display:flex;flex-direction:column;gap:10px;padding:2px 12px 18px}
+ #listView table.sl tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px;align-items:start;background:#fff;border:1px solid #dfded8;border-radius:12px;padding:6px 10px 10px}
+ #listView table.sl tr.ss{margin-top:6px}
+ #listView table.sl tr.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+ #listView table.sl tr.pick{background:#eef3fd}
+ #listView table.sl td{display:block;width:auto!important;min-width:0;border:0!important;padding:0;background:none!important}
+ #listView table.sl td[data-c=sb],#listView table.sl td[data-c=desc],#listView table.sl td[data-c=sn],#listView table.sl td[data-c=_h]{grid-column:1/-1}
+ #listView table.sl td[data-c=shot],#listView table.sl td[data-c=_h]{order:-3;display:flex;align-items:center;gap:6px}
+ #listView table.sl td[data-c=shot]{grid-column:1}
+ #listView table.sl td[data-c=ver]{order:-3;grid-column:2;display:flex;justify-content:flex-end;align-items:center;color:#55565b}
+ #listView table.sl td[data-c=ver]::before{content:"Version";font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#77787d;margin-right:2px}
+ #listView table.sl td[data-c=sb]{order:-2;margin:2px 0 4px}
+ #listView table.sl td[data-c=sb] .sbw,#listView table.sl td[data-c=sb] .sb{width:min(100%,240px)}
+ #listView table.sl td:not([data-c=shot]):not([data-c=ver]):not([data-c=sb]):not([data-c=_h])::before{content:attr(data-l);display:block;margin:8px 0 3px 2px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#77787d}
+ #listView table.sl select,#listView table.sl input:not([type=checkbox]),#listView table.sl textarea{border-color:#dcdbd5;background:#fff}
+ #listView table.sl textarea{min-height:64px}
+ #listView table.sl .shotno{font-size:19px;padding:6px 2px}
+ #listView table.sl .grip{margin-left:auto;padding:8px 6px;font-size:18px;touch-action:none}
+}
+/* a phone turned sideways: wide enough for the plan and the panel side by side, as on the iPad */
+@media (min-width:641px) and (max-width:999px) and (max-height:520px){
+ #app.set-on,#app.set-on.side-off,#app.scout-on,#app.scout-on.side-off{grid-template-columns:minmax(0,1fr) min(300px,42vw);grid-template-rows:50px minmax(0,1fr)}
+ #app.set-on #setPanel,#app.scout-on #scoutPanel{grid-column:2;grid-row:2;border-top:0;border-left:1px solid var(--line)}
+ #app.set-on #setPanel .setTop{position:sticky}
+ #app.scout-on #scoutPanel>[data-sc=back],#app.scout-on #scoutPanel>.setH{order:-3}
+ #app.scout-on #scoutPanel>.phf{order:-2}
+ #top .seg button{padding:0 7px;font-size:12.5px}
+ #top #sceneBtn{max-width:20vw}
+ #top .brand{display:none}
+ #setPanel .snav button,#setPanel .sst button{padding:0 4px;font-size:13px;white-space:nowrap}
+}
+@media (min-width:641px) and (max-width:760px) and (max-height:520px){
+ #top{gap:5px;padding:0 8px}
+ #top #sceneBtn{max-width:15vw;padding:0 7px}
+ #top .seg button{padding:0 5px;font-size:12px}
 }
 </style>
 </head>
@@ -713,7 +752,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126051206';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126060942';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -6696,7 +6735,7 @@ function renderList(){
   const pbar=cols.some(c=>c.k==='pri')?`<div class="slpf"><span>Show</span>${[['','All'],['A','A only'],['AB','A and B']].map(([v,l])=>`<button class="sm${pf===v?' on':''}" data-pf="${v}" aria-pressed="${pf===v}">${l}</button>`).join('')}${pf?`<span class="mut">${rows.length} of ${rows0.length} shots</span>`:''}</div>`:'';
   const minW=cols.reduce((a,c)=>a+(c.k==='desc'?300:(CW[c.k]||150)),0);lv.innerHTML=head+pbar+(tot?`<p class="sltot">Estimated time for these shots: <b>${minTxt(tot)}</b>${tNo?` <span class="mut">· ${tNo} of ${rows.length} ${tNo===1?'has':'have'} no estimate</span>`:''}</p>`:'')+(rows.length?'':'<div class="lv-empty">No shots at this priority. Choose All to see every shot.</div>')+cols.filter(c=>c.cc).map(c=>`<datalist id="dl-cx-${c.cc.id}">${[...(cxU[c.cc.id]||[])].filter(Boolean).sort().map(v=>`<option value="${esc(v)}">`).join('')}</datalist>`).join('')
   +`<div class="slw" style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="sl" style="min-width:${minW}px"><thead><tr>${cols.map(c=>c.k==='_h'?'<th></th>':`<th data-ck="${esc(c.k)}" title="Drag sideways to move this column">${esc(c.l)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>{const k=`data-id="${r.it.id}" data-v="${r.vi}"`,on=sel&&sel.id===r.it.id&&(sel.mark||0)===r.vi;
-  return `<tr class="${r.first?'ss':''}${on?' on':''}${r.m.ss?' stat-'+r.m.ss:''}${slMulti.has(r.it.id+'|'+r.vi)?' pick':''}" data-id="${r.it.id}" data-v="${r.vi}">${cols.map(c=>`<td${c.k==='desc'?'':` style="width:${CW[c.k]||150}px"`}>${cell(c,r,k)}</td>`).join('')}</tr>`;}).join('')}</tbody></table></div>`;}
+  return `<tr class="${r.first?'ss':''}${on?' on':''}${r.m.ss?' stat-'+r.m.ss:''}${slMulti.has(r.it.id+'|'+r.vi)?' pick':''}" data-id="${r.it.id}" data-v="${r.vi}">${cols.map(c=>`<td data-c="${esc(c.k)}" data-l="${esc(c.l||'')}"${c.k==='desc'?'':` style="width:${CW[c.k]||150}px"`}>${cell(c,r,k)}</td>`).join('')}</tr>`;}).join('')}</tbody></table></div>`;}
  $('#lvInfo').onclick=()=>sceneInfo();{const b=$('#lvMenu');if(b)b.onclick=()=>shotMenu(b);}{const b=$('#lvCols');if(b)b.onclick=()=>colDialog();}
  {const a=$('#lvSel');if(a)a.onclick=()=>{slSelMode=true;renderList();};const d=$('#lvSelDone');if(d)d.onclick=()=>{slSelMode=false;slMulti.clear();renderList();};const g=$('#lvBulk');if(g)g.onclick=bulkGo;}
 }
