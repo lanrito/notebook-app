@@ -752,7 +752,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126060942';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126063834';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -2076,6 +2076,11 @@ function readyDialog(){try{flushNotes();if(txTimer)txFlush();}catch(e){}const s=
  else h+=row(true,`Everything made here has reached the cloud (last confirmed ${whenTxt(lastSync)}).`);
  if(location.protocol!=='file:')h+=swOk?row(true,'The app opens without internet.'):row(false,'The app isn’t ready to open offline yet. Reload it once while you’re online, then check again.');
  if(ios)h+=home?row(true,'Added to the Home Screen, so the iPad keeps its saved data.'):row(false,'Add the app to the Home Screen (Share › Add to Home Screen) and use it from there. Safari can clear a website’s saved data after 7 days without a visit; Home Screen apps aren’t affected.');
+ {let noLook=0,noTime=0,anyTime=false,all=0;for(const x of scs){let R=[];try{R=rowsOf(x).filter(q=>q.m.ss!=='drop');}catch(e){}for(const q of R){all++;if(!q.m.size||!q.m.type)noLook++;if(q.m.time)anyTime=true;else noTime++;}}
+  const anyDay=scs.some(x=>dayKey(x)),noDay=scs.filter(x=>!dayKey(x)&&x.items.length).length;
+  if(all)h+=noLook?row(null,`<b>${plural(noLook,'shot')}</b> ${noLook===1?'has':'have'} no size or type yet.`):row(true,'Every shot has a size and a type.');
+  if(anyTime&&noTime)h+=row(null,`<b>${plural(noTime,'shot')}</b> ${noTime===1?'has':'have'} no time estimate, so the day’s total runs short.`);
+  if(anyDay&&noDay)h+=row(null,`<b>${plural(noDay,'scene')}</b> ${noDay===1?'has':'have'} no shoot day yet.`);}
  h+=row(null,'PDFs you saved to the Files app open without the app or internet. Check them there.');
  modal(`<h3>Ready for Set?</h3><p class="mut">Run this on the iPad before you leave Wi-Fi.</p><div class="rdyL">${h}</div><div class="btns end"><button class="pri" data-x>Done</button></div>`,card=>{
   const a=card.querySelector('#rdImg');if(a)a.onclick=()=>{imgViaMeta=true;for(const id of miss)imgTry[id]=0;imgWant({imgs:miss});imgPull();toast('Downloading images…');setTimeout(()=>{closeModal();readyDialog();},3000);};
@@ -2466,8 +2471,8 @@ function lkSyncBit(){if(!fbUser)return '';
  if(lk.need==='conv')return `<p><b>Locking your synced work:</b> ${lk.prog[0]} of ${lk.prog[1]}. Keep the app open and online; your work on this device is safe meanwhile.</p>`;
  if(lk.need==='wait')return `<p class="warnbox">The lock is waiting for the internet. Everything is saved on this device.</p>`;
  if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` ${plural(lk.bad.size,'item')} could not be opened on this device.`:''}</p><div class="btns"><button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
- if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so no one else can read the copy in the cloud. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock My Synced Work…</button><button id="lkp">Change Password…</button></div>`;
- return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock My Synced Work…</button>':''}</div>`;}
+ if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so no one else can read the copy in the cloud. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock and Sync…</button><button id="lkp">Change Password…</button></div>`;
+ return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock and Sync…</button>':''}</div>`;}
 function lkSyncBind(c){const b=(id,f)=>{const e=c.querySelector(id);if(e)e.onclick=()=>{mNext=accountDialog;f();};};b('#lku',lkUnlockDialog);b('#lkc',lkNewCodeDialog);b('#lkp',lkPwDialog);b('#lks',lkSetupDialog);}
 /* ---------- sync (private to the signed-in person, through their Claude account) ---------- */
 let coll=null,online='off',pushT=null,pushing=false,syncErr='',pendingRemote=null,dlNS=null,warnedBig=false;
@@ -2881,7 +2886,7 @@ function whenTxt(t){if(!t)return 'never';const d=new Date(t),now=new Date(),same
 function confirmSynced(){if(sync.dirty.length||outdated||bigN())return;if(fbDb&&fbDb.waitForPendingWrites){fbDb.waitForPendingWrites().then(()=>{if(!sync.dirty.length&&!bigN()&&!syncErr)markSynced();}).catch(()=>{});}else if(coll)markSynced();}
 function syncNow(){if(!coll){toast(fbAuth?'Sign in first (Menu › Sync & Backup).':'Sync isn’t set up in this copy of the app.');return;}
  if(!navigator.onLine){toast('No internet connection. Everything is saved on this device and will sync when you’re back online.');return;}
- if(lkHold()&&!coll.locked){toast('Your work syncs once it is locked: tap the status at the top right, then Lock My Synced Work…');return;}
+ if(lkHold()&&!coll.locked){toast('Your work syncs once it is locked: tap the status at the top right, then Lock and Sync…');return;}
  toast('Syncing…');const go=()=>{detectChanges();saveLocal();schedulePush(0);try{const m=docs().meta;if(m&&coll){for(const id of m.imgs)if(!images[id])imgTry[id]=0;imgPull();}}catch(e){}
   const t0=Date.now(),wait=()=>{if(!sync.dirty.length&&!pushing){if(fbDb&&fbDb.waitForPendingWrites)fbDb.waitForPendingWrites().then(()=>{if(sync.dirty.length||syncErr){toast('Not everything could be sent yet. Your work is saved here; it will keep trying.');return;}if(bigN()){toast('Sent, except what is too large to sync. Ready for Set shows which part.');return;}markSynced();toast('Sent. Everything made here is in the cloud; your other device gets it the next time it’s online.');}).catch(()=>toast('Couldn’t reach the cloud. Your work is saved here; try again in a moment.'));else{markSynced();toast('Synced.');}}else if(Date.now()-t0<20000)setTimeout(wait,500);else toast('Still sending. It will finish in the background.');};setTimeout(wait,400);};
  if(fbDb&&fbDb.disableNetwork){fbDb.disableNetwork().then(()=>fbDb.enableNetwork()).then(go,go);}else go();}
@@ -2923,7 +2928,7 @@ $('#setPanel').addEventListener('click',e=>{const s=scene();
  const q=e.target.closest('[data-ss]');if(q){const r=setRow(s);if(!r)return;if(q.dataset.ss==='plan')delete r.m.ss;else r.m.ss=q.dataset.ss;commit();return;}
  const w=e.target.closest('[data-sr]');if(w){const [id,vi]=w.dataset.sr.split('|');sel={id,mark:+vi};const it=itemById(id);if(it&&!vis(it,s)){s.pageId=(it.pgs&&it.pgs[0])||'all';saveLocal();render();}else{renderUI();renderSet();}}});
 $('#setPanel').addEventListener('input',e=>{if(e.target.id!=='setNote')return;const r=setRow(scene());if(!r)return;const v=e.target.value;if(v)r.m.sn=v;else delete r.m.sn;clearTimeout(setNoteT);setNoteT=setTimeout(()=>{setNoteT=null;commit({insp:false});},700);updateStatus();});
-$('#setPanel').addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('setSt')){if(e.target.open)P.ui.setSt=1;else delete P.ui.setSt;saveLocal();}},true);
+$('#setPanel').addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('setSt')){const k=e.target.dataset.k==='nb'?'setNb':'setSt';if(e.target.open)P.ui[k]=1;else delete P.ui[k];saveLocal();}},true);
 $('#setPanel').addEventListener('focusout',e=>{if(e.target.id==='setNote'){clearTimeout(setNoteT);setNoteT=null;commit({insp:false});setTimeout(renderSet,0);}});
 $('#stView').addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(!b)return;const s=scene(),k=b.dataset.bk,B=s.beats||(s.beats=[]),bt=B.find(x=>x.id===b.dataset.b);
  if(k==='add'){const nb={id:uid(),t:''};B.push(nb);commit();renderDocs(true);focusBeat(nb.id);}
@@ -5666,6 +5671,8 @@ function renderSet(){const el=$('#setPanel');if(!el||!setOn)return;const a=docum
   h+=`<div class="setSec">Shots</div><div class="setList">${rows.map(q=>`<button data-sr="${q.it.id}|${q.vi}" class="${q===r?'on ':''}st-${q.m.ss||'plan'}"><i class="sdot ${q.m.ss||''}"></i><b>${esc(rowCode(s,q))}</b><span>${esc(vlabel(q.m)||'')}${q.m.sn?' · '+esc(trunc(q.m.sn,40)):''}</span></button>`).join('')}</div>`;}
  if(false&&B.length){h+=`<div class="setSec">Beats</div><div class="setBeats">${B.map((b,i)=>{const cv=rows.filter(q=>covers(s,q,b)),fl=beatFlag(s,b,rows),got=cv.some(q=>q.m.ss==='shot');
    return `<div><span class="bn">${i+1}</span><span style="flex:1;min-width:120px">${esc(beatName(s,b))}</span>${cv.map(q=>`<i class="shc st-${q.m.ss||'plan'}">${esc(rowCode(s,q))}</i>`).join('')}${fl==='none'?'<i class="bfl none">No shot</i>':got?'':''}</div>`;}).join('')}</div>`;}
+ {const x=txOf(s.id)||{},full=v=>!!v&&!!String(v).replace(/<[^>]+>|&nbsp;/g,'').trim(),B=nbShown(s).map(c=>{const q=x.nb&&x.nb[c.k],hh=q&&!q.del&&full(q.h)?q.h:(c.k==='syn'&&full(s.synopsis)?esc(s.synopsis):'');return hh?`<div class="sth">${esc(c.name||'')}</div><div class="stx">${hh}</div>`:'';}).filter(Boolean);
+  if(B.length)h+=`<details class="setSt" data-k="nb"${P.ui.setNb?' open':''}><summary>Breakdown</summary>${B.join('')}</details>`;}
  {const secs=stSecs(s).filter(q=>q.h&&String(q.h).replace(/<[^>]+>|&nbsp;/g,'').trim());if(secs.length)h+=`<details class="setSt"${P.ui.setSt?' open':''}><summary>Strategy</summary>${secs.map(q=>`<div class="sth">${esc(secTitle(s,q))}</div><div class="stx">${q.h}</div>`).join('')}</details>`;}
  h+=`<button class="sm" data-sv="todo" style="align-self:flex-start">Checklist${(s.todo||[]).length?` · ${(s.todo||[]).filter(t=>!t.d).length} open`:''}…</button>`;
  h+=`<button class="sm" data-sv="ready" style="align-self:flex-start">Ready for Set check…</button>`;

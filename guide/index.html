@@ -15,6 +15,7 @@ h1,h2,h3,.op-num{font-family:"Inter Display",Inter,-apple-system,system-ui,sans-
 .cover h1{color:#fff;font-weight:800;letter-spacing:-.03em;margin:0}
 .cover .g{letter-spacing:.42em;text-transform:uppercase;font-weight:600;margin:0}
 .cover .foot{margin-top:auto;width:100%;display:flex;justify-content:space-between;border-top:1px solid rgba(252,247,233,.55);font-weight:600;letter-spacing:.04em}
+@media screen and (max-width:640px){.cover .foot{flex-direction:column;align-items:center;text-align:center;gap:6px}.cover .foot span{white-space:nowrap;font-size:13px}}
 .cover .cr{width:100%;text-align:center;opacity:.6;letter-spacing:.03em}
 .opener{background:#000;color:var(--cream)}
 .op-top{display:flex;justify-content:space-between;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
@@ -169,7 +170,21 @@ h3.hit{animation:gshit 2.2s ease-out}
 
 <div class="keep4"><h4>On an Android tablet</h4><ol class="steps"><li>Open the address in Chrome.</li><li>Open Chrome’s menu and choose <b>Add to Home screen</b>.</li><li>Open it from the Home screen from then on.</li></ol></div>
 
+<div class="keep4"><h4>On a phone</h4><ol class="steps"><li>Open the address in Safari on an iPhone, or Chrome on an Android phone.</li><li>Add it to the Home Screen the same way as on a tablet.</li></ol></div>
+
+<p>On a phone the app shows one thing at a time, and a row of buttons at the bottom switches between them. Everything in this guide is there; the pictures show the wider screen.</p>
 <p class="note">The app updates itself. When a new version is ready it reloads at a quiet moment, or shows a Reload bar if you are in the middle of something. The version date is in Menu › Sync &amp; Backup.</p>
+<div class="keep"><h3 id="first">Your first five minutes</h3><p>The shortest way to see what the notebook does. It takes one empty scene.</p><ol class="steps">
+<li>Open the app. It starts on an empty scene, on the <b>Floor Plan</b> tab.</li>
+<li>Tap the label at the top left of the plan and give the scene its number and heading.</li>
+<li>Tap <b>＋</b> at the bottom left and add a wall or two, then a character.</li>
+<li>Tap <b>＋</b> again and add a camera. Drag it into place and turn it toward the character.</li>
+<li>Open the <b>Shot List</b> tab. The camera is already there as a shot. Give it a size, a type and a line of description.</li>
+<li>Menu › Export › <b>Export PDF…</b> makes the floor plan and the shot list as a PDF.</li>
+</ol></div>
+
+
+<p>That is the whole idea: a camera on the plan is already a shot on the list. The rest of this guide is each of those steps in full.</p>
 <div class="keep"><h3 id="c1-the-screen">The screen</h3><figure><div class="fr"><img alt="The Floor Plan tab: a top bar, the plan in the middle with a set, two characters and a camera, the Shot List panel on the right, and a dark toolbar along the bottom." height="1133" src="img/main.jpg" width="1800"/><span class="mk" style="left:2.12%;top:6.40%">1</span><span class="mk" style="left:33.75%;top:6.40%">2</span><span class="mk" style="left:57.39%;top:6.40%">3</span><span class="mk" style="left:80.97%;top:6.40%">4</span><span class="mk" style="left:93.63%;top:6.40%">5</span><span class="mk" style="left:3.37%;top:93.02%">6</span><span class="mk" style="left:14.79%;top:93.02%">7</span><span class="mk" style="left:24.89%;top:93.02%">8</span><span class="mk" style="left:64.42%;top:93.02%">9</span><span class="mk" style="left:75.84%;top:93.02%">10</span></div><figcaption>Sc. 1 of the invented project, on the Floor Plan tab.</figcaption></figure></div>
 
 <ol class="key">
@@ -240,7 +255,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 <tr><td>Sync starts for your account</td><td>A window with your <b>recovery code</b>. If you made your account before you were given sync, the app asks for your password once first.</td></tr>
 <tr><td>You sign in on another device</td><td>Nothing extra. Signing in lets that device in.</td></tr>
 <tr><td>A device that was signed in before the lock</td><td>The status says <b>Unlock to sync</b>. Tap it and type your password once.</td></tr>
-<tr><td>You closed the lock window without locking</td><td>The status says <b>Lock to sync</b>. Your work stays on the device and nothing is sent until it is locked. Tap the status, then <b>Lock My Synced Work…</b>.</td></tr>
+<tr><td>You closed the lock window without locking</td><td>The status says <b>Lock to sync</b>. Your work stays on the device and nothing is sent until it is locked. Tap the status, then <b>Lock and Sync…</b>.</td></tr>
 </tbody></table></div>
 
 
