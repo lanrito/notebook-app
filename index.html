@@ -544,7 +544,10 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 #drop.scn .sdr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mut);font-size:13px;letter-spacing:.02em}
 #drop.scn .sdr.cur{background:light-dark(#e6edfb,#2a3550)}#drop.scn .sdr.cur span{color:var(--ink)}#drop.scn .sdk{margin-left:auto;padding-left:10px;font-style:normal;font-weight:800;color:light-dark(#2f6fde,#a9c4ff)}
 #drop.scn .sdf{flex:none;border-top:1px solid var(--line);padding:8px 0}
-#drop.scn #sdLib{justify-content:center;background:#2f6fde;color:#fff;font-weight:650;box-shadow:0 1px 2px rgba(0,0,0,.12)}#drop.scn #sdLib:hover{background:#2a62c6}
+#drop.scn #sdLib,#drop.scn #sdNew{justify-content:center;background:#2f6fde;color:#fff;font-weight:650;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+#drop.scn #sdLib:hover,#drop.scn #sdNew:hover{background:#2a62c6}
+#drop.scn .sdf.two{display:flex;gap:8px;padding:8px 8px}
+#drop.scn .sdf.two button{flex:1 1 auto;min-width:0;width:auto;margin:0;white-space:nowrap;padding-left:10px;padding-right:10px}
 #drop.scn .pnote{padding:8px 16px 10px;color:var(--mut);font-size:13.5px}
 #drop.mm h4{display:flex;align-items:center;gap:9px}
 #drop.mm button{display:flex;align-items:center;gap:10px;text-align:left}
@@ -755,7 +758,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126160929';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261126174618';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -4971,13 +4974,15 @@ function sceneDrop(){const b=$('#sceneBtn'),was=document.querySelector('#drop.sc
  const row=x=>{const top=x.number?'Sc. '+x.number:(x.scout?'Place':''),name=(x.title||x.heading||'Untitled').toUpperCase(),me=x.id===c.id;
   return `<button class="sdr${me?' cur':''}" data-sd="${x.id}"${me?' aria-current="true"':''} title="${esc(sceneLabel(x))}">${top?`<b>${esc(top)}</b>`:''}<span>${esc(name)}</span>${me?'<i class="sdk">✓</i>':''}</button>`;};
  const d=document.createElement('div');d.id='drop';d.className='mm scn';
- d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf"><button id="sdLib">${setOn?'All Scenes…':on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
+ d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf${setOn||scoutOn?'':' two'}">${setOn||scoutOn?'':'<button id="sdNew">New Scene</button>'}<button id="sdLib">${setOn?'All Scenes…':on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
  document.body.appendChild(d);const r=b.getBoundingClientRect();d.style.top=(r.bottom+6)+'px';d.style.maxHeight=Math.max(200,innerHeight-r.bottom-16)+'px';d.style.minWidth=Math.min(Math.max(300,r.width),innerWidth-16)+'px';d.style.left=Math.max(8,Math.min(innerWidth-d.offsetWidth-8,r.left))+'px';
  const me=d.querySelector('.sdr.cur');if(me)me.scrollIntoView({block:'nearest'});
  d.addEventListener('click',e=>{const x=e.target.closest('[data-sd]');if(x){closeDrop();libPick(x.dataset.sd);return;}
+  if(e.target.closest('#sdNew')){closeDrop();newScene();return;}
   if(e.target.closest('#sdLib')){closeDrop();if(setOn)openBrowser();else if(libOn())libSet(false);else{libSet(true);libReveal();}}});
  setTimeout(()=>addEventListener('pointerdown',dropOut,true),0);}
-function newScene(folder){if(acctWall())return;if(folder===undefined)folder=sFolder(scene());const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
+const newHome=()=>{const f=sFolder(scene()),fo=f?fById(f):null;return fo&&fo.sample?null:f;};
+function newScene(folder){if(acctWall())return;if(folder===undefined)folder=newHome();const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
 /* ---------- scene browser: folders, search, recent, trash ---------- */
 function natCmp(a,b){return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});}
 function liveScenes(){return P.scenes.filter(s=>!s.trashed&&!s.tpl);}
@@ -7831,7 +7836,7 @@ function menu(sub){
  const B=(m,l,kb,cls)=>`<button data-m="${m}"${cls?` class="${cls}"`:''}>${l}${kb?`<span class="kb">${kb}</span>`:''}</button>`,
   G=(g,l,note)=>`<button data-g="${g}">${l}${note?`<small>${note}</small>`:''}<i class="mmc">›</i></button>`,SEP='<div class="mmsep"></div>';
  let h;
- if(!sub)h='<h4>Menu</h4>'+B('new','New Scene'+(fo?' in '+esc(fo.name):''))+B('open','Open Scene…','⇧⌘O')+G('scene','This Scene')+SEP
+ if(!sub)h='<h4>Menu</h4>'+B('new','New Scene'+(fo&&!fo.sample?' in '+esc(fo.name):''))+B('open','Open Scene…','⇧⌘O')+G('scene','This Scene')+SEP
    +(fo?B('overview',esc(fo.name)+' Overview & Questions…'):'')+G('import','Import')+G('export','Export')+SEP
    +G('data','Sync & Backup',esc($('#status').textContent||''))+B('keys','Keyboard Shortcuts','?')+B('guide','The Guide');
  else{let body='';
