@@ -16,6 +16,7 @@ h1,h2,h3,.op-num{font-family:"Inter Display",Inter,-apple-system,system-ui,sans-
 .cover .g{letter-spacing:.42em;text-transform:uppercase;font-weight:600;margin:0}
 .cover .foot{margin-top:auto;width:100%;display:flex;justify-content:space-between;border-top:1px solid rgba(252,247,233,.55);font-weight:600;letter-spacing:.04em}
 @media screen and (max-width:640px){.cover .foot{flex-direction:column;align-items:center;text-align:center;gap:6px}.cover .foot span{white-space:nowrap;font-size:13px}}
+.inapp nav.bar a.go{display:none}
 .cover .cr{width:100%;text-align:center;opacity:.6;letter-spacing:.03em}
 .opener{background:#000;color:var(--cream)}
 .op-top{display:flex;justify-content:space-between;font-weight:600;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
@@ -1046,6 +1047,7 @@ h3.hit{animation:gshit 2.2s ease-out}
 </div>
 </section>
 <footer class="end"><span>The Director’s Notebook · The Guide · Version of November 25, 2026. The project in the pictures, “The Long Way Home”, is invented for this guide.</span><span><a href="#contents">Contents</a> · <a href="The-Directors-Notebook-Guide.pdf">Download PDF</a> · <a href="https://thedirectorsnotebook.com/">The front page</a> · <a href="../">Open the app</a></span><span class="cr">© 2026 Lanrito Films. All Rights Reserved.</span></footer>
+<script>if(window.top!==window.self){document.documentElement.classList.add('inapp');document.querySelectorAll('a[href^="http"]').forEach(a=>{a.target='_blank';a.rel='noopener';});}</script>
 <dialog class="gs" id="gs" aria-label="Search the guide"><div class="q"><input id="gsQ" type="text" inputmode="search" enterkeyhint="search" placeholder="Search the guide" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search the guide" aria-controls="gsR"><button class="x" type="button" id="gsX">Close</button></div><div class="res" id="gsR" role="listbox" aria-label="Results"></div><div class="ft"><span id="gsN"></span><span class="k">↑ ↓ to move · Enter to open · Esc to close</span></div></dialog>
 <script>(()=>{
 const d=document.getElementById('gs'),q=document.getElementById('gsQ'),R=document.getElementById('gsR'),N=document.getElementById('gsN'),open=document.getElementById('gsOpen');
