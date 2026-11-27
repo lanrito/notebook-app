@@ -758,7 +758,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127030718';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127035544';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -1857,8 +1857,8 @@ function sceneDecide(k,b,local){if(!local)return 'take';const L=sceneFp(local),R
  if(!known.length||known[known.length-1]===L)return 'take';
  return 'conflict';}
 /* the short fields of a scene as they were when both devices last agreed, so a clash can tell who changed what */
-const SF=['title','heading','number','synopsis','snote','folder','code','day'];
-const sfH=v=>fpStr(JSON.stringify(v==null?'':v));
+const SF=['title','heading','number','synopsis','snote','folder','code','day','date','pp','act','story','todo','sun','night','cast','numbering']; /* only ever added to at the end: the remembered versions are stored by position */
+const sfH=v=>fpStr(canonJ(v==null?'':v)); /* the same for text as before; for a list or a group of settings, the same whatever order the cloud hands the parts back in */
 /* remember those fields for a version this device held (by fingerprint); a few versions per scene are enough */
 function fhPut(k,fp,sc){if(!fp||!sc)return;const all=sync.fh=sync.fh||{},m=all[k]=all[k]||{};if(m[fp])return;m[fp]=SF.map(f=>sfH(sc[f])).join(',');const ks=Object.keys(m);if(ks.length>6)delete m[ks[0]];}
 /* the last version both devices had, as far as their histories show, and its fields */
@@ -1911,7 +1911,11 @@ function load(big,bigSync){
  if(!P||!Array.isArray(P.scenes)||!P.scenes.length){const s=blankScene(1);s.ph=1;P={characters:[],folders:[],scenes:[s],sceneId:s.id,ui:{}};sync={stamps:{},dirty:[]};}
  delete sync.base;P.ui=P.ui||{};P.prefs=P.prefs&&typeof P.prefs==='object'?P.prefs:{};P.characters=P.characters||[];P.folders=P.folders||[];P.labels=P.labels||{};P.text=P.text||{};for(const id in P.text)if(!P.scenes.some(s=>s.id===id))delete P.text[id];
  if(!P.scenes.some(s=>s.id===P.sceneId))P.sceneId=P.scenes[0].id;
-migrate();let castNow=[];try{castNow=castReconcile();}catch(e){}
+migrate();
+/* story names for scenes outside a folder used to sit where sync and backups did not look; they travel with the account's preferences now */
+try{if(Array.isArray(P.stories)&&P.stories.length&&!P.prefs.stories)P.prefs.stories={v:P.stories,t:1};delete P.stories;}catch(e){}
+try{folderHeal();}catch(e){}
+let castNow=[];try{castNow=castReconcile();}catch(e){}
  ensureLive();baseline();if(castNow.length){mergedNow.push(...castNow);delete lastJson.meta;}flushMerged();
  for(const sc of P.scenes){const k='scene-'+sc.id;if(!ancOf(k).length)ancAdd(k,[sceneFp(stripScene(sc))]);}
  {const here=new Set(P.scenes.map(x=>x.id)),TS=(P.tomb&&P.tomb.s)||{};sync.sIds=[...here];
@@ -2033,7 +2037,16 @@ function metaMerge(meta){const T=P.tomb=P.tomb||{},R=meta.tomb||{},ls0=Object.as
   if(canonJ(o)!==canonJ(ra))back=true;T.sa=o;T.sv=ov;}
  if(meta.labels){const lb=clone(meta.labels);for(const x in P.labels||{}){const u=[...new Set([...(lb[x]||[]),...P.labels[x]])];if(u.length!==(lb[x]||[]).length)back=true;lb[x]=u;}P.labels=lb;}
  {const L=P.prefs=P.prefs||{},R2=meta.prefs&&typeof meta.prefs==='object'?meta.prefs:{};for(const k of new Set([...Object.keys(L),...Object.keys(R2)])){const a=L[k],b=R2[k],at=a&&a.t||0,bt=b&&b.t||0;if(b&&(!a||bt>at||(bt===at&&canonJ(b)>canonJ(a))))L[k]=clone(b);else if(a&&(!b||at>bt||canonJ(a)!==canonJ(b)))back=true;}}
+ try{const h=folderHeal();if(h.length){back=true;setTimeout(()=>toast(`Two folders had been moved into each other on different devices. “${h[0]}” is back at the top of the Library.`,8000),500);}}catch(e){console.error(e);}
  return back;}
+/* two devices can each move a folder into the other while apart; merged, the two make a ring that hangs from nothing and
+   vanishes from the Library. The folder in the ring that was moved last goes back to the top; every device picks the same one. */
+function folderHeal(){const F=P.folders||[],by=new Map(F.map(f=>[f.id,f])),out=[];
+ for(const f of F){const seen=new Set();let p=f,g=0;while(p&&!seen.has(p.id)&&g++<500){seen.add(p.id);p=p.parent?by.get(p.parent):null;}
+  if(!p)continue; /* it reaches the top */
+  const ring=[];let q=p;do{ring.push(q);q=q.parent?by.get(q.parent):null;}while(q&&q!==p&&ring.length<500);
+  const pick=ring.slice().sort((a,b)=>((b._t||0)-(a._t||0))||(a.id<b.id?-1:a.id>b.id?1:0))[0];pick.parent=null;out.push(pick.name||'A folder');}
+ return out;}
 function detectChanges(){try{metaStamp();}catch(e){console.error(e);}const d=docs(),now=Date.now();
  for(const k in d){const j=JSON.stringify(d[k]);if(j!==lastJson[k]){if(k.startsWith('scene-')&&lastJson[k]&&!sync.dirty.includes(k)){try{const a=ancOf(k);if(a.length)fhPut(k,a[a.length-1],JSON.parse(lastJson[k]).scene);}catch(e){}}
    lastJson[k]=j;sync.stamps[k]=Math.max(now,(sync.stamps[k]||0)+1);if(sync.big)delete sync.big[k];markDirty(k);if(k.startsWith('scene-'))(sync.mine=sync.mine||{})[k]=sceneFp(d[k].scene);}}
@@ -2084,6 +2097,7 @@ function readyDialog(){try{flushNotes();if(txTimer)txFlush();}catch(e){}const s=
  else if(syncErr)h+=row(false,'The cloud refused the last sync. Your work is saved on this device; tap the status at the top for your account.');
  else if(sync.dirty.length||unacked||bootPend)h+=row(false,`<b>${plural(Math.max(1,sync.dirty.length+unacked),'change')}</b> made here haven’t reached the cloud yet${navigator.onLine?'.':'. Connect to the internet before you leave so the other device gets them.'}`,navigator.onLine?'<div><button class="sm" id="rdSync">Sync now</button></div>':'');
  else h+=row(true,`Everything made here has reached the cloud (last confirmed ${whenTxt(lastSync)}).`);
+ if(coll&&coll.locked&&lk.bad.size)h+=row(false,`<b>${plural(lk.bad.size,'item')}</b> in the cloud could not be opened on this device, so work from another device may be missing here. Open the app on that device and let it sync, then check again.`);
  if(location.protocol!=='file:')h+=swOk?row(true,'The app opens without internet.'):row(false,'The app isn’t ready to open offline yet. Reload it once while you’re online, then check again.');
  if(ios)h+=home?row(true,'Added to the Home Screen, so the iPad keeps its saved data.'):row(false,'Add the app to the Home Screen (Share › Add to Home Screen) and use it from there. Safari can clear a website’s saved data after 7 days without a visit; Home Screen apps aren’t affected.');
  {let noLook=0,noTime=0,anyTime=false,all=0;for(const x of scs){let R=[];try{R=rowsOf(x).filter(q=>q.m.ss!=='drop');}catch(e){}for(const q of R){all++;if(!q.m.size||!q.m.type)noLook++;if(q.m.time)anyTime=true;else noTime++;}}
@@ -2255,7 +2269,7 @@ const lkU=x=>x&&x.toUint8Array?x.toUint8Array():x;
 const lkKeysRef=()=>lk.base.collection('keys').doc('main');
 const lkMarker=b=>!!(b&&b.locked);
 const lkSig=b=>canonJ(b||null);
-function lkStop(){clearInterval(lk.askT);lk.askT=null;clearTimeout(lk.rvT);if(lk.un){try{lk.un();}catch(e){}lk.un=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;lk.sure=false;}
+function lkStop(){clearInterval(lk.askT);lk.askT=null;clearTimeout(lk.rvT);if(lk.un){try{lk.un();}catch(e){}lk.un=null;}if(lk.un2){try{lk.un2();}catch(e){}lk.un2=null;}lk.on=false;lk.key=null;lk.u=null;lk.base=null;lk.need='';lk.kd=null;lk.bad.clear();lk.marker=false;lk.job=null;lk.sure=false;}
 /* run f once the internet is back, or in half a minute, if the same person is still signed in */
 function lkWhenOnline(f){const u=lk.u;let done=false;const go=()=>{if(done)return;done=true;removeEventListener('online',go);if(lk.u===u&&u)f();};addEventListener('online',go);setTimeout(go,30000);}
 /* is this account locked? Asks the server, never this device's saved copy. */
@@ -2264,7 +2278,9 @@ async function lkPeek(base){try{const d=await base.collection('keys').doc('main'
 /* the collection sync talks to once an account is locked: the same calls as before, sealed going out and opened coming in */
 function lkVault(base,uid,key){
  const raw=base.collection('vault'),seen=new Map(),name=id=>uid+'/'+id;
- async function body(d){const b=d.data();if(!b)return null;const n=lkU(b.n),c=lkU(b.c),tag=n?LK.b64(n):'',img=d.id.startsWith('img-'),h=!img&&seen.get(d.id);
+ async function body(d){const b=d.data();if(!b)return null;let n,c,tag='';
+  try{n=lkU(b.n);c=lkU(b.c);tag=n?LK.b64(n):'';}catch(e){lk.bad.add(d.id);return {};} /* not even the right shape: counted as one that will not open, and the rest of the cloud still arrives */
+  const img=d.id.startsWith('img-'),h=!img&&seen.get(d.id);
   if(h&&h.t===tag)return JSON.parse(h.j);
   try{const o=await LK.open(key,name(d.id),{v:b.v,n,c});if(!img)seen.set(d.id,{t:tag,j:JSON.stringify(o)});lk.bad.delete(d.id);return o;}
   catch(e){lk.bad.add(d.id);return {};}} /* one that will not open counts as there and is left alone: never read as a deletion, never overwritten */
@@ -2274,7 +2290,9 @@ function lkVault(base,uid,key){
    const on=s=>{line=line.then(async()=>{if(dead)return;const w=await many(s);if(!dead)cb(w);}).catch(e=>console.error(e));};
    const un=opts?rq.onSnapshot(opts,on,er):rq.onSnapshot(on,er);return ()=>{dead=true;try{un();}catch(e){}};}});
  const c=q(raw);
- c.doc=id=>({set:async data=>{const o=decFS(data);delete o.na;const s=await LK.seal(key,name(id),o);return raw.doc(id).set({v:1,n:lkB(s.n),c:lkB(s.c)});},
+ /* sealSet seals, then hands back the send itself: the caller knows the moment the sealed change is ready to go */
+ c.doc=id=>({sealSet:async data=>{const o=decFS(data);delete o.na;const s=await LK.seal(key,name(id),o),body={v:1,n:lkB(s.n),c:lkB(s.c)};return ()=>raw.doc(id).set(body);},
+  set:async data=>{const o=decFS(data);delete o.na;const s=await LK.seal(key,name(id),o);return raw.doc(id).set({v:1,n:lkB(s.n),c:lkB(s.c)});},
   delete:()=>raw.doc(id).delete(),
   get:async o=>{const d=await(o?raw.doc(id).get(o):raw.doc(id).get());const b=d.exists?await body(d):null;return {id,exists:!!b,data:()=>b};},
   onSnapshot:(...a)=>raw.doc(id).onSnapshot(...a)});
@@ -2362,7 +2380,7 @@ async function lkAfter(){const u=lk.u;if(!u||!lk.on)return;const r=await lkPeek(
  if(r.st==='denied')return; /* refused: keep the key, send nothing; syncRevive comes back here once the cloud answers */
  const mine=lsGet('blk.kid.'+u.uid)||'';
  if(r.st==='legacy'||(r.kd.kid||'')!==mine){ /* the cloud was started fresh from another device: this device's key no longer fits. Its own work stays and is sent again once it is let in */
-  if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}
+  if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}if(lk.un2){try{lk.un2();}catch(e){}lk.un2=null;}
   coll=null;lk.on=false;lk.sure=false;lk.key=null;lkForget(u.uid);lkFlag(u.uid,'vault');lk.marker=true;lkAll();lkNeed(r.st==='locked'?r.kd:null);return;}
  if(lk.pw){const pw=lk.pw;lkPwDrop();try{await LK.unwrap(r.kd.pw,pw);}catch(e){if(e.message==='bad-secret'){try{await lkKeysRef().update({pw:await LK.wrapPw(lkKeyOf(u.uid),pw)});}catch(x){console.error(x);}}}} /* the password was reset by email: this device still holds the key, so it seals it again under the new one */
  lkSure();lkWatch();}
@@ -2370,7 +2388,11 @@ async function lkAfter(){const u=lk.u;if(!u||!lk.on)return;const r=await lkPeek(
 function lkAll(){const now=Date.now(),d=docs();for(const k in d){sync.stamps[k]=Math.max(now,(sync.stamps[k]||0)+1);markDirty(k);}for(const k in images){sync.stamps['img-'+k]=Math.max(now,(sync.stamps['img-'+k]||0)+1);markDirty('img-'+k);}try{saveLocal();}catch(e){}}
 /* readable items that turn up after the change-over come from a copy of the app that had not updated yet. The marker is put back so it stops;
    what this very device sent that way is removed here (it holds the work, and sends it again sealed). Another device's is left for that device to clear once it has updated. */
-function lkWatch(){if(lk.un||!lk.on)return;const u=lk.u,src=lk.base.collection('docs');let busy=false;
+/* the key record, watched while this device is open: if the lock is started fresh from another device, this one learns it now, not at its next start */
+function lkKeyWatch(){if(lk.un2||!lk.on||!lk.base)return;const u=lk.u;
+ try{lk.un2=lkKeysRef().onSnapshot(d=>{if(lk.u!==u||!lk.on)return;if(d&&d.metadata&&d.metadata.fromCache)return;
+  const kd=d&&d.exists?d.data():null,mine=lsGet('blk.kid.'+u.uid)||'';if(!kd||!kd.pw||(kd.kid||'')!==mine)lkAfter();},()=>{});}catch(e){}}
+function lkWatch(){lkKeyWatch();if(lk.un||!lk.on)return;const u=lk.u,src=lk.base.collection('docs');let busy=false;
  try{lk.un=src.onSnapshot(async s=>{if(busy||lk.u!==u||!lk.on)return;busy=true;
   try{const m=s.docs.find(d=>d.id==='meta'),mb=m?m.data():null;
    if(mb&&mb.closed){acctClosed();return;} /* the account was deleted from another device: stop, and leave its marker alone */
@@ -2401,7 +2423,7 @@ async function lkRecover(code,pw){const u=lk.u,kd=lk.kd;if(!u||!kd)throw new Err
  await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw));
  await lkKeysRef().update({pw:await LK.wrapPw(dk,pw)});await lkEnter(dk,kd);}
 /* no password that fits, no code, no device with the key: erase the sealed copy, then lock again with what this device holds */
-async function lkFresh(pw){const u=lk.u;if(!u||!lk.base)throw new Error('signed-out');
+async function lkFresh(pw){const u=lk.u;if(!u||!lk.base)throw new Error('signed-out');if(lk.un2){try{lk.un2();}catch(e){}lk.un2=null;}
  await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw));
  if(pw.length<LOCK_MIN)throw new Error('short');
  const SV={source:'server'},v=lk.base.collection('vault'),all=await v.get(SV);for(const d of all.docs)await v.doc(d.id).delete();
@@ -2481,7 +2503,7 @@ function lkSyncBit(){if(!fbUser)return '';
  if(lk.need==='pw')return `<p class="warnbox">This account’s work is locked with its password, and this device has not been let in yet.</p><div class="btns"><button id="lku">Unlock…</button></div>`;
  if(lk.need==='conv')return `<p><b>Locking your synced work:</b> ${lk.prog[0]} of ${lk.prog[1]}. Keep the app open and online; your work on this device is safe meanwhile.</p>`;
  if(lk.need==='wait')return `<p class="warnbox">The lock is waiting for the internet. Everything is saved on this device.</p>`;
- if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` ${plural(lk.bad.size,'item')} could not be opened on this device.`:''}</p>${lkUnacked()?`<p class="warnbox" id="lkna"><b>You have not confirmed that you saved your recovery code.</b> ${lk.code?'Open it again and save it somewhere that is not this device.':'This device no longer holds it. Make a new one and save it; the old code stops working.'}</p>`:''}<div class="btns">${lkUnacked()&&lk.code?'<button class="pri" id="lkv">Show My Recovery Code</button>':''}<button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
+ if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` <b>${plural(lk.bad.size,'item')} in the cloud could not be opened on this device.</b> ${lk.bad.size===1?'It was':'They were'} sealed with a key this device does not have, usually by a device that has not unlocked again since the lock was started fresh. Open the app on your other devices and let them sync. Work made on this device is not affected.`:''}</p>${lkUnacked()?`<p class="warnbox" id="lkna"><b>You have not confirmed that you saved your recovery code.</b> ${lk.code?'Open it again and save it somewhere that is not this device.':'This device no longer holds it. Make a new one and save it; the old code stops working.'}</p>`:''}<div class="btns">${lkUnacked()&&lk.code?'<button class="pri" id="lkv">Show My Recovery Code</button>':''}<button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
  if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so no one else can read the copy in the cloud. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock and Sync…</button><button id="lkp">Change Password…</button></div>`;
  return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock and Sync…</button>':''}</div>`;}
 function lkSyncBind(c){const b=(id,f)=>{const e=c.querySelector(id);if(e)e.onclick=()=>{mNext=accountDialog;f();};};b('#lku',lkUnlockDialog);b('#lkv',()=>lkCodeDialog(lk.code,''));b('#lkc',lkNewCodeDialog);b('#lkp',lkPwDialog);b('#lks',lkSetupDialog);}
@@ -2576,10 +2598,14 @@ const wfail=new Set();
 const bigN=()=>sync.big?Object.keys(sync.big).length:0;
 /* a document the cloud will never take as it is (too large): out of the queue, on a list the status and Ready for Set show, until it is changed */
 function bigMark(k){if(!k)return;(sync.big=sync.big||{})[k]=1;sync.dirty=sync.dirty.filter(x=>x!==k);bigToast(k);}
-function writeDoc(ref,data,k){const w=data?ref.set(data):ref.delete();if(!fbPersist)return w;
+function writeDoc(ref,data,k){if(!fbPersist)return data?ref.set(data):ref.delete();
+ /* a locked change is sealed first; only then is it handed to the cloud's own waiting line, and only then does push take it off ours */
+ if(data&&ref.sealSet)return ref.sealSet(data).then(go=>{writeSent(go(),k);});
+ writeSent(data?ref.set(data):ref.delete(),k);return Promise.resolve();}
+function writeSent(w,k){
  unacked++;w.then(()=>{unacked--;updateStatus();},e=>{unacked--;const c=(e&&e.code)||'error';
   if(tooBig(c))bigMark(k);else if(k){syncErr=c;wfail.add(k);markDirty(k);setTimeout(()=>wfail.delete(k),0);clearTimeout(wfT);wfT=setTimeout(()=>schedulePush(0),retryIn());}
-  try{saveLocal();}catch(x){}updateStatus();});return Promise.resolve();}
+  try{saveLocal();}catch(x){}updateStatus();});}
 let wfT=null,imgReady=false;
 /* refused by the cloud (not on the sync list, or removed from it): keep asking, but less and less often. Anything else: every 15 s as before */
 let denyN=0,denyAt=0;
@@ -2613,7 +2639,7 @@ const acctBit=h=>{const b='<button id="acDel">Delete Account…</button>',i=h.la
 /* ---------- deleting an account ---------- */
 let acctShut=false;   /* this account is closed (deleted, or part-way through being deleted): nothing syncs */
 const acctT=(pr,ms)=>Promise.race([pr,new Promise((_,no)=>setTimeout(()=>{const e=new Error('timeout');e.code='timeout';no(e);},ms||20000))]);
-function acctQuiet(){if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}clearTimeout(pushT);coll=null;online='off';}
+function acctQuiet(){if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}if(lk.un2){try{lk.un2();}catch(e){}lk.un2=null;}clearTimeout(pushT);coll=null;online='off';}
 /* a closed account is remembered on the device, so opening the app again never starts its sync before the marker is met */
 const acctShutKey=uid=>'blk.shut.'+uid;
 function acctShutSet(){acctShut=true;try{if(fbUser)lsSet(acctShutKey(fbUser.uid),'1');}catch(e){}}
@@ -2818,7 +2844,8 @@ function applyRemote(snap){gMem.clear();
  if(join&&!snap.docs.length){const now=Date.now(),d=docs();for(const k in d){if(!sync.stamps[k])sync.stamps[k]=now;markDirty(k);}for(const k in images){if(!sync.stamps['img-'+k])sync.stamps['img-'+k]=now;markDirty('img-'+k);}sync.uid=acct;saveLocal();return;}
  const newer=(k,b)=>(b.updatedAt||0)>(sync.stamps[k]||0);
  const pids={};for(const s of P.scenes)pids[s.id]=s.pageId;
- let nConf=0;const take=(k,b)=>{const sc=clone(b.scene);migrateScene(sc);if(mergedNow.length)setTimeout(flushMerged,50);const pv=pids[sc.id];sc.pageId=pv==='all'||sc.pages.some(p=>p.id===pv)?pv:sc.pages[0].id;sync.stamps[k]=b.updatedAt;sync.dirty=sync.dirty.filter(x=>x!==k);if(sync.big)delete sync.big[k];ancAdd(k,[...(b.anc||[]),sceneFp(b.scene)]);pinSet(k,b);if(sync.mine)delete sync.mine[k];if(sync.cf)delete sync.cf[k];return sc;};
+ let nConf=0,nNews=0;const take=(k,b)=>{const sc=clone(b.scene);migrateScene(sc);
+  try{const lp=new Set(((P.scenes.find(x=>x.id===sc.id)||{}).plans||[]).map(p=>p&&p.id));if(b.dev!==DEVICE&&(sc.plans||[]).some(p=>p&&/^cf(?!o)/.test(String(p.id))&&!lp.has(p.id)))nNews++;}catch(e){} /* the other device merged the two versions: say so here too */if(mergedNow.length)setTimeout(flushMerged,50);const pv=pids[sc.id];sc.pageId=pv==='all'||sc.pages.some(p=>p.id===pv)?pv:sc.pages[0].id;sync.stamps[k]=b.updatedAt;sync.dirty=sync.dirty.filter(x=>x!==k);if(sync.big)delete sync.big[k];ancAdd(k,[...(b.anc||[]),sceneFp(b.scene)]);pinSet(k,b);if(sync.mine)delete sync.mine[k];if(sync.cf)delete sync.cf[k];return sc;};
  const arrive=(k,b,local)=>{const d=sceneDecide(k,b,local);if(d==='take')return take(k,b);if(d==='conflict'){nConf++;const c=sceneConflict(k,b,local);c.pageId=local.pageId;return c;}if(d==='same'){ancAdd(k,[sceneFp(b.scene)]);if(b.dev!==DEVICE){pinSet(k,b);if(sync.mine)delete sync.mine[k];}const oc=JSON.stringify(b.scene.conflicts||[]);if(oc!==JSON.stringify(local.conflicts||[])){const c=clone(local);if(b.scene.conflicts&&b.scene.conflicts.length)c.conflicts=clone(b.scene.conflicts);else delete c.conflicts;sync.stamps[k]=b.updatedAt||sync.stamps[k];return c;}}return local;};
  let metaBack=false;if(meta){const was=canonJ([P.characters,P.folders,P.productions,P.labels,P.prefs||{}]);try{metaBack=metaMerge(meta);const lw=canonJ(P.locations||[]);P.locations=locMerge(P.locations,meta.locations);if(canonJ(P.locations)!==canonJ(meta.locations||[]))metaBack=true;if(canonJ(P.locations)!==lw)changed=true;}catch(e){console.error(e);}if(canonJ([P.characters,P.folders,P.productions,P.labels,P.prefs||{}])!==was)changed=true;}
  if(meta&&(join||newer('meta',meta))){
@@ -2843,6 +2870,7 @@ function applyRemote(snap){gMem.clear();
   {const ord=(meta&&meta.sceneOrder)||[],ai=ord.indexOf(id);let at=P.scenes.length;if(ai>=0)for(let q=ai+1;q<ord.length;q++){const z=P.scenes.findIndex(x=>x.id===ord[q]);if(z>=0){at=z;break;}}P.scenes.splice(at,0,take(k,b));}changed=true;}}
  if(meta){const RS=(meta.tomb&&meta.tomb.s)||{},out=[],keep=P.scenes.filter(s=>{if(delWins(s.id,RS[s.id])){out.push(s.id);return false;}return true;});if(keep.length&&keep.length!==P.scenes.length){P.scenes=keep;goneNow.push(...out);changed=true;}}
  for(const k in sd){const b=sd[k];if(!b.scene)continue;const i=P.scenes.findIndex(s=>'scene-'+s.id===k);if(i<0)continue;const was=P.scenes[i],nx=arrive(k,b,was);if(nx!==was){P.scenes[i]=nx;changed=true;}}
+ if(nNews&&!nConf)setTimeout(()=>toast(nNews===1?'A scene was changed on both devices. The newer version is in place; the older one is saved as a Blocking Plan (Pages menu).':nNews+' scenes were changed on both devices. The newer version of each is in place; the older ones are saved as Blocking Plans (Pages menu).',7000),60);
  if(nConf)setTimeout(()=>{toast(nConf===1?'A scene was changed on both devices. The newer version is in place; the older one is saved as a Blocking Plan (Pages menu).':nConf+' scenes were changed on both devices. The newer version of each is in place; the older ones are saved as Blocking Plans (Pages menu).');saveLocal();schedulePush(500);},30);
  let tch=0,tconf=0;for(const k in td){const r=mergeTxt(k,td[k]);if(r){tch+=r.ch;tconf+=r.conf;}}
  if(tconf)toast(tconf===1?'One piece of writing was changed on two devices. Both versions are kept, look for OTHER VERSION.':tconf+' pieces of writing were changed on two devices. Both versions are kept, look for OTHER VERSION.');
@@ -2931,6 +2959,7 @@ function updateStatus(){acctNote();
  else if(imgProg.of>0)t=`Downloading pictures ${Math.min(imgProg.n+1,imgProg.of)} of ${imgProg.of}…`;
  else if(imgProg.bulk)t='Downloading pictures…';
  else if(bigN()){t='Part too large to sync · saved here';c='warn';}
+ else if(coll.locked&&lk.bad.size){t=`Synced · ${lk.bad.size} unreadable`;c='warn';}
  else{t='Synced';c='ok';}
  el.textContent=t;el.className=c;el.title=t+(coll?' · last confirmed by the cloud '+whenTxt(lastSync):'');
  $('#bUndo').disabled=!undoS.length&&!penPend.length;$('#bRedo').disabled=!redoS.length&&!penRedo.length;
@@ -6907,7 +6936,7 @@ const ST_PICK=['OPENING SHOT','SCRIPT CHANGE','NOTE'];
 const CUT_TYPES=['MATCH CUT','CONTRAST CUT','POSSIBLE MATCH CUT','POSSIBLE CONTRAST CUT'];
 const STORIES=[{id:'A',name:'A story',color:'#E5484D'},{id:'B',name:'B story',color:'#3E63DD'},{id:'C',name:'C story',color:'#30A46C'},{id:'D',name:'D story',color:'#8E4EC6'}];
 function storyHome(s){const fid=s&&sFolder(s);return fid?topFolder(fid):null;}
-function storiesFor(s){const tf=storyHome(s);if(tf&&Array.isArray(tf.stories)&&tf.stories.length)return tf.stories;const pr=prodFor(s);if(pr&&Array.isArray(pr.stories)&&pr.stories.length)return pr.stories;return Array.isArray(P.stories)&&P.stories.length?P.stories:STORIES;}
+function storiesFor(s){const tf=storyHome(s);if(tf&&Array.isArray(tf.stories)&&tf.stories.length)return tf.stories;const pr=prodFor(s);if(pr&&Array.isArray(pr.stories)&&pr.stories.length)return pr.stories;{const mine=prefGet('stories');if(Array.isArray(mine)&&mine.length)return mine;}return Array.isArray(P.stories)&&P.stories.length?P.stories:STORIES;}
 function storiesDialog(s,after){const tf=storyHome(s),L=clone(storiesFor(s)),where=tf?esc(tf.name):'scenes that aren’t in a folder';
  const row=(t,i)=>`<div class="psr" data-id="${esc(t.id)}" style="display:flex;gap:8px;margin-top:8px;align-items:center"><b class="stid">${esc(/^[A-Z]$/.test(t.id)?t.id:'•')}</b><input type="color" data-s="color" value="${esc(hex7(t.color))}" style="width:46px;height:36px;padding:0;border:0;background:none;flex:none"><input data-s="name" value="${esc(t.name||'')}" placeholder="e.g. Maya &amp; Dev" style="flex:1"><button class="sm" data-rm="${i}" title="Remove story" style="flex:none;width:38px;padding:0">✕</button></div>`;
  modal(`<h3>Stories</h3><p class="mut">The names and colors of the stories in ${where}. ${tf?'Every scene in it uses this list.':''} The Breakdown is tinted with the scene’s story color.</p><div id="stL">${L.map(row).join('')}</div><button class="sm" id="stAddS" style="margin-top:10px">Add a story</button>
@@ -6917,7 +6946,7 @@ function storiesDialog(s,after){const tf=storyHome(s),L=clone(storiesFor(s)),whe
   q('#stAddS').onclick=()=>{cur=read();const used=new Set(cur.map(t=>t.id)),id='ABCDEFGHIJKL'.split('').find(c=>!used.has(c))||uid();cur.push({id,name:'',color:distinctColor(cur.map(t=>t.color))});draw();q('#stL').lastChild.querySelector('[data-s=name]').focus();};
   q('#stL').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(!b)return;cur=read();cur.splice(+b.dataset.rm,1);draw();});
   q('#stReset').onclick=()=>{cur=clone(STORIES);draw();};
-  q('#stOk').onclick=()=>{cur=read().map(t=>Object.assign(t,{name:t.name||(/^[A-Z]$/.test(t.id)?t.id+' story':'Story')}));if(!cur.length)cur=clone(STORIES);if(tf)tf.stories=cur;else P.stories=cur;closeModal();commit();renderDocs(true);toast(tf?`Stories saved for ${tf.name}.`:'Stories saved.');if(after)after();};
+  q('#stOk').onclick=()=>{cur=read().map(t=>Object.assign(t,{name:t.name||(/^[A-Z]$/.test(t.id)?t.id+' story':'Story')}));if(!cur.length)cur=clone(STORIES);if(tf)tf.stories=cur;else{delete P.stories;prefSet('stories',cur);}closeModal();commit();renderDocs(true);toast(tf?`Stories saved for ${tf.name}.`:'Stories saved.');if(after)after();};
  },'numcard');}
 function storyOf(s){return s&&s.story?storiesFor(s).find(x=>x.id===s.story)||null:null;}
 
@@ -7292,7 +7321,7 @@ function cutMenu(btn,key){const [o,id]=key.split(':');docPop(btn,[{label:'Change
 let stHold=null,stSwallow=false,stLast=null;
 function storyRename(id){const s=scene(),L=storiesFor(s),t=L.find(x=>x.id===id);if(!t)return;const tf=storyHome(s);
  modal(`<h3>Rename story</h3><p class="mut">${tf?'For every scene in '+esc(tf.name)+'.':'For scenes that aren’t in a folder.'}</p><label class="fld">Name<input id="srn" value="${esc(t.name||'')}" autocomplete="off" placeholder="e.g. Maya &amp; Dev"></label><div class="btns end"><button data-x>Cancel</button><button class="pri" id="ok">Save</button></div>`,card=>{
-  const i=card.querySelector('#srn'),go=()=>{const v=i.value.trim();if(!v)return;const list=clone(L);list.find(x=>x.id===id).name=v;if(tf)tf.stories=list;else P.stories=list;closeModal();commit();renderDocs(true);};
+  const i=card.querySelector('#srn'),go=()=>{const v=i.value.trim();if(!v)return;const list=clone(L);list.find(x=>x.id===id).name=v;if(tf)tf.stories=list;else{delete P.stories;prefSet('stories',list);}closeModal();commit();renderDocs(true);};
   card.querySelector('#ok').onclick=go;i.addEventListener('keydown',e=>{if(e.key==='Enter')go();});i.focus();i.select();},'numcard');}
 function docClick(e){
  if(stSwallow){stSwallow=false;if(e.target.closest('[data-story]'))return;}
