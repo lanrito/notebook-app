@@ -758,7 +758,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127023300';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127030718';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -1965,10 +1965,14 @@ function showUpdate(msg){if(document.getElementById('updBar'))return;const d=doc
 const UPD=(o=>Object.assign(o,Object.assign({away:30000,idle:300000,quiet:20000,every:600000,gap:120000,tick:30000},o)))(window.BB_UPD||{}); /* milliseconds; a test page may hand in its own */
 let updPending=false,updMsg='',updTag='',updHidAt=0,updAct=Date.now(),updQuiet=Date.now(),updFile=0,updAsk=Date.now();
 function appReload(auto){try{flushNotes();if(typeof txFlush==='function')txFlush();saveLocal();}catch(e){}
- const t0=Date.now(),go=()=>{if((pIn>0||imgIn>0)&&Date.now()-t0<5000){setTimeout(go,150);return;}try{if(auto){sessionStorage.setItem('blk.upd',String(Date.now()));sessionStorage.setItem('blk.updT',String(Date.now()));if(updTag)sessionStorage.setItem('blk.updTag',updTag);}}catch(e){}location.reload();};go();}
+ const t0=Date.now(),go=()=>{if((pIn>0||imgIn>0)&&Date.now()-t0<8000){setTimeout(go,150);return;}
+  if(!localOk||pIn>0||imgIn>0){ /* this device could not save the latest work: no reload takes it away unasked */
+   if(auto){showUpdate(updMsg||'A new version of the app is ready.');return;}
+   confirmBox('Reload without saving?','This device could not save your latest changes, so reloading now would lose them. If you can, choose Cancel, then Menu › Sync & Backup › Back Up Everything.','Reload Anyway',()=>location.reload());return;}
+  try{if(auto){sessionStorage.setItem('blk.upd',String(Date.now()));sessionStorage.setItem('blk.updT',String(Date.now()));if(updTag)sessionStorage.setItem('blk.updTag',updTag);}}catch(e){}location.reload();};go();}
 function updSafe(){let last=0;try{last=+sessionStorage.getItem('blk.upd')||0;if(updTag&&sessionStorage.getItem('blk.updTag')===updTag)return false;}catch(e){}
  const a=document.activeElement,typing=!!a&&(/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)||a.isContentEditable);
- return navigator.onLine!==false&&Date.now()-last>UPD.gap&&!gesture&&!penT&&!penPend.length&&!tool&&!typing&&!(pIn>0||imgIn>0)&&!(updFile&&Date.now()-updFile<600000)&&modalEl.hidden!==false&&!document.querySelector('#pop.on,#drop,#br');}
+ return navigator.onLine!==false&&localOk&&Date.now()-last>UPD.gap&&!gesture&&!penT&&!penPend.length&&!tool&&!typing&&!(pIn>0||imgIn>0)&&!(updFile&&Date.now()-updFile<600000)&&modalEl.hidden!==false&&!document.querySelector('#pop.on,#drop,#br');}
 function updMark(msg,tag){if(!updPending){updPending=true;updMsg=msg;updTag=tag||'';}
  if(document.visibilityState==='hidden')return; /* decided on the way back */
  if(updAct<=updQuiet&&Date.now()-updQuiet<UPD.quiet&&updSafe()){appReload(true);return;} /* just arrived and nothing touched yet */
@@ -2554,7 +2558,7 @@ function syncProbe(){clearTimeout(probeT);if(!coll||!fbUser||online==='on')retur
 /* the live connection stopped (refused before this account was approved, or dropped by the service): start it again */
 let reviveAt=0;
 function syncRevive(){if(online!=='error'||!fbUser||!coll||acctShut||Date.now()-reviveAt<4000)return;reviveAt=Date.now();try{syncListen(fbUser,coll);if(!coll.locked)lkAsk();else if(!lk.sure)lkAfter();}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncRevive();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(denyN>1&&syncErr==='permission-denied'&&coll){denyN=0;schedulePush(1500);}syncRevive();}});
 function syncWhy(){if(!navigator.onLine)return 'This device has no internet connection right now.';
  if(online==='quota')return 'The sync service’s free daily limit for this app has been used up. Sync starts again by itself after midnight Pacific time. Until then everything is saved on this device, and it’s all sent once sync is back.';
  if(online==='stuck')return 'The sync service is answering, but the live connection got stuck. The app is reconnecting by itself; if this stays for more than a minute or two, reload the page. Everything is saved on this device meanwhile.';
@@ -2574,9 +2578,12 @@ const bigN=()=>sync.big?Object.keys(sync.big).length:0;
 function bigMark(k){if(!k)return;(sync.big=sync.big||{})[k]=1;sync.dirty=sync.dirty.filter(x=>x!==k);bigToast(k);}
 function writeDoc(ref,data,k){const w=data?ref.set(data):ref.delete();if(!fbPersist)return w;
  unacked++;w.then(()=>{unacked--;updateStatus();},e=>{unacked--;const c=(e&&e.code)||'error';
-  if(tooBig(c))bigMark(k);else if(k){syncErr=c;wfail.add(k);markDirty(k);setTimeout(()=>wfail.delete(k),0);clearTimeout(wfT);wfT=setTimeout(()=>schedulePush(0),15000);}
+  if(tooBig(c))bigMark(k);else if(k){syncErr=c;wfail.add(k);markDirty(k);setTimeout(()=>wfail.delete(k),0);clearTimeout(wfT);wfT=setTimeout(()=>schedulePush(0),retryIn());}
   try{saveLocal();}catch(x){}updateStatus();});return Promise.resolve();}
 let wfT=null,imgReady=false;
+/* refused by the cloud (not on the sync list, or removed from it): keep asking, but less and less often. Anything else: every 15 s as before */
+let denyN=0,denyAt=0;
+function retryIn(){if(syncErr!=='permission-denied'){denyN=0;return 15000;}const now=Date.now();if(now-denyAt>10000){denyAt=now;denyN=Math.min(denyN+1,6);}return Math.min(300000,15000*Math.pow(2,denyN-1));}
 function authMsg(e){const c=(e&&e.code)||'';return ({'auth/invalid-credential':'That email and password don’t match. First time here? Tap Create account.','auth/invalid-login-credentials':'That email and password don’t match. First time here? Tap Create account.','auth/missing-email':'Type your email first.','auth/user-disabled':'This account has been switched off. Write to info@thedirectorsnotebook.com.','auth/admin-restricted-operation':'New accounts are switched off right now. Write to info@thedirectorsnotebook.com.','auth/web-storage-unsupported':'This browser is blocking saved data, so it can’t sign in. Turn off private browsing, or use another browser.','auth/internal-error':'The sign-in service had a problem. Try again in a minute.','auth/wrong-password':'That email and password don’t match.','auth/missing-password':'Type a password first.','auth/user-not-found':'No account with that email yet. Tap Create account.','auth/email-already-in-use':'There’s already an account with that email. Tap Sign in.','auth/weak-password':'Use at least 10 characters for the password.','auth/invalid-email':'That email address doesn’t look right.','auth/network-request-failed':'No connection. Sign in when you’re online; your work stays saved here.','auth/operation-not-allowed':'Email sign-in isn’t switched on in Firebase yet.','auth/too-many-requests':'Too many tries. Wait a minute and try again.'})[c]||('Something went wrong. Please try again.'+authWhy(e));}
 function authWhy(e){const c=String((e&&e.code)||'').replace(/^auth\//,''),m=c||String((e&&e.message)||'').replace(/\s+/g,' ').trim();return m?' Reason: '+m.slice(0,90)+(/[.!?]$/.test(m)?'':'.'):'';}
 /* ---------- the free account: without one, this device holds one scene and one location scout ---------- */
@@ -2665,13 +2672,16 @@ function accountDialog(){
   {const ad=c.querySelector('#acDel');if(ad)ad.onclick=()=>{kidNext();acctDeleteDialog();};}const ap=c.querySelector('#apr');if(ap){ap.onclick=()=>kidNext()||approvedDialog();apProbe().then(()=>{if(ap.isConnected)ap.hidden=!apOwn();});}const sn=c.querySelector('#snow');if(sn)sn.onclick=()=>{closeModal();syncNow();};const re=c.querySelector('#sre');if(re)re.onclick=()=>location.reload();c.querySelector('#so').onclick=async()=>{try{await fbAuth.signOut();}catch(e){}closeModal();toast('Signed out. Your work stays saved on this device.');};});return;}
  modal(`<h3>Sign in</h3><p class="mut">A free account opens as many scenes as you need. Use the same email and password on every device you use. The very first time, choose a password and tap Create account.</p><p class="mut" id="invn">Sync across devices is invitation only for now. To request access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p><label class="fld">Email<input id="em" type="email" autocomplete="username" autocapitalize="off"></label><label class="fld">Password<input id="pw" type="password" autocomplete="current-password"></label><label class="fld" id="pw2w" hidden>Type the password again, then tap Create account<input id="pw2" type="password" autocomplete="new-password"></label><p id="aerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns"><button id="fp">Forgot password</button></div><div class="btns end"><button id="ca">Create account</button><button class="pri" id="si">Sign in</button></div><p class="mut" id="prv" style="margin-top:12px;font-size:12.5px">We use your email only to sign you in. We do not sell it. <a href="https://thedirectorsnotebook.com/#privacy" target="_blank" rel="noopener">Privacy</a></p>`,c=>{
   const em=()=>c.querySelector('#em').value.trim(),pw=()=>c.querySelector('#pw').value,err=m=>{c.querySelector('#aerr').textContent=m;};
-  const run=async(f,msg)=>{err('');try{await f();closeModal();toast(msg||'Signed in.');}catch(e){err(authMsg(e));}};
+  const run=async(f,msg)=>{err('');try{await f();closeModal();toast((typeof msg==='function'?msg():msg)||'Signed in.',typeof msg==='function'?7000:0);}catch(e){err(authMsg(e));}};
   c.querySelector('#si').onclick=()=>run(()=>{lkPwHold(pw());acctTell=true;return fbAuth.signInWithEmailAndPassword(em(),pw());});
   /* a new account types its password twice: the first tap on Create account opens the second box, the next one checks the two match */
   c.querySelector('#ca').onclick=()=>{const w=c.querySelector('#pw2w'),p2=c.querySelector('#pw2');
    if(w.hidden){err('');if(!em()){err('Type your email first.');return;}if(pw().length<LOCK_MIN){err(authMsg({code:'auth/weak-password'}));return;}w.hidden=false;p2.value='';c.querySelector('#ca').classList.add('pri');c.querySelector('#si').classList.remove('pri');p2.focus();return;}   /* Create account becomes the blue button while its second box is open */
    if(p2.value!==pw()){err('The two passwords are not the same.');p2.focus();return;}
-   run(()=>{if(pw().length<LOCK_MIN){const e=new Error('weak');e.code='auth/weak-password';throw e;}lkPwHold(pw());const to=em();return fbAuth.createUserWithEmailAndPassword(to,pw()).then(async cr=>{try{await ((cr&&cr.user)||fbAuth.currentUser).sendEmailVerification();}catch(e){}});},'Account created. We sent a link to '+em()+' to confirm your email.');};
+   const to=em();let sent=true;
+   run(()=>{if(pw().length<LOCK_MIN){const e=new Error('weak');e.code='auth/weak-password';throw e;}lkPwHold(pw());return fbAuth.createUserWithEmailAndPassword(to,pw()).then(async cr=>{const u=(cr&&cr.user)||fbAuth.currentUser;
+     try{if(u&&u.uid&&!u.emailVerified)lsSet('blk.acct.'+u.uid,'no');}catch(e){} /* new and unconfirmed from the first moment, not from the cloud's first refusal */
+     try{await u.sendEmailVerification();}catch(e){sent=false;}});},()=>sent?'Account created. We sent a link to '+to+' to confirm your email.':'Account created. The email to confirm your address could not be sent just now. Tap the status at the top right, then Send it again.');};
   c.querySelector('#pw2').addEventListener('keydown',e=>{if(e.key==='Enter')c.querySelector('#ca').click();});
   c.querySelector('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')c.querySelector('#si').click();});
   c.querySelector('#fp').onclick=async()=>{if(!em()){err('Type your email first.');return;}try{await fbAuth.sendPasswordResetEmail(em());err('If there’s an account for that email, a reset link is on its way. Nothing in a minute or two (check spam)? Then there’s no account yet: pick a password and tap Create account.');}catch(e){err(authMsg(e));}};
@@ -2764,9 +2774,9 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
      <div class="apl">${list.length?list.map((e,i)=>`<div class="apr"><span>${esc(e)}</span><button data-rm="${i}" aria-label="Remove ${esc(e)}">×</button></div>`).join(''):'<p class="mut" style="margin:6px 0">No one yet.</p>'}</div>
      <div class="apa"><input id="apE" type="email" placeholder="friend@example.com" autocapitalize="off" autocomplete="off"><button class="pri" id="apAdd">Add</button></div>
      <p class="mut" style="font-size:12.5px">They tap Create account in the app using exactly this email, then open the link we email them to confirm it. Removing someone stops their syncing; their scenes stay on their devices.</p>`;
-    const add=async()=>{const i=box.querySelector('#apE'),v=i.value.trim().toLowerCase();if(!valid(v)){toast('That doesn’t look like an email address.');return;}if(v===me){toast('You’re always allowed.');return;}if(!list.includes(v)){list.push(v);list.sort();if(await save())toast(`${v} can sync now.`);}draw();};
+    const add=async()=>{const i=box.querySelector('#apE'),v=i.value.trim().toLowerCase();if(!valid(v)){toast('That doesn’t look like an email address.');return;}if(v===me){toast('You’re always allowed.');return;}if(!list.includes(v)){const was=list.slice();list.push(v);list.sort();if(await save())toast(`${v} can sync now.`);else list=was;}draw();};
     box.querySelector('#apAdd').onclick=add;box.querySelector('#apE').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
-    box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const v=list[+b.dataset.rm];list.splice(+b.dataset.rm,1);if(await save())toast(`${v} removed.`);draw();});cpBind();return;}
+    box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{const v=list[+b.dataset.rm],was=list.slice();list.splice(+b.dataset.rm,1);if(await save())toast(`${v} removed.`);else list=was;draw();});cpBind();return;}
    /* off (or wide open): the one-time setup */
    box.innerHTML=`<p>${state==='open'?'Right now <b>anyone</b> who signs in can sync.':'Approval isn’t on yet.'} To allow only the people you choose, do this once in Firebase:</p>
     <ol class="aps"><li>Open your Firebase rules: <a href="https://console.firebase.google.com/project/${esc(pid)}/firestore/rules" target="_blank" rel="noopener">Firebase › Firestore › Rules</a>. Sign in with the Google account you made it with.</li>
@@ -2856,7 +2866,7 @@ function schedulePush(ms){if(!coll)return;clearTimeout(pushT);pushT=setTimeout(p
 let pushDefer=0;
 async function push(){
  if(!coll||pushing||outdated||copyPaused)return;
- if(lkHold()){if(online==='error'){syncRevive();clearTimeout(lk.rvT);lk.rvT=setTimeout(()=>schedulePush(0),15000);}updateStatus();return;} /* held, and the live connection was refused (not on the sync list yet): keep asking, as the refused sends used to */
+ if(lkHold()){if(online==='error'){syncRevive();clearTimeout(lk.rvT);lk.rvT=setTimeout(()=>schedulePush(0),retryIn());}updateStatus();return;} /* held, and the live connection was refused (not on the sync list yet): keep asking, as the refused sends used to */
  if(gesture&&pushDefer<8){pushDefer++;schedulePush(600);return;}pushDefer=0;
  detectChanges(); /* anything typed or moved since the last save is counted before sending */
  if(!sync.dirty.length){updateStatus();return;}
@@ -2883,7 +2893,7 @@ async function push(){
  if(!wfail.size)syncErr=err;
  pushing=false;saveLocal();updateStatus();
  if(went&&!err)syncRevive();
- if(retry)setTimeout(()=>schedulePush(0),15000);else if(sync.dirty.length)schedulePush(again?900:300);else confirmSynced();
+ if(retry)setTimeout(()=>schedulePush(0),retryIn());else if(sync.dirty.length)schedulePush(again?900:300);else confirmSynced();
 }
 /* ---------- when the cloud last confirmed everything from this device ---------- */
 let lastSync=+(lsGet('blk.lastSync')||0);
@@ -2894,7 +2904,7 @@ function confirmSynced(){if(sync.dirty.length||outdated||bigN())return;if(fbDb&&
 function syncNow(){if(!coll){toast(fbAuth?'Sign in first (Menu › Sync & Backup).':'Sync isn’t set up in this copy of the app.');return;}
  if(!navigator.onLine){toast('No internet connection. Everything is saved on this device and will sync when you’re back online.');return;}
  if(lkHold()&&!coll.locked){toast('Your work syncs once it is locked: tap the status at the top right, then Lock and Sync…');return;}
- toast('Syncing…');const go=()=>{detectChanges();saveLocal();schedulePush(0);try{const m=docs().meta;if(m&&coll){for(const id of m.imgs)if(!images[id])imgTry[id]=0;imgPull();}}catch(e){}
+ denyN=0;toast('Syncing…');const go=()=>{detectChanges();saveLocal();schedulePush(0);try{const m=docs().meta;if(m&&coll){for(const id of m.imgs)if(!images[id])imgTry[id]=0;imgPull();}}catch(e){}
   const t0=Date.now(),wait=()=>{if(!sync.dirty.length&&!pushing){if(fbDb&&fbDb.waitForPendingWrites)fbDb.waitForPendingWrites().then(()=>{if(sync.dirty.length||syncErr){toast('Not everything could be sent yet. Your work is saved here; it will keep trying.');return;}if(bigN()){toast('Sent, except what is too large to sync. Ready for Set shows which part.');return;}markSynced();toast('Sent. Everything made here is in the cloud; your other device gets it the next time it’s online.');}).catch(()=>toast('Couldn’t reach the cloud. Your work is saved here; try again in a moment.'));else{markSynced();toast('Synced.');}}else if(Date.now()-t0<20000)setTimeout(wait,500);else toast('Still sending. It will finish in the background.');};setTimeout(wait,400);};
  if(fbDb&&fbDb.disableNetwork){fbDb.disableNetwork().then(()=>fbDb.enableNetwork()).then(go,go);}else go();}
 function updateStatus(){acctNote();
@@ -7829,7 +7839,11 @@ function exportDialog(){const s=scene(),fid=sFolder(s),o=expOpts(),mp=s.pages.le
    saveLocal();closeModal();exportPDF(v);};
  },'numcard');}
 async function exportPNG(){const s=scene();try{const c=await rasterize(sheetSVG(s,s.pageId),1650,1275,1.5);const blob=await new Promise(r=>c.toBlob(r,'image/png'));await save(fname(s)+(s.pages.length>1?' '+(s.pageId==='all'?'all pages':pageName(s,s.pageId)):'')+'.png',blob);}catch(e){toast('Image export failed.');}}
-async function backup(){const d=new Date().toISOString().slice(0,10);await save(`The Director’s Notebook backup ${d}.json`,JSON.stringify({app:'blocking-board',v:3,characters:P.characters,folders:P.folders,productions:P.productions||[],labels:P.labels||{},prefs:P.prefs||{},text:P.text||{},locations:P.locations||[],scenes:P.scenes.map(stripScene),images}));}
+async function backup(){try{flushNotes();if(txTimer)txFlush();}catch(e){}
+ if(!imgReady){toast('Gathering your pictures…',22000);const t0=Date.now();while(!imgReady&&Date.now()-t0<21000)await new Promise(r=>setTimeout(r,150));}
+ let miss=0;try{const need=new Set();for(const sc of P.scenes)for(const k of sceneImgs(sc))need.add(k);for(const k of need)if(!images[k])miss++;}catch(e){}
+ const d=new Date().toISOString().slice(0,10);await save(`The Director’s Notebook backup ${d}.json`,JSON.stringify({app:'blocking-board',v:3,characters:P.characters,folders:P.folders,productions:P.productions||[],labels:P.labels||{},prefs:P.prefs||{},text:P.text||{},locations:P.locations||[],scenes:P.scenes.map(stripScene),images}));
+ if(miss)setTimeout(()=>toast(`Backup saved, but ${plural(miss,'picture')} had not reached this device yet, so the file does not hold ${miss>1?'them':'it'}. Let sync finish, then back up again.`,10000),600);}
 $('#fJson').addEventListener('change',async e=>{
  const f=e.target.files[0];e.target.value='';if(!f)return;
  try{const o=JSON.parse(await f.text());if(o.app!=='blocking-board'||!Array.isArray(o.scenes)||!o.scenes.length)throw 0;
