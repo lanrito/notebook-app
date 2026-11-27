@@ -758,7 +758,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127035544';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127051951';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -819,7 +819,7 @@ function propOpts(s){const root=rootOf(s),out=[],add=v=>{v=String(v||'').trim();
  shots(s);for(const it of s.items)if(it.type==='prop'&&it.label)add(it.label);for(const sc of P.scenes)if(sc!==s&&rootOf(sc)===root)shots(sc);return out;}
 const PRI=[['A','Must have'],['B','Should have'],['C','If there is time']];
 /* the shot list can be narrowed to the top priorities; only while the Priority column is on, and it carries into the PDF */
-const priF=s=>colsOn(s).some(c=>c.k==='pri')?(uiOn('priF')||''):'';
+const priF=s=>expAllPri?'':colsOn(s).some(c=>c.k==='pri')?(uiOn('priF')||''):'';
 function priRows(s,rows){const f=priF(s);return f?rows.filter(r=>f.includes(r.m.pri||'-')):rows;}
 const priSel=(attrs,v,first)=>`<select ${attrs}>${first}${PRI.map(([p,l])=>`<option value="${p}"${v===p?' selected':''}>${p} · ${l}</option>`).join('')}</select>`;
 const vaOn=()=>!!uiOn('va');
@@ -1763,7 +1763,9 @@ function iconSVG(k){
 }
 
 /* ---------- model ---------- */
-function blankScene(num){const pg={id:uid(),name:'Page 1'};return {id:uid(),number:String(num),title:'',heading:'',synopsis:'',code:'',day:'',setups:[],items:[],pages:[pg],bgId:null,bg:null,pageId:'all',wv:1};}
+function blankScene(num){const pg={id:uid(),name:'Page 1'};const o={id:uid(),number:String(num),title:'',heading:'',synopsis:'',code:'',day:'',setups:[],items:[],pages:[pg],bgId:null,bg:null,pageId:'all',wv:1};
+ try{const nd=P&&P.prefs&&P.prefs.numDefault&&P.prefs.numDefault.v;if(nd&&typeof nd==='object')o.numbering=clone(nd);}catch(e){} /* the numbering default is for new scenes */
+ return o;}
 let P=null,images={},sel=null;
 const scene=()=>P.scenes.find(s=>s.id===P.sceneId)||P.scenes[0];
 function posStarts(it){if(it.type==='char')return it.marks.map((m,i)=>m.t?-1:i).filter(i=>i>=0);if(it.type==='cam')return it.marks.map((m,i)=>i);if(it.type==='prop'||it.type==='light')return [0,...(it.mv||[]).map((_,i)=>i+1)];return [0];}
@@ -1915,6 +1917,8 @@ migrate();
 /* story names for scenes outside a folder used to sit where sync and backups did not look; they travel with the account's preferences now */
 try{if(Array.isArray(P.stories)&&P.stories.length&&!P.prefs.stories)P.prefs.stories={v:P.stories,t:1};delete P.stories;}catch(e){}
 try{folderHeal();}catch(e){}
+/* the numbering default used to live on one device and restyle every scene without settings of its own. Those scenes get it written in, once, so they look as they did; from here on it travels with the account and applies to new scenes only */
+try{if(P.numDefault&&typeof P.numDefault==='object'){const d=P.numDefault;for(const x of P.scenes)if(!x.tpl){x.numbering=x.numbering||{};for(const k in d)if(x.numbering[k]===undefined)x.numbering[k]=d[k];}if(!P.prefs.numDefault)P.prefs.numDefault={v:clone(d),t:1};}delete P.numDefault;}catch(e){}
 let castNow=[];try{castNow=castReconcile();}catch(e){}
  ensureLive();baseline();if(castNow.length){mergedNow.push(...castNow);delete lastJson.meta;}flushMerged();
  for(const sc of P.scenes){const k='scene-'+sc.id;if(!ancOf(k).length)ancAdd(k,[sceneFp(stripScene(sc))]);}
@@ -2182,13 +2186,21 @@ function restore(snap){gMem.clear();
  cur=snap;sel=null;msel=null;rvBump(mk);detectChanges();cur=snapshot();saveLocal();schedulePush();render();
 }
 /* give the undo step for a restore the writing as it was before, even when only writing changed */
-function undoWithText(tx0,u0,j0,g0){if(!tx0)return;if(undoS.length>u0)undoS[undoS.length-1].tx=tx0;else if(JSON.stringify(tx0)!==JSON.stringify(P.text||{})){undoS.push({j:j0,g:g0,tx:tx0});redoS=[];updateStatus();}}
+function undoWithText(tx0,u0,j0,g0){if(!tx0)return;if(undoS.length>u0){undoS[undoS.length-1].tx=tx0;undoS[undoS.length-1].txT=txStamps();}else if(JSON.stringify(tx0)!==JSON.stringify(P.text||{})){undoS.push({j:j0,g:g0,tx:tx0,txT:txStamps()});redoS=[];updateStatus();}}
 function undoTx(e,into){const n={j:cur,g:rgen};if(e.tx)n.tx=clone(P.text||{});into.push(n);return e.tx;}
-function undoTxApply(tx){if(!tx)return;try{txAdopt(tx);txFlush();renderDocs(true);}catch(x){console.error(x);}}
+/* every piece of writing with the moment it was last changed: taken right after a restore, an undo or a redo, so the next
+   one can tell what has been written or received since (a stamp that is not the one recorded), whatever the clocks say */
+function txStamps(){const o={};for(const sid in P.text||{}){const c=txCells(P.text[sid]);for(const key in c)o[sid+'\u0001'+key]=c[key].t||0;}return o;}
+/* writing put back by Undo or Redo: anything written or received after that point is kept, cell by cell */
+function undoTxApply(tx,T,into){if(!tx)return;try{const later=[];
+  if(T)for(const sid in P.text||{}){const c=txCells(P.text[sid]);for(const key in c)if((c[key].t||0)>1&&T[sid+'\u0001'+key]!==(c[key].t||0))later.push([sid,key,clone(c[key])]);}
+  txAdopt(tx);let n=0;
+  for(const [sid,key,c] of later){if(!P.scenes.some(z=>z.id===sid))continue;txPut(txOf(sid,true),key,c);txBump(sid,key,c);n++;}
+  txFlush();if(into&&into.length)into[into.length-1].txT=txStamps();renderDocs(true);if(n)toast('Writing changed after that point was kept.');}catch(x){console.error(x);}}
 let penRedo=[];
 function penBtns(){try{$('#bUndo').disabled=!undoS.length&&!penPend.length;$('#bRedo').disabled=!redoS.length&&!penRedo.length;}catch(e){}}
-function undo(){if(penPend.length&&tool&&tool.t==='pen'){penRedo.push(penPend.pop());if(!penPend.length){clearTimeout(penT);penT=null;}penRedraw();penBtns();return;}penCommitNow();if(!undoS.length)return;const e=undoS[undoS.length-1],tx=undoTx(e,redoS);undoS.pop();restore(patchSnap(e.j,e.g));undoTxApply(tx);}
-function redo(){if(penRedo.length&&tool&&tool.t==='pen'){penPend.push(penRedo.pop());clearTimeout(penT);penT=setTimeout(penCommit,PEN_REST);penRedraw();penBtns();return;}penCommitNow();if(!redoS.length)return;const e=redoS[redoS.length-1],tx=undoTx(e,undoS);redoS.pop();restore(patchSnap(e.j,e.g));undoTxApply(tx);}
+function undo(){if(penPend.length&&tool&&tool.t==='pen'){penRedo.push(penPend.pop());if(!penPend.length){clearTimeout(penT);penT=null;}penRedraw();penBtns();return;}penCommitNow();if(!undoS.length)return;const e=undoS[undoS.length-1],tx=undoTx(e,redoS);undoS.pop();restore(patchSnap(e.j,e.g));undoTxApply(tx,e.txT,redoS);}
+function redo(){if(penRedo.length&&tool&&tool.t==='pen'){penPend.push(penRedo.pop());clearTimeout(penT);penT=setTimeout(penCommit,PEN_REST);penRedraw();penBtns();return;}penCommitNow();if(!redoS.length)return;const e=redoS[redoS.length-1],tx=undoTx(e,undoS);redoS.pop();restore(patchSnap(e.j,e.g));undoTxApply(tx,e.txT,undoS);}
 
 /* ---------- the lock: synced work is sealed on this device before it is sent ----------
    One random 256-bit key per account (the data key) seals every synced item with AES-GCM. The data key itself is kept in the
@@ -2357,10 +2369,10 @@ async function lkConvert(){const u=lk.u,uid=u.uid,src=lk.base.collection('docs')
   const all=await src.get(SV),todo=all.docs.filter(d=>!(d.id==='meta'&&lkMarker(d.data())));
   if(!todo.length)break;
   if(lk.u!==u)throw new Error('signed-out');
-  lk.prog=[0,todo.length];updateStatus();const sig={};
+  lk.prog=[0,todo.length];updateStatus();const sig={},gone=new Set();
   for(const d of todo){let b=d.data(),sealed=await seal(d.id,b);
    for(let t=0;t<4;t++){const r=await fbDb.runTransaction(async tx=>{const now=await tx.get(src.doc(d.id));if(!now.exists)return 'gone';if(lkSig(now.data())!==lkSig(b))return now.data();tx.set(dst.doc(d.id),sealed);return 'ok';});
-    if(r==='ok'){sig[d.id]=lkSig(b);break;}if(r==='gone')break;b=r;sealed=await seal(d.id,b);}
+    if(r==='ok'){sig[d.id]=lkSig(b);break;}if(r==='gone'){gone.add(d.id);break;}b=r;sealed=await seal(d.id,b);}
    if(lk.u!==u)throw new Error('signed-out');lk.prog[0]++;updateStatus();}
   const have=new Set((await dst.get(SV)).docs.map(d=>d.id));
   if(todo.some(d=>sig[d.id]&&!have.has(d.id)))continue;
@@ -2370,6 +2382,7 @@ async function lkConvert(){const u=lk.u,uid=u.uid,src=lk.base.collection('docs')
   else again=true;
   if(!again)for(const d of todo){if(d.id==='meta'||sig[d.id]===undefined)continue;
    const r=await fbDb.runTransaction(async tx=>{const now=await tx.get(src.doc(d.id));if(!now.exists)return 'ok';if(lkSig(now.data())!==sig[d.id])return 'changed';tx.delete(src.doc(d.id));return 'ok';});if(r!=='ok')again=true;}
+  if(todo.some(d=>d.id!=='meta'&&sig[d.id]===undefined&&!gone.has(d.id)))again=true; /* one kept changing while it was being sealed: its readable copy is still there, so this is not done */
   if(!again)break;
   if(pass===5)throw new Error('busy');
  }
@@ -2382,8 +2395,21 @@ async function lkAfter(){const u=lk.u;if(!u||!lk.on)return;const r=await lkPeek(
  if(r.st==='legacy'||(r.kd.kid||'')!==mine){ /* the cloud was started fresh from another device: this device's key no longer fits. Its own work stays and is sent again once it is let in */
   if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}if(lk.un){try{lk.un();}catch(e){}lk.un=null;}if(lk.un2){try{lk.un2();}catch(e){}lk.un2=null;}
   coll=null;lk.on=false;lk.sure=false;lk.key=null;lkForget(u.uid);lkFlag(u.uid,'vault');lk.marker=true;lkAll();lkNeed(r.st==='locked'?r.kd:null);return;}
- if(lk.pw){const pw=lk.pw;lkPwDrop();try{await LK.unwrap(r.kd.pw,pw);}catch(e){if(e.message==='bad-secret'){try{await lkKeysRef().update({pw:await LK.wrapPw(lkKeyOf(u.uid),pw)});}catch(x){console.error(x);}}}} /* the password was reset by email: this device still holds the key, so it seals it again under the new one */
- lkSure();lkWatch();}
+ if(lk.pw){const pw=lk.pw;lkPwDrop();try{await LK.unwrap(r.kd.pw,pw);lkRwDone(u.uid);}catch(e){if(e.message==='bad-secret'){try{await lkKeysRef().update({pw:await LK.wrapPw(lkKeyOf(u.uid),pw)});lkRwDone(u.uid);}catch(x){console.error(x);}}}} /* the password was reset by email: this device still holds the key, so it seals it again under the new one */
+ lkSure();lkWatch();setTimeout(lkRewrapAsk,3000);}
+/* the sign-in password changed, but the lock's copy of the key is still sealed under the old one. Keep at it until it is done;
+   if the app is closed first, the next start asks once for the new password (lkRewrapAsk) */
+const lkRwDone=uid=>{try{localStorage.removeItem('blk.rewrap.'+uid);}catch(e){}};
+function lkRewrap(pw){const u=lk.u;if(!u)return;lsSet('blk.rewrap.'+u.uid,'1');lk.rw=true;let n=0;
+ const go=async()=>{if(lk.u!==u||lsGet('blk.rewrap.'+u.uid)!=='1'){lk.rw=false;return;}const dk=lk.on?lkKeyOf(u.uid):null;
+  if(dk){try{await lkKeysRef().update({pw:await LK.wrapPw(dk,pw)});lkRwDone(u.uid);lk.rw=false;toast('The lock now uses your new password.');return;}catch(e){}}
+  n++;setTimeout(go,Math.min(60000,4000*n));};
+ setTimeout(go,4000);}
+function lkRewrapAsk(){const u=lk.u;if(!u||!lk.on||lk.rw||lsGet('blk.rewrap.'+u.uid)!=='1')return;if(!modalEl.hidden){setTimeout(lkRewrapAsk,5000);return;}
+ modal(`<h3>Finish changing your password</h3><p>Your sign-in password was changed, but the app closed before the lock was updated to match. Type your <b>new</b> password once to finish. Until then, another device may ask for the old one.</p><label class="fld">New password<input id="rwp" type="password" autocomplete="current-password"></label><p id="rwe" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Later</button><button class="pri" id="rwg">Finish</button></div>`,c=>{
+  const err=m=>{c.querySelector('#rwe').textContent=m;};
+  c.querySelector('#rwg').onclick=async()=>{const pw=c.querySelector('#rwp').value;if(!pw){err('Type your new password first.');return;}
+   try{await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,pw));await lkKeysRef().update({pw:await LK.wrapPw(lkKeyOf(u.uid),pw)});lkRwDone(u.uid);closeModal();toast('Done. The lock uses your new password.');}catch(e){err(lkErr(e));}};});}
 /* everything on this device is to be sent again */
 function lkAll(){const now=Date.now(),d=docs();for(const k in d){sync.stamps[k]=Math.max(now,(sync.stamps[k]||0)+1);markDirty(k);}for(const k in images){sync.stamps['img-'+k]=Math.max(now,(sync.stamps['img-'+k]||0)+1);markDirty('img-'+k);}try{saveLocal();}catch(e){}}
 /* readable items that turn up after the change-over come from a copy of the app that had not updated yet. The marker is put back so it stops;
@@ -2413,7 +2439,7 @@ async function lkSetup(pw,newPw){const u=lk.u;if(!u||!lk.base)throw new Error('s
  if(!made)throw new Error('already');
  let kept=false;
  if(newPw){try{await fbUser.updatePassword(newPw);}catch(e){kept=true;}
-  if(!kept){const w=await LK.wrapPw(dk,newPw);let ok=false;for(let i=0;i<4&&!ok;i++){try{await kref.update({pw:w});ok=true;}catch(e){await new Promise(z=>setTimeout(z,800));}}if(!ok)lkPwHold(newPw);}}
+  if(!kept){const w=await LK.wrapPw(dk,newPw);let ok=false;for(let i=0;i<4&&!ok;i++){try{await kref.update({pw:w});ok=true;}catch(e){await new Promise(z=>setTimeout(z,800));}}if(!ok){lkPwHold(newPw);lkRewrap(newPw);}}}
  if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}coll=null;
  lkEnter(dk,kd); /* seals everything in the background; the status line shows how far it is */
  return {code,kept};}
@@ -2435,12 +2461,12 @@ async function lkChangePw(cur,nw){const u=lk.u;if(!u)throw new Error('signed-out
  await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email,cur));
  const dk=lk.on?lkKeyOf(u.uid):null,w=dk?await LK.wrapPw(dk,nw):null;
  await fbUser.updatePassword(nw);
- if(w){let ok=false;for(let i=0;i<4&&!ok;i++){try{await lkKeysRef().update({pw:w});ok=true;}catch(e){await new Promise(z=>setTimeout(z,800));}}if(!ok){lkPwHold(nw);throw new Error('rewrap');}}}
+ if(w){let ok=false;for(let i=0;i<4&&!ok;i++){try{await lkKeysRef().update({pw:w});ok=true;}catch(e){await new Promise(z=>setTimeout(z,800));}}if(!ok){lkPwHold(nw);lkRewrap(nw);throw new Error('rewrap');}}}
 async function lkNewCode(){const u=lk.u,dk=u&&lk.on?lkKeyOf(u.uid):null;if(!dk)throw new Error('no-key');const code=LK.newCode();await lkKeysRef().update({rc:await LK.wrapCode(dk,code)});return code;}
 /* ---- windows ---- */
 const lkErr=e=>{const c=(e&&(e.code||e.message))||'';return c==='auth/wrong-password'||c==='auth/invalid-credential'?'That is not this account’s password.':c==='short'?`Use at least ${LOCK_MIN} characters for the password.`:c==='already'?'This account is already locked. Close this window; the app will ask for your password.':c==='bad-code'?'That recovery code does not fit. Check each group of four.':c==='permission-denied'?'The sync service refused. This account may not be approved for sync yet.':c==='auth/network-request-failed'||c==='unavailable'?'No connection. Try again when you’re online.':c==='auth/too-many-requests'?'Too many tries. Wait a minute and try again.':c==='rewrap'?'Your password is changed, but the lock could not be updated yet. Keep the app open and online; it will finish by itself.':'Something went wrong. Nothing was changed. Please try again.';};
 function lkSetupDialog(){if(!fbUser)return;
- modal(`<h3>Lock your synced work</h3><p>Your scenes are sealed with your password on this device before they are sent. After that, no one else can read the copy in the cloud, not even the person who runs this app.${LOCK_MODE==='required'?' Sync starts once this is done.':''}</p><p class="mut">Your work on this device, and your Back Up Everything files, stay as they are.</p><label class="fld">Your password<input id="lp" type="password" autocomplete="current-password"></label><div id="lnew" hidden><p>Your password is shorter than ${LOCK_MIN} characters, which is too easy to guess. Choose a longer one. It becomes your sign-in password on every device, and your other devices will ask you to sign in again.</p><label class="fld">New password<input id="ln1" type="password" autocomplete="new-password"></label><label class="fld">New password, again<input id="ln2" type="password" autocomplete="new-password"></label></div><p id="lerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="lgo">Lock My Work</button></div>`,c=>{
+ modal(`<h3>Lock your synced work</h3><p>Your scenes are sealed with your password on this device before they are sent. After that, the copy in the cloud opens only with your password or your recovery code. The person who runs this app has neither.${LOCK_MODE==='required'?' Sync starts once this is done.':''}</p><p class="mut">Your work on this device, and your Back Up Everything files, stay as they are.</p><label class="fld">Your password<input id="lp" type="password" autocomplete="current-password"></label><div id="lnew" hidden><p>Your password is shorter than ${LOCK_MIN} characters, which is too easy to guess. Choose a longer one. It becomes your sign-in password on every device, and your other devices will ask you to sign in again.</p><label class="fld">New password<input id="ln1" type="password" autocomplete="new-password"></label><label class="fld">New password, again<input id="ln2" type="password" autocomplete="new-password"></label></div><p id="lerr" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="lgo">Lock My Work</button></div>`,c=>{
   const $q=s=>c.querySelector(s),err=m=>{$q('#lerr').textContent=m;},go=$q('#lgo');
   go.onclick=async()=>{const pw=$q('#lp').value,nw=$q('#lnew');err('');if(!pw){err('Type your password first.');return;}
    let np='';if(pw.length<LOCK_MIN){if(nw.hidden){go.disabled=true;try{await fbUser.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(fbUser.email,pw));nw.hidden=false;$q('#ln1').focus();}catch(e){err(lkErr(e));}go.disabled=false;return;}
@@ -2503,8 +2529,8 @@ function lkSyncBit(){if(!fbUser)return '';
  if(lk.need==='pw')return `<p class="warnbox">This account’s work is locked with its password, and this device has not been let in yet.</p><div class="btns"><button id="lku">Unlock…</button></div>`;
  if(lk.need==='conv')return `<p><b>Locking your synced work:</b> ${lk.prog[0]} of ${lk.prog[1]}. Keep the app open and online; your work on this device is safe meanwhile.</p>`;
  if(lk.need==='wait')return `<p class="warnbox">The lock is waiting for the internet. Everything is saved on this device.</p>`;
- if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. No one else can read the copy in the cloud.${lk.bad.size?` <b>${plural(lk.bad.size,'item')} in the cloud could not be opened on this device.</b> ${lk.bad.size===1?'It was':'They were'} sealed with a key this device does not have, usually by a device that has not unlocked again since the lock was started fresh. Open the app on your other devices and let them sync. Work made on this device is not affected.`:''}</p>${lkUnacked()?`<p class="warnbox" id="lkna"><b>You have not confirmed that you saved your recovery code.</b> ${lk.code?'Open it again and save it somewhere that is not this device.':'This device no longer holds it. Make a new one and save it; the old code stops working.'}</p>`:''}<div class="btns">${lkUnacked()&&lk.code?'<button class="pri" id="lkv">Show My Recovery Code</button>':''}<button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
- if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so no one else can read the copy in the cloud. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock and Sync…</button><button id="lkp">Change Password…</button></div>`;
+ if(lk.on)return `<p><b>Locked.</b> Your synced work is sealed with your password before it leaves this device. The copy in the cloud opens only with your password or your recovery code.${lk.bad.size?` <b>${plural(lk.bad.size,'item')} in the cloud could not be opened on this device.</b> ${lk.bad.size===1?'It was':'They were'} sealed with a key this device does not have, usually by a device that has not unlocked again since the lock was started fresh. Open the app on your other devices and let them sync. Work made on this device is not affected.`:''}</p>${lkUnacked()?`<p class="warnbox" id="lkna"><b>You have not confirmed that you saved your recovery code.</b> ${lk.code?'Open it again and save it somewhere that is not this device.':'This device no longer holds it. Make a new one and save it; the old code stops working.'}</p>`:''}<div class="btns">${lkUnacked()&&lk.code?'<button class="pri" id="lkv">Show My Recovery Code</button>':''}<button id="lkc">New Recovery Code…</button><button id="lkp">Change Password…</button></div>`;
+ if(LOCK_MODE==='required'&&coll&&!coll.locked&&online==='on')return `<p class="warnbox">Your work is not syncing yet. It is locked with your password first, so the copy in the cloud opens only with your password or your recovery code. Everything is saved on this device meanwhile.</p><div class="btns"><button class="pri" id="lks">Lock and Sync…</button><button id="lkp">Change Password…</button></div>`;
  return `<div class="btns"><button id="lkp">Change Password…</button>${lkCan()&&coll?'<button id="lks">Lock and Sync…</button>':''}</div>`;}
 function lkSyncBind(c){const b=(id,f)=>{const e=c.querySelector(id);if(e)e.onclick=()=>{mNext=accountDialog;f();};};b('#lku',lkUnlockDialog);b('#lkv',()=>lkCodeDialog(lk.code,''));b('#lkc',lkNewCodeDialog);b('#lkp',lkPwDialog);b('#lks',lkSetupDialog);}
 /* ---------- sync (private to the signed-in person, through their Claude account) ---------- */
@@ -2519,13 +2545,20 @@ function initFirebase(){
    fbUser=u;acct=u?u.uid:null;acctShut=false;if(fbUnsub){fbUnsub();fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}lkStop();
    if(!u){coll=null;online='off';updateStatus();return;}
    if(lsGet(acctShutKey(u.uid))==='1'){acctShut=true;coll=null;online='off';updateStatus();return;} /* closed here before: nothing syncs; the Sync window can finish the deletion */
-   coll=null;online='connecting';syncErr='';updateStatus();
-   const base=db.collection('users').doc(u.uid);
-   lkBegin(u,base).then(c=>{if(fbUser===u&&c)syncListen(u,c);},e=>{console.error(e);if(fbUser===u&&!coll&&!lk.need)syncListen(u,base.collection('docs'));});
+   const start=()=>{coll=null;online='connecting';syncErr='';updateStatus();
+    const base=db.collection('users').doc(u.uid);
+    lkBegin(u,base).then(c=>{if(fbUser===u&&c)syncListen(u,c);},e=>{console.error(e);if(fbUser===u&&!coll&&!lk.need)syncListen(u,base.collection('docs'));});};
+   /* the work on this device was last synced with a different account: nothing is sent or merged until the person says so */
+   if(sync.uid&&sync.uid!==u.uid&&lsGet('blk.join.'+u.uid)!==sync.uid){coll=null;online='off';updateStatus();joinAsk(u,start);return;}
+   start();
   });
   return true;
  }catch(e){return false;}
 }
+function joinAsk(u,go){const ask=()=>{if(fbUser!==u)return;if(!modalEl.hidden){setTimeout(ask,1200);return;}
+ modal(`<h3>This device holds another account’s work</h3><p>The scenes on this device were last synced with a different account. If you go on, they are added to <b>${esc(u.email||'this account')}</b> and sync there.</p><p class="mut">If that is not what you want, sign out. Nothing here is changed, and the scenes stay on this device.</p><div class="btns end"><button id="jaOut">Sign Out</button><button class="pri" id="jaGo">Add Them to This Account</button></div>`,c=>{
+  c.querySelector('#jaOut').onclick=async()=>{closeModal();try{await fbAuth.signOut();}catch(e){}toast('Signed out. Nothing was changed.');};
+  c.querySelector('#jaGo').onclick=()=>{lsSet('blk.join.'+u.uid,sync.uid);closeModal();if(fbUser===u)go();};},'hold');};ask();}
 /* listen to the person's collection: the readable one, or the vault once the account is locked */
 function syncListen(u,c){if(fbUser!==u)return;if(fbUnsub){try{fbUnsub();}catch(e){}fbUnsub=null;}if(fbUnsubM){try{fbUnsubM();}catch(e){}fbUnsubM=null;}
    coll=c;if(fbDb&&fbDb.waitForPendingWrites){bootPend=true;fbDb.waitForPendingWrites().then(()=>{bootPend=false;updateStatus();},()=>{bootPend=false;updateStatus();});}online='connecting';syncErr='';updateStatus();
@@ -2714,16 +2747,18 @@ function accountDialog(){
  });
 }
 /* ---------- approved people: only emails on your list can sync ---------- */
-const RULES_V='v3'; /* the version of the rules below. Change it whenever they change: Approved people then offers the new ones */
+const RULES_V='v4'; /* the version of the rules below. Change it whenever they change: Approved people then offers the new ones */
 function rulesText(owner){return `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
       return request.auth != null && request.auth.token.email != null;
     }
-    // You: always allowed, and the only one who can change the approved list.
+    // You: the only one who can change the approved list. Your email has to be confirmed too:
+    // without that, someone who made an account for your address before you did would be you.
     function owner() {
-      return signedIn() && request.auth.token.email.lower() == '${owner}';
+      return signedIn() && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() == '${owner}';
     }
     // Everyone else: on your list, with their email confirmed. Without that, someone could make the account
     // for an address you approved before its owner does.
@@ -2735,6 +2770,11 @@ service cloud.firestore {
     function me(uid) {
       return signedIn() && request.auth.uid == uid;
     }
+    // An account that was deleted takes nothing more: a device that was offline at the time cannot put work back.
+    function closed(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid)/docs/meta)
+        && get(/databases/$(database)/documents/users/$(uid)/docs/meta).data.get('closed', 0) > 0;
+    }
     // Each person's own corner. Seeing it needs approval. Removing your own work never does:
     // anyone may list their own work a short page at a time, which is how Delete Account finds all of it.
     match /users/{uid}/{rest=**} {
@@ -2742,18 +2782,19 @@ service cloud.firestore {
       allow list: if me(uid) && (approved() || request.query.limit <= 300);
       allow delete: if me(uid);
     }
-    // The lock's sealed key.
+    // The lock's sealed key: one record, with its own fields and nothing else.
     match /users/{uid}/keys/{key} {
-      allow create, update: if me(uid) && approved();
+      allow create, update: if me(uid) && approved() && !closed(uid) && key == 'main'
+        && request.resource.data.keys().hasOnly(['v', 'kid', 'pw', 'rc', 'conv', 'at']);
     }
     // Synced work arrives sealed: three fields, and nothing else.
     match /users/{uid}/vault/{item} {
-      allow create, update: if me(uid) && approved()
+      allow create, update: if me(uid) && approved() && !closed(uid)
         && request.resource.data.keys().hasOnly(['v', 'n', 'c']);
     }
     // Nothing readable is accepted. Only the small marker that says an account is locked, or closed.
     match /users/{uid}/docs/{item} {
-      allow create, update: if me(uid) && approved() && item == 'meta'
+      allow create, update: if me(uid) && approved() && !closed(uid) && item == 'meta'
         && request.resource.data.keys().hasOnly(['appV', 'locked', 'updatedAt', 'closed']);
     }
     // The approved list: only you can see or change it.
@@ -2767,6 +2808,8 @@ service cloud.firestore {
   }
 }
 `;}
+/* the rules ask for the owner's own confirmed email: handed out before that, they would lock the owner out of sync */
+const apRules=me=>fbUser&&fbUser.emailVerified?rulesText(me):'First confirm your own email.\n\nThese rules accept only a confirmed email, yours included. Close this window, tap the status at the top right, tap Send it again, and open the link in the email. Then come back here.';
 const apDoc=()=>firebase.firestore().collection('admin').doc('approved');
 /* who gets the Approved people button: only an account the cloud lets read the list. Asked when the Sync window opens, remembered on this device */
 try{if(/[?&]owner(=|&|$)/.test(location.search))localStorage.setItem('blk.ownopt','1');}catch(e){}
@@ -2786,17 +2829,19 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
  modal(`<h3>Approved people</h3><div id="apB"><p class="mut">Checking…</p></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,async c=>{
   const box=c.querySelector('#apB'),valid=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
   const save=async()=>{try{await apDoc().set({emails:list,owner:me,at:Date.now()});return true;}catch(e){toast('Couldn’t save the list. Check your connection and try again.');return false;}};
-  const cpBind=()=>{const b=box.querySelector('#apCp');if(b)b.onclick=()=>{const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};const r=box.querySelector('#apRe');if(r)r.onclick=go;};
+  const cpBind=()=>{const b=box.querySelector('#apCp');if(b)b.onclick=async()=>{if(!fbUser.emailVerified){try{await fbUser.reload();}catch(e){}}
+    if(!fbUser.emailVerified){toast('First confirm your own email. The new rules accept only a confirmed email, yours included: tap the status at the top right, then Send it again.',9000);const d=box.querySelector('details');if(d)d.open=true;return;}
+    const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};const r=box.querySelector('#apRe');if(r)r.onclick=go;};
   const draw=()=>{
    if(state==='checking'){box.innerHTML='<p class="mut">Checking…</p>';return;}
    if(state==='offline'){box.innerHTML='<p>Connect to the internet to manage who can sync.</p><div class="btns"><button id="apRe">Try again</button></div>';box.querySelector('#apRe').onclick=go;return;}
    if(state==='no'){box.innerHTML='<p>Only the person who runs this app manages who can sync. To ask about access, write to <a href="mailto:info@thedirectorsnotebook.com?subject=Sync%20access">info@thedirectorsnotebook.com</a>.</p>';return;}
-   if(state==='on'){box.innerHTML=`${old?`<div class="warnbox" style="margin-bottom:12px"><b>One update to make in Firebase.</b> Your rules are older than this version of the app. The new ones accept only locked work, ask everyone but you for a confirmed email, and let someone you have removed delete all of their own copy from the cloud.
+   if(state==='on'){box.innerHTML=`${old?`<div class="warnbox" style="margin-bottom:12px"><b>One update to make in Firebase.</b> Your rules are older than this version of the app. The new ones ask for your own confirmed email as well as everyone else’s, accept only the lock’s own fields in the key record, and take nothing more from an account that was deleted.
      <ol class="aps"><li>Open your Firebase rules: <a href="https://console.firebase.google.com/project/${esc(pid)}/firestore/rules" target="_blank" rel="noopener">Firebase › Firestore › Rules</a>.</li>
      <li>Tap <b>Copy Rules</b> below. In Firebase, select all the text in the rules box, paste over it, and press <b>Publish</b>.</li>
      <li>Come back here and tap <b>Check Again</b>.</li></ol>
      <div class="btns"><button id="apCp">Copy Rules</button><button class="pri" id="apRe">Check Again</button></div>
-     <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(rulesText(me))}</textarea></details></div>`:''}<p class="mut">Approval is on. Only you and the people below can sync. Anyone else can still use the app, but their work stays on their own device.${old===false?' Your Firebase rules are the current ones.':''}</p>
+     <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(apRules(me))}</textarea></details></div>`:''}<p class="mut">Approval is on. Only you and the people below can sync. Anyone else can still use the app, but their work stays on their own device.${old===false?' Your Firebase rules are the current ones.':''}</p>
      <div class="apl">${list.length?list.map((e,i)=>`<div class="apr"><span>${esc(e)}</span><button data-rm="${i}" aria-label="Remove ${esc(e)}">×</button></div>`).join(''):'<p class="mut" style="margin:6px 0">No one yet.</p>'}</div>
      <div class="apa"><input id="apE" type="email" placeholder="friend@example.com" autocapitalize="off" autocomplete="off"><button class="pri" id="apAdd">Add</button></div>
      <p class="mut" style="font-size:12.5px">They tap Create account in the app using exactly this email, then open the link we email them to confirm it. Removing someone stops their syncing; their scenes stay on their devices.</p>`;
@@ -2810,8 +2855,10 @@ function approvedDialog(){if(!fbUser)return;const me=(fbUser.email||'').toLowerC
     <li>Come back here and tap <b>Check Again</b>.</li></ol>
     <div class="btns"><button id="apCp">Copy Rules</button><button class="pri" id="apRe">Check Again</button></div>
     <p class="mut" style="font-size:12.5px">The rules always let <b>${esc(me)}</b> sync, so your own syncing keeps working. If someone else shared this app with you, only they can manage this list.</p>
-    <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(rulesText(me))}</textarea></details>`;
-   box.querySelector('#apCp').onclick=()=>{const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};
+    <details class="oth"><summary>Show the rules</summary><textarea class="aprt" readonly>${esc(apRules(me))}</textarea></details>`;
+   box.querySelector('#apCp').onclick=async()=>{if(!fbUser.emailVerified){try{await fbUser.reload();}catch(e){}}
+    if(!fbUser.emailVerified){toast('First confirm your own email. The new rules accept only a confirmed email, yours included: tap the status at the top right, then Send it again.',9000);const d=box.querySelector('details');if(d)d.open=true;return;}
+    const t=rulesText(me);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Rules copied. Paste them in Firebase and press Publish.'),()=>{const d=box.querySelector('details');d.open=true;const a=box.querySelector('.aprt');a.focus();a.select();toast('Select the rules shown and copy them.');});};
    box.querySelector('#apRe').onclick=go;};
   const go=async()=>{state='checking';draw();let rerr=null;try{const d=await apDoc().get();if(d.exists)list=(d.data().emails||[]).slice();}catch(e){rerr=(e&&e.code)||'error';}state=!rerr?await apCheck(list):rerr==='permission-denied'?'off':'offline';old=state==='on'?await rulesOld():null;if(state==='off'&&!apSetup())state='no';if(state!=='offline')apMark(state!=='no');draw();};
   go();});}
@@ -3935,7 +3982,7 @@ function setField(f,v){
  switch(f){
   case 'char.name':{const c=charById(it.charId);if(c)c.name=v;break;}
   case 'char.color':{const c=charById(it.charId);if(c)c.color=v;break;}
-  case 'v.size':case 'v.type':case 'v.angle':case 'v.move':case 'v.desc':(it.marks[sel.mark||0])[f.slice(2)]=v;if(f==='v.type')delete it.marks[sel.mark||0].on;break;
+  case 'v.size':case 'v.type':case 'v.angle':case 'v.move':case 'v.desc':{const vm=it.marks[it.type==='cam'?verStart(it,sel.mark||0):(sel.mark||0)];vm[f.slice(2)]=v;if(f==='v.type')delete vm.on;break;}
   case 'cam.letter':{const l=v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,2);if(l)it.letter=l;break;}
   case 'cam.fov':{it.fov=+v;const fv=$('#fovv');if(fv)fv.textContent=v+'°';break;}
   case 'setup.color':{const st=setupIn(s,it.setupId);if(st)st.color=v;break;}
@@ -4729,7 +4776,9 @@ function planPut(s,d){for(const k of PLAN_KEYS){if(d[k]===undefined)delete s[k];
 function planNext(s){const used=new Set([planName(s),...(s.plans||[]).map(p=>p.name)]);for(let i=0;i<26;i++){const n='Plan '+String.fromCharCode(65+i);if(!used.has(n))return n;}return 'Plan '+((s.plans||[]).length+2);}
 function planNew(){const s=scene();stopPlay();anim.step=0;const nm=planNext(s);(s.plans=s.plans||[]).push({id:uid(),name:planName(s),d:planTake(s)});s.plan=nm;sel=null;msel=null;commit();toast(`${nm} is a copy of ${s.plans[s.plans.length-1].name}. Change it freely; switch back from the Pages menu.`);}
 function planGo(id){const s=scene(),i=(s.plans||[]).findIndex(p=>p.id===id);if(i<0)return;stopPlay();anim.step=0;const p=s.plans[i];
- s.plans.splice(i,1,{id:uid(),name:planName(s),d:planTake(s)});planPut(s,p.d);s.plan=p.name;sel=null;msel=null;commit();fit();}
+ const set=x=>canonJ((x.items||[]).filter(it=>it.lid).map(it=>{const o={};for(const k in it)if(k[0]!=='_'&&k!=='id'&&k!=='local')o[k]=it[k];return o;}).sort((a,b)=>String(a.lid)<String(b.lid)?-1:1));
+ s.plans.splice(i,1,{id:uid(),name:planName(s),d:planTake(s)});planPut(s,p.d);const was=s.loc?set(s):'';s.plan=p.name;sel=null;msel=null;commit();fit();
+ try{const L=s.loc&&locById(s.loc);if(L&&was!==set(s))toast(`${p.name} was drawn when ${L.name||'this location'} looked different. The set is shown as the location is now.`,7000);}catch(e){}}
 function planRename(){const s=scene();modal(`<h3>Rename plan</h3><label class="fld">Name<input id="pln" value="${esc(planName(s))}" autocomplete="off" placeholder="e.g. Plan B: rain"></label><div class="btns end"><button data-x>Cancel</button><button class="pri" id="ok">Save</button></div>`,card=>{
  const go=()=>{const v=card.querySelector('#pln').value.trim();if(v)s.plan=v;closeModal();commit();};card.querySelector('#ok').onclick=go;card.querySelector('#pln').addEventListener('keydown',e=>{if(e.key==='Enter')go();});});}
 function planDelete(){const s=scene();if(!(s.plans||[]).length)return;const nm=planName(s);
@@ -4811,11 +4860,14 @@ function renderLoc(){const el=$('#locBar');if(!el)return;const s=scene(),L=s&&lo
  const cb=$('#confBar'),bn=$('#banner');el.style.top=((cb&&!cb.hidden)||(bn&&getComputedStyle(bn).display!=='none'))?'60px':'';el.onclick=()=>locManage();}
 function locSceneRow(x,chk,note){const L=esc(sceneLabel(x)),i=L.indexOf(' · ');return `<label class="imopt"><input type="checkbox" data-s="${x.id}"${chk?' checked':''}> <span>${i>0?`<b>${L.slice(0,i)}</b>${L.slice(i)}`:L}${note?` <span class="mut">· ${note}</span>`:''}</span></label>`;}
 /* ---------- Clear Moves: start the blocking over without rebuilding the set or re-placing anyone ---------- */
-function clearMoves(s,o){o=o||{};const only=o.only?new Set(o.only):null,inS=it=>!it.locked&&(!only||only.has(it.id));let cams=0,chars=0;
+function clearMoves(s,o){o=o||{};const only=o.only?new Set(o.only):null,LL=(lay(s)||{}).lock||{},inS=it=>!it.locked&&!LL[layerOf(it)]&&(!only||only.has(it.id));let cams=0,chars=0;
  if(o.cams)for(const it of s.items){if(it.type!=='cam'||!it.marks||!inS(it)||!it.marks.some(m=>m.tk))continue;const keep=[],map={};
   it.marks.forEach((m,i)=>{if(!m.tk||!keep.length){map[i]=keep.length;if(m.tk)delete m.tk;keep.push(m);return;}cams++;
    /* a storyboard frame drawn for a position that is going stays with the shot */
-   const base=keep[keep.length-1],fr=[m.sb,...(m.sbs||[])].filter(Boolean);if(fr.length){if(!base.sb)base.sb=fr.shift();if(fr.length)base.sbs=[...(base.sbs||[]),...fr];}});
+   const base=keep[keep.length-1],fr=[m.sb,...(m.sbs||[])].map((id,k)=>id?{id,fh:fGet(m,k,'fh'),fv:fGet(m,k,'fv'),e:k&&m.sbx&&m.sbx[id]?m.sbx[id]:null}:null).filter(Boolean);
+   for(const f of fr){ /* the frame goes with its flips */
+    if(!base.sb){base.sb=f.id;for(const key of ['fh','fv']){if(f[key])base[FK[key]]=f[key];else delete base[FK[key]];}}
+    else{base.sbs=[...(base.sbs||[]),f.id];if(f.e||f.fh||f.fv){base.sbx=base.sbx||{};base.sbx[f.id]=Object.assign({},f.e||{},f.fh?{fh:f.fh}:{},f.fv?{fv:f.fv}:{});}}}});
   it.marks=keep;for(const m of keep)delete m.trk;for(const key of ['cutIn','cutOut']){const c=s[key];if(c&&c.id===it.id){if(map[c.v]!=null)c.v=map[c.v];else delete s[key];}}}
  if(o.chars)for(const it of s.items){if(it.type!=='char'||!it.marks||it.marks.length<2||!inS(it))continue;const n=it.marks.length;let K;
   if(o.keep==='start')K=it.marks[0];else{const [a,b]=runOf(it,n-1),rot=effFacing(it,b);K=it.marks[a];K.rot=rot;}
@@ -6023,11 +6075,13 @@ function dayCfg(root,key){const d=(root&&root.days&&root.days[key])||{};return {
 /* the minutes a day has for shooting: call to wrap, less lunch (a wrap after midnight is the next morning) */
 function dayAvail(c){let a=dayHM(c.call),b=dayHM(c.wrap);if(b<=a)b+=1440;return Math.max(0,b-a-c.lunch);}
 function dayOf(s0,S){const live=x=>{let R=[];try{R=rowsOf(x);}catch(e){}return R.filter(r=>r.m.ss!=='drop');};
- const d={key:dayKey(s0),name:dayName(s0),scenes:[],pp:0,setups:0,shots:0,min:0,left:0,noEst:0};
- for(const x of S){const L=live(x),m=rowsMin(L);d.scenes.push({s:x,min:m,shots:L.length});d.pp+=ppParse(x.pp);d.setups+=new Set(L.map(r=>r.st&&r.st.id)).size;d.shots+=L.length;d.min+=m;d.left+=rowsMin(L,r=>r.m.ss!=='shot');d.noEst+=L.filter(r=>!(+r.m.time)).length;}
+ const d={key:dayKey(s0),name:dayName(s0),scenes:[],pp:0,setups:0,shots:0,min:0,left:0,noEst:0,todo:0,todoNoEst:0};
+ for(const x of S){const L=live(x),m=rowsMin(L);d.scenes.push({s:x,min:m,shots:L.length});d.pp+=ppParse(x.pp);d.setups+=new Set(L.map(r=>r.st&&r.st.id)).size;d.shots+=L.length;d.min+=m;d.left+=rowsMin(L,r=>r.m.ss!=='shot');{const key=r=>(r.st?r.st.id:'')+'|'+(r.vn||0),mx=rows=>{const by=new Map();for(const r of rows)by.set(key(r),Math.max(by.get(key(r))||0,+r.m.time||0));return by;};
+   const all=mx(L),T=L.filter(r=>r.m.ss!=='shot'),tm=mx(T);
+   d.noEst+=L.filter(r=>!all.get(key(r))).length;d.todo+=T.length;d.todoNoEst+=T.filter(r=>!tm.get(key(r))).length;}} /* a shot has no estimate only when no camera in its setup has one: cameras in a setup roll together */
  return d;}
 /* a folder's scenes gathered by shoot day, in order; scenes with no shoot day yet come last */
-function dayList(S){const by=new Map();for(const x of S){if(x.scout)continue;const k=dayKey(x);if(!by.has(k))by.set(k,[]);by.get(k).push(x);}
+function dayList(S){const by=new Map();for(const x of S){if(x.scout||(x.rev&&x.rev.k==='omitted'))continue;const k=dayKey(x);if(!by.has(k))by.set(k,[]);by.get(k).push(x);}
  return [...by.values()].map(L=>dayOf(L[0],L)).sort((a,b)=>(!a.key-!b.key)||natCmp(a.name,b.name));}
 function dayDialog(rootId,key,name,after){const root=fById(rootId);if(!root)return;const c=dayCfg(root,key);kidNext();
  modal(`<h3>${esc(name)}</h3><p class="mut">The hours this day has for shooting. The day’s shots are measured against them.</p><div style="display:flex;gap:10px"><label class="fld" style="flex:1">Call<input id="dyC" type="time" value="${c.call.padStart(5,'0')}"></label><label class="fld" style="flex:1">Wrap<input id="dyW" type="time" value="${c.wrap.padStart(5,'0')}"></label></div><label class="fld">Lunch<select id="dyL">${[[0,'Not counted'],[30,'30 min'],[45,'45 min'],[60,'1 h']].map(([v,l])=>`<option value="${v}"${c.lunch===v?' selected':''}>${l}</option>`).join('')}</select></label><p id="dyE" class="danger" style="min-height:1.3em;margin-top:10px"></p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="dyOk">Save</button></div>`,card=>{
@@ -6072,23 +6126,25 @@ function ovDays(f,S){const root=topFolder(f.id)||f,D=dayList(S.map(o=>o.s));if(!
  return h;}
 /* the line in Set mode: what is left of this scene's shoot day, against the clock */
 function setDayLine(s){const fid=sFolder(s),key=dayKey(s);if(!fid||!key)return '';const root=topFolder(fid);if(!root)return '';
- const d=dayOf(s,folderScenes(root.id).filter(x=>!x.scout&&dayKey(x)===key));if(!d.min)return '';
+ const d=dayOf(s,folderScenes(root.id).filter(x=>!x.scout&&!(x.rev&&x.rev.k==='omitted')&&dayKey(x)===key));if(!d.min)return '';
  const c=dayCfg(root,key),av=dayAvail(c),call=dayHM(c.call);let wrap=dayHM(c.wrap);if(wrap<=call)wrap+=1440;
  const now=new Date();let n=now.getHours()*60+now.getMinutes();if(wrap>1440&&n<call&&n<=wrap-1440+240)n+=1440;
  /* a shoot date that is plainly another day: no clock, just the plan */
  let today=true;{const t=String(s.date||'').trim();if(t){const q=Date.parse(/\b(19|20)\d\d\b/.test(t)?t:t+', '+now.getFullYear());if(isFinite(q)){const x=new Date(q);today=x.getFullYear()===now.getFullYear()&&x.getMonth()===now.getMonth()&&x.getDate()===now.getDate();}}}
  let main,cls='';
- if(!d.left)main='Everything planned for this day is shot.';
+ if(!d.todo)main='Everything planned for this day is shot.';
+ else if(!d.left)main=`<b>${plural(d.todo,'shot')}</b> left to shoot, with no time estimate.`;
  else if(!today||n<call){const o=d.left-av;cls=o>0?'bad':'good';main=`<b>${minTxt(d.left)}</b> to shoot in a day of ${minTxt(av)||'0 min'} · <b class="${cls}">${o>0?minTxt(o)+' over':o<0?minTxt(-o)+' to spare':'exactly the day'}</b>`;}
  else if(n>=wrap){cls='bad';main=`<b>${minTxt(d.left)}</b> still to shoot · <b class="bad">wrap was ${dayClock(c.wrap)}</b>`;}
- else{const lunch=c.lunch&&n<call+360?c.lunch:0,until=Math.max(0,wrap-n-lunch),o=d.left-until;cls=o>0?'bad':'good';main=`<b>${minTxt(d.left)}</b> to shoot · ${minTxt(until)||'0 min'} until wrap${lunch?', after lunch':''} · <b class="${cls}">${o>0?minTxt(o)+' over':o<0?minTxt(-o)+' in hand':'right on time'}</b>`;}
+ else{const lunch=c.lunch?Math.max(0,Math.min(c.lunch,call+360+c.lunch-n)):0,until=Math.max(0,wrap-n-lunch),o=d.left-until;cls=o>0?'bad':'good';main=`<b>${minTxt(d.left)}</b> to shoot · ${minTxt(until)||'0 min'} until wrap${lunch?', after lunch':''} · <b class="${cls}">${o>0?minTxt(o)+' over':o<0?minTxt(-o)+' to spare':'right on time'}</b>`;}
+ if(d.todo&&d.left&&d.todoNoEst)main+=` <span class="mut">· ${plural(d.todoNoEst,'shot')} left with no estimate</span>`;
  return `<div class="setDay" id="setDayL"><div>${main}</div><small>${esc(d.name)} · call ${dayClock(c.call)} · wrap ${dayClock(c.wrap)} · <button class="lnk" data-sv="day">Change…</button></small></div>`;}
 setInterval(()=>{if(!setOn)return;const e=document.getElementById('setDayL');if(!e)return;const h=setDayLine(scene());if(h){const t=document.createElement('div');t.innerHTML=h;if(t.firstChild.innerHTML!==e.innerHTML)e.innerHTML=t.firstChild.innerHTML;}},30000);
 function ovStats(s){const x=txOf(s.id),full=c=>!!(c&&!c.del&&c.h&&rtText(rtPrune(rtParse(c.h))));
  const nbK=nbCols(s).filter(c=>c.on&&c.k!=='q').map(c=>c.k),nb=nbK.filter(k=>full(x&&x.nb&&x.nb[k])||(k==='syn'&&!!String(s.synopsis||'').trim())).length;
  const secs=stSecs(s),st=secs.filter(q=>q.h!=null&&!!rtText(rtPrune(rtParse(q.h)))).length;
  const chars=new Set(s.items.filter(i=>i.type==='char').map(i=>i.charId)).size,cams=s.items.filter(i=>i.type==='cam').length,set=s.items.filter(i=>!ACTOR(i.type)&&i.type!=='axis').length+(s.bgId?1:0);
- let R=[];try{R=rowsOf(s);}catch(e){}
+ let R=[];try{R=rowsOf(s).filter(r=>r.m.ss!=='drop');}catch(e){} /* dropped shots are not counted, here as in the days */
  return {nb,nbN:nbK.length,st,stN:secs.length,chars,cams,set,shots:R.length,setups:new Set(R.map(r=>r.st&&r.st.id)).size,frames:R.filter(r=>r.m&&r.m.sb).length,time:rowsMin(R),todo:(s.todo||[]).filter(t=>!t.d).length,qs:ovQs(s)};}
 
 /* ---------- script pages, in eighths ---------- */
@@ -6216,7 +6272,7 @@ async function ovCutsPdf(f,S){const D=await ovPdfDoc(f,'Cuts',false,S[0]&&S[0].s
  D.foot();await save(`${f.name} - Cuts.pdf`,doc.output('blob'));}
 async function ovPdf(tab,f,S,SS,fid){toast('Making the PDF…');try{if(tab==='sp')await ovSpinePdf(f,SS);else if(tab==='cu')await ovCutsPdf(f,SS);else await ovScenesPdf(f,S,fid);}catch(e){console.error(e);toast('The PDF couldn’t be made.');}}
 function overviewDialog(fid){const f=fById(fid);if(!f){toast('Put this scene in a folder to see an overview of the episode or film.');return;}
- const list=folderScenes(fid),S=list.map(s=>({s,k:ovStats(s)})),nq=S.reduce((a,o)=>a+o.k.qs.length,0),SS=[...S].sort((a,b)=>sceneCmp(a.s,b.s));
+ const list=folderScenes(fid).filter(x=>!x.scout),S=list.map(s=>({s,k:ovStats(s)})),nq=S.reduce((a,o)=>a+o.k.qs.length,0),SS=[...S].sort((a,b)=>sceneCmp(a.s,b.s));
  const pc=(a,b)=>b?Math.round(a/b*100):0,meter=(a,b,lbl)=>`<span class="ovm${a&&a>=b?' full':''}"><span style="width:${pc(a,b)}%"></span></span><span class="ovc${a?'':' no'}">${a?`<b>${a}</b> of ${b} ${lbl}`:'Not started'}</span>`;
  const dot=s=>{const t=storyOf(s);return `<i style="background:${t?esc(t.color):'transparent'}"></i>`;};
  const sum=()=>{const n=S.length,c=k=>S.filter(o=>k(o.k)).length,sh=S.reduce((a,o)=>a+o.k.shots,0),su=S.reduce((a,o)=>a+o.k.setups,0);
@@ -7371,7 +7427,17 @@ const WIN_X='€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œ
 const PDF_MAP={'●':'•','○':'o','◦':'o','▪':'•','■':'•','‣':'•','‐':'-','‑':'-','‒':'–','―':'—','−':'-','′':'’','″':'”','\u2009':' ','\u200A':' ','\u202F':' ','\u2002':' ','\u2003':' ','\u200B':'','\uFEFF':'','✓':'v','✔':'v','\t':' '};
 const PDF_SYM={'→':'\xAE','←':'\xAC','↔':'\xAB','↑':'\xAD','↓':'\xAF','⇒':'\xDE','⇐':'\xDC','≠':'\xB9','≤':'\xA3','≥':'\xB3','≈':'\xBB'};
 const SYM_RE=/([→←↔↑↓⇒⇐≠≤≥≈]|\s+)/,SYM_W={'\xAE':.987,'\xAC':.987,'\xAB':1.042,'\xAD':.603,'\xAF':.603,'\xDE':.987,'\xDC':.987,'\xB9':.549,'\xA3':.549,'\xB3':.549,'\xBB':.549};
-function pdfStr(t){let o='';for(const ch of String(t==null?'':t)){const c=ch.codePointAt(0);if(c<32){o+=' ';continue;}if((c<256&&!(c>=127&&c<160))||WIN_X.includes(ch)||PDF_SYM[ch]){o+=ch;continue;}if(ch in PDF_MAP){o+=PDF_MAP[ch];continue;}const n=ch.normalize('NFKD').replace(/[\u0300-\u036f]/g,'');if(n&&n!==ch&&[...n].every(x=>x.codePointAt(0)<127))o+=n;}return o;}
+/* writing with letters the PDF's own faces lack (Yoruba marks, Greek, Cyrillic): a font that has them is loaded for that PDF */
+var pdfUni=false,pdfUniB64=null,pdfLost=false;
+function pdfNeedsUni(str){for(const ch of String(str||'')){const c=ch.codePointAt(0);if(c<256||WIN_X.includes(ch)||PDF_SYM[ch]||(ch in PDF_MAP))continue;return true;}return false;}
+async function pdfUniLoad(doc){const base=window.BB_UNIFONT;if(!base)return false;
+ try{if(!pdfUniB64){const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error('font');const b=new Uint8Array(await r.arrayBuffer());let z='';for(let i=0;i<b.length;i+=8192)z+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(z);};pdfUniB64=[await get(base+'.ttf'),await get(base+'-b.ttf')];}
+  doc.addFileToVFS('nbuni.ttf',pdfUniB64[0]);doc.addFileToVFS('nbuni-b.ttf',pdfUniB64[1]);
+  for(const st of ['normal','italic'])doc.addFont('nbuni.ttf','nbuni',st);for(const st of ['bold','bolditalic'])doc.addFont('nbuni-b.ttf','nbuni',st);
+  const sf=doc.setFont.bind(doc);doc.setFont=(fam,style)=>fam==='symbol'?sf(fam,style):sf('nbuni',style||'normal');return true;}catch(e){console.error(e);return false;}}
+const PDF_UNI_RE=/[^\u0020-\u024F\u0250-\u02FF\u0300-\u036F\u0370-\u03FF\u0400-\u052F\u1E00-\u1EFF\u2000-\u206F\u20A0-\u20CF\u2100-\u214F\u2190-\u21FF\u2200-\u222F\u25A0-\u25FF]/g;
+function pdfStr(t){if(pdfUni){const z=String(t==null?'':t).normalize('NFC').replace(/[\u0000-\u001f\u007f-\u009f]/g,' ');let o='';for(const ch of z){if(PDF_SYM[ch]){o+=ch;continue;}PDF_UNI_RE.lastIndex=0;if(PDF_UNI_RE.test(ch)){pdfLost=true;continue;}o+=ch;}return o;}
+ let o='';for(const ch of String(t==null?'':t)){const c=ch.codePointAt(0);if(c<32){o+=' ';continue;}if((c<256&&!(c>=127&&c<160))||WIN_X.includes(ch)||PDF_SYM[ch]){o+=ch;continue;}if(ch in PDF_MAP){o+=PDF_MAP[ch];continue;}const n=ch.normalize('NFKD').replace(/[\u0300-\u036f]/g,'');if(n&&n!==ch&&[...n].every(x=>x.codePointAt(0)<127))o+=n;pdfLost=true;}return o;}
 function pdfKit(doc){
  const FAM={h:'helvetica',t:'times',c:'courier'};   /* the PDF's own faces: the app's Sans Serif and Helvetica both print as Helvetica */
  const cache=new Map(),font=(b,i,sym,f)=>{if(sym)doc.setFont('symbol','normal');else doc.setFont(FAM[f]||'helvetica',b?(i?'bolditalic':'bold'):(i?'italic':'normal'));};
@@ -7457,10 +7523,12 @@ async function pdfTextPages(doc,s,o,np){
      put([...T,...B],box,g,!L.length?(box?bp:0):box?(prevBox?bp*2:fs*1.1+bp):(prevBox?fs*1.1+bp:fs*1.15));prevBox=box;
      if(z.q.id==='arc'){cutRows();placed=true;}}
     if(!placed)cutRows();
-    let y=0,sl=0;L.forEach((l,i)=>{let h=l.h+(y?l.gap:(l.box?bp:0));const nx=L[i+1],need=l.ttl&&nx?h+nx.h+nx.gap:h;if(y&&y+need+(l.box?bp:0)>cap){sl++;y=0;h=l.h+(l.box?bp:0);}l.sl=sl;l.y=y+h;y+=h;});
-    return {fs,L,slots:sl+1};};
+    const flow=cx=>{let y=0,sl=0,tall=0;L.forEach((l,i)=>{let h=l.h+(y?l.gap:(l.box?bp:0));const nx=L[i+1],need=l.ttl&&nx?h+nx.h+nx.gap:h;if(y&&y+need+(l.box?bp:0)>cx){sl++;y=0;h=l.h+(l.box?bp:0);}l.sl=sl;l.y=y+h;y+=h;tall+=h;});return {slots:sl+1,tall};};
+    const F=flow(cap);return {fs,L,slots:F.slots,tall:F.tall,flow};};
    let G=null;for(let fs=10.5;fs>=(port?7.75:8.5);fs-=.25){G=lay(fs);if(G.slots<=ncol)break;}
    if(G.slots>ncol)G=lay(9.5);
+   /* one long column beside an empty one: two columns of about the same height */
+   if(ncol===2&&G.slots===1&&G.tall>cap*.5){const F=G.flow(Math.min(cap,G.tall/2+G.fs*2.5));if(F.slots===2)G.slots=2;else G.slots=G.flow(cap).slots;}
    const pages=Math.ceil(G.slots/ncol);
    for(let p=0;p<pages;p++){np();added++;await head('st');doc.setLineWidth(.5);
     for(let c=0;c<ncol;c++){const Lp=G.L.filter(l=>l.sl===p*ncol+c),x0=M+c*(tw+gut),groups={};if(!Lp.length)continue;
@@ -7660,13 +7728,13 @@ function listPagesSVG(s,o){
 }
 /* ---------- storyboard sheet: every frame in a grid, with its shot and description ---------- */
 function boardPagesSVG(s,o){o=o||{};const port=!!o.port,W=port?1275:1650,H=port?1650:1275,M=48,TW=W-2*M,out=[];
- const panels=[];for(const r of rowsOf(s)){const fr=shotFrames(r.it,r.vi).map(f=>f.id);fr.forEach((id,k)=>panels.push({r,id,k,n:fr.length}));}
+ const panels=[];for(const r of rowsOf(s)){const fr=shotFrames(r.it,r.vi);fr.forEach((f,k)=>panels.push({r,id:f.id,k,n:fr.length,f}));}
  if(!panels.length)return out;
  const cols=port?2:3,rows=port?3:2,G=26,PW=(TW-G*(cols-1))/cols,IH=Math.round(PW*9/16),CAP=118,PH=IH+CAP,per=cols*rows,np=Math.ceil(panels.length/per),fitc=Math.max(10,Math.floor((PW-8)/10.2));
  for(let p=0;p<np;p++){const LH=letterhead(s,'board',W);let h=LH.h+pageFooter(s,W,H,[s.number?'Sc. '+s.number:'','Storyboards'+(np>1?` ${p+1} of ${np}`:'')].filter(Boolean).join('  ·  '));
   const top=LH.y+26,gapY=Math.max(G,Math.min(48,(H-70-top-rows*PH)/Math.max(1,rows-1)));
   panels.slice(p*per,p*per+per).forEach((q,i)=>{const cx=M+(i%cols)*(PW+G),cy=top+Math.floor(i/cols)*(PH+gapY),src=images[q.id],r=q.r;
-   h+=`<rect x="${cx}" y="${cy}" width="${PW}" height="${IH}" fill="#f4f4f1"/>${src?`<image href="${src}" xlink:href="${src}" x="${cx}" y="${cy}" width="${PW}" height="${IH}" preserveAspectRatio="xMidYMid slice"/>`:''}<rect x="${cx}" y="${cy}" width="${PW}" height="${IH}" fill="none" stroke="#1c1c1e" stroke-width="1.5"/>`;
+   h+=`<rect x="${cx}" y="${cy}" width="${PW}" height="${IH}" fill="#f4f4f1"/>${src?fImgTag(src,PW,IH,r.it.marks[q.f.j],q.f.k,cx,cy):''}<rect x="${cx}" y="${cy}" width="${PW}" height="${IH}" fill="none" stroke="#1c1c1e" stroke-width="1.5"/>`;
    const code=shotCode(s,r.it),ver=nVer(r.it)>1?'  V'+verCode(s,r.vn):'',fk=q.n>1?`frame ${q.k+1} of ${q.n}`:'';let y=cy+IH+30;
    h+=`<rect x="${cx}" y="${y-17}" width="18" height="18" rx="3" fill="${r.st.color}"/><text x="${cx+26}" y="${y}" style="font-size:22px;font-weight:800;fill:#141414">${esc(code+ver)}</text>${fk?`<text x="${cx+PW}" y="${y}" text-anchor="end" style="font-size:15px;fill:#8a8b90">${fk}</text>`:''}`;
    const spec=[r.m.size,r.m.type,r.m.angle,r.m.move].map(x=>String(x||'').trim()).filter(Boolean).join('  ·  ');
@@ -7676,17 +7744,20 @@ function boardPagesSVG(s,o){o=o||{};const port=!!o.port,W=port?1275:1650,H=port?
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${RK_DEFS}<style>${SVG_CSS}${SHEET_CSS}</style><rect width="${W}" height="${H}" fill="#fff"/>${h}</svg>`);}
  return out;}
 let expNoDesc=false; /* an export that leaves shot descriptions off */
+var expAllPri=false; /* a folder's or a day's PDF: every shot, whatever priority filter the screen has on */
 function listKit(s,o,W){
- const port=!!o.port,M=48,TW=W-2*M,on=colsOn(s).filter(c=>!(expNoDesc&&c.k==='desc')),sb=o.sb!==false&&on.some(c=>c.k==='sb');
+ const port=!!o.port,M=48,TW=W-2*M,on=colsOn(s).filter(c=>!(expNoDesc&&c.k==='desc')),sb=o.sb!==false&&on.some(c=>c.k==='sb')&&rowsOf(s).some(r=>shotFrames(r.it,r.vi).length); /* no frames in the scene: no empty column */
  const WL={sb:276,shot:92,ver:62,nick:140,size:150,type:150,angle:140,move:140,lens:90,gear:150,cast:160,props:160,time:84,pri:86,flag:66,vfx:62,sfx:62,ss:100,sn:180},WP={sb:204,shot:80,ver:54,nick:116,size:128,type:128,angle:118,move:118,lens:78,gear:126,cast:136,props:136,time:74,pri:76,flag:58,vfx:54,sfx:54,ss:86,sn:150};
  const base=Object.assign({},port?WP:WL),list=on.filter(c=>c.k!=='sb'||sb),wOf=c=>base[c.k]||(port?116:140),core=new Set(['sb','shot','ver','time','pri','flag','vfx','sfx','lens']),hasD=list.some(c=>c.k==='desc'),minD=hasD?(port?240:320):0;
  let fixed=0,scal=0;for(const c of list){if(c.k==='desc')continue;if(core.has(c.k))fixed+=wOf(c);else scal+=wOf(c);}
  let f0=scal?(TW-minD-fixed)/scal:1;const sbw0=base.sb;if(sb&&f0<.8){base.sb=Math.round(sbw0*.8);fixed-=sbw0-base.sb;f0=(TW-minD-fixed)/scal;}
- const crowd=f0<.8,CH=crowd?8.4:10.4,LHt=crowd?20:24,f=scal?Math.max(.35,hasD?Math.min(1,f0/(crowd?.81:1)):f0):1,ws=list.map(c=>c.k==='desc'?0:Math.round(core.has(c.k)?wOf(c):wOf(c)*f)),used=ws.reduce((a,b)=>a+b,0);
+ const crowd=f0<.8,CH=crowd?8.4:10.4,LHt=crowd?20:24,f=scal?Math.max(.35,hasD?Math.min(1,f0/(crowd?.81:1)):f0):1,ws=list.map(c=>c.k==='desc'?0:Math.round(core.has(c.k)?wOf(c):wOf(c)*f));let used=ws.reduce((a,b)=>a+b,0);
+ {const room=TW-(hasD?140:0);if(used>room){const kk=room/used;for(let i=0;i<ws.length;i++)ws[i]=Math.floor(ws[i]*kk);used=ws.reduce((a,b)=>a+b,0);}} /* more columns than the page is wide: all of them narrow together, none runs off the edge */
  const cols=[];let cx=0;list.forEach((c,i)=>{const w=c.k==='desc'?Math.max(140,TW-used):ws[i];cols.push([c.P,cx,w,c.k]);cx+=w;});
  const C=k=>cols.findIndex(c=>c[3]===k),fit=w=>Math.max(4,Math.floor((w-20)/CH)),IW=Math.min(o.dense?(port?150:176):(port?184:256),(sb?cols[C('sb')][2]:300)-20),IH=Math.round(IW*9/16);
- const tk=cols.map(c=>c[3]).filter(k=>!['sb','shot','ver'].includes(k)),cell=(k,str,lines)=>{const n=fit(cols[C(k)][2]),out=[];for(const l of wrapText(str,n))for(let p=0;p<l.length;p+=n)out.push(l.slice(p,p+n));return out.slice(0,lines);};
- const rows=priRows(s,rowsOf(s)).map(r=>{const t={};for(const k of tk)t[k]=cell(k,cellVal(s,r,k),k==='desc'?30:k==='sn'?8:3);
+ const tk=cols.map(c=>c[3]).filter(k=>!['sb','shot','ver'].includes(k)),cell=(k,str,lines)=>{const n=fit(cols[C(k)][2]),out=[];for(const l of wrapText(str,n))for(let p=0;p<l.length;p+=n)out.push(l.slice(p,p+n));if(out.length<=lines)return out;
+  const cut=out.slice(0,lines);cut[lines-1]=cut[lines-1].slice(0,Math.max(1,n-1)).replace(/\s+$/,'')+'…';return cut;}; /* text that runs out of room says so */
+ const rows=priRows(s,rowsOf(s)).map(r=>{const t={};for(const k of tk)t[k]=cell(k,cellVal(s,r,k),k==='desc'?30:k==='sn'?10:6);
   const n=Math.max(1,...Object.values(t).map(a=>a.length)),nf=sbN(r),more=shotFrames(r.it,r.vi).length>SBMAX?26:0;return {r,t,h:Math.max(sb?nf*IH+(nf-1)*8+(o.dense?18:24)+more:(o.dense?50:58),22+n*LHt+(o.dense?8:14))};});
  const txt=(k,y,arr)=>arr.map((l,j)=>`<text x="${M+cols[C(k)][1]+10}" y="${y+30+j*LHt}" class="x-lt"${crowd?' style="font-size:15.5px"':''}>${esc(l)}</text>`).join('');
  const head=y=>`<rect x="${M}" y="${y}" width="${TW}" height="42" fill="#2b3445"/>`+cols.map(c=>{const t=String(c[0]),fs=Math.max(9,Math.min(14,(c[2]-18)/(t.length*.74)));return `<text x="${M+c[1]+10}" y="${y+27}" class="x-th"${fs<14?` style="font-size:${fs.toFixed(1)}px"`:''}>${esc(t)}</text>`;}).join('');
@@ -7770,24 +7841,28 @@ async function exportPDF(o){
  if(!o.dia&&!o.list&&!o.nb&&!o.st&&!o.bd){toast('Pick at least one thing to include.');return;}
  toast('Building PDF…');
  try{const {jsPDF}=await loadJsPDF(),doc=new jsPDF({orientation:o.port?'portrait':'landscape',unit:'pt',format:'letter'});let n=0,used=0;
-  expProd=o.prod===undefined?undefined:(o.prod||null);expNoDesc=!!o.nodesc;
-  const np=()=>{if(n++)doc.addPage('letter',o.port?'portrait':'landscape');};let cover=0;
+  expProd=o.prod===undefined?undefined:(o.prod||null);expNoDesc=!!o.nodesc;expAllPri=!!(day||folder);
+  const np=()=>{if(n++)doc.addPage('letter',o.port?'portrait':'landscape');};let cover=0;pdfLost=false;pdfUni=false;
+  if(o.nb||o.st){let blob='';try{for(const sc of list)blob+=JSON.stringify([txOf(sc.id)||0,sc.heading,sc.title,sc.synopsis,sc.number])+JSON.stringify(cutsFor(sc)||0);blob+=JSON.stringify(P.productions||[])+JSON.stringify(P.folders||[]);}catch(e){}
+   if(pdfNeedsUni(blob))pdfUni=await pdfUniLoad(doc);}
   if(day){for(const sv of dayCoverSVG(day,o)){const c=await rasterize(sv,W,H,1.4);np();doc.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,o.port?612:792,o.port?792:612);try{svgTextLayer(doc,sv,W,o.port?612:792);}catch(e){console.error(e);}}cover=n;}
-  for(let si=0;si<list.length;si++){const sc=list[si],written=(o.nb||o.st)&&(txHas(sc)||(o.nb&&!!String(sc.synopsis||'').trim()));if(folder&&!sc.items.length&&!written)continue;
+  for(let si=0;si<list.length;si++){const sc=list[si],written=(o.nb||o.st)&&(txHas(sc)||(o.nb&&!!String(sc.synopsis||'').trim()));const hasPlan=!!(sc.items.length||(sc.bgId&&sc.bg&&images[sc.bgId])); /* a plan that is only a background picture is still a plan */
+   if(folder&&!hasPlan&&!written)continue;
    let svgs=[],tp=0;if(written)tp=await pdfTextPages(doc,sc,o,np);const keep=P.sceneId,frK=frForce;P.sceneId=sc.id;frForce=o.pf!==false;nightForce=o.nl===false?false:null;
-   try{if(!sc.items.length&&written){}else if(!o.dia&&!o.list){}else if(o.layout==='compact'){svgs=compactPagesSVG(sc,o);}else{if(o.dia){const n=sc.pages.length;if(n<2)svgs.push(sheetSVG(sc,sc.pages[0].id,o.port,o.list,{fa:o.fa}));else{
+   try{if(!hasPlan&&written){}else if(!o.dia&&!o.list){}else if(o.layout==='compact'){svgs=compactPagesSVG(sc,o);}else{if(o.dia){const n=sc.pages.length;if(n<2)svgs.push(sheetSVG(sc,sc.pages[0].id,o.port,o.list,{fa:o.fa}));else{
      const box=o.zoom?null:planBox(sc,'all',o.fa),master=o.master||!o.split;
      if(master)svgs.push(sheetSVG(sc,'all',o.port,o.list,{label:`Master  ·  every move, all ${n} pages`,fa:o.fa}));
-     if(o.split)sc.pages.forEach((pg,i)=>{const nm=String(pg.name||'').trim(),lbl=`Page ${i+1} of ${n}`+(nm&&!/^page\s*\d+$/i.test(nm)?`  ·  ${nm}`:'');svgs.push(sheetSVG(sc,pg.id,o.port,o.list,{label:lbl,box:box||planBox(sc,pg.id,o.fa),fa:o.fa}));});}}if(o.list)svgs.push(...listPagesSVG(sc,{port:o.port,sb:o.sb}));}if(o.bd==='auto'?!(o.list&&o.sb!==false&&colsOn(sc).some(c=>c.k==='sb')):o.bd)svgs.push(...boardPagesSVG(sc,{port:o.port}));}finally{P.sceneId=keep;frForce=frK;nightForce=null;}
+     if(o.split)sc.pages.forEach((pg,i)=>{const nm=String(pg.name||'').trim(),lbl=`Page ${i+1} of ${n}`+(nm&&!/^page\s*\d+$/i.test(nm)?`  ·  ${nm}`:'');svgs.push(sheetSVG(sc,pg.id,o.port,o.list,{label:lbl,box:box||planBox(sc,pg.id,o.fa),fa:o.fa}));});}}if(o.list)svgs.push(...listPagesSVG(sc,{port:o.port,sb:o.sb}));}if(o.bd==='auto'?(!(o.list&&o.sb!==false&&colsOn(sc).some(c=>c.k==='sb'))||rowsOf(sc).some(r=>shotFrames(r.it,r.vi).length>SBMAX)):o.bd)svgs.push(...boardPagesSVG(sc,{port:o.port}));}finally{P.sceneId=keep;frForce=frK;nightForce=null;}
    if(svgs.length||tp)used++;
    for(const sv of svgs){const c=await rasterize(sv,W,H,1.4);np();doc.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,o.port?612:792,o.port?792:612);try{svgTextLayer(doc,sv,W,o.port?612:792);}catch(e){console.error(e);}}
    if(folder&&list.length>2)toast(`Building PDF… scene ${si+1} of ${list.length}`);
   }
-  expProd=undefined;expNoDesc=false;if(day&&n===cover){toast('This day’s scenes have nothing to export yet.');return;}if(!n){toast(o.dia?'Nothing to export yet.':o.list?'No shots to put in the shot list yet.':o.bd?'No storyboard frames yet. Add them in the shot list.':'Nothing is written in the Breakdown or Strategy yet.');return;}
+  expProd=undefined;expNoDesc=false;expAllPri=false;pdfUni=false;if(day&&n===cover){toast('This day’s scenes have nothing to export yet.');return;}if(!n){toast(o.dia?'Nothing to export yet.':o.list?'No shots to put in the shot list yet.':o.bd?'No storyboard frames yet. Add them in the shot list.':'Nothing is written in the Breakdown or Strategy yet.');return;}
   if(day){await save(`${day.folder||'Day'} - ${day.name} - ${day.dir?'Director copy':'Crew copy'}`.replace(/[^\w\- ]+/g,'').replace(/\s+/g,' ').trim()+'.pdf',doc.output('blob'));return;}
   const base=folder?(fById(fid).name||'Folder').replace(/[^\w\- ]+/g,'').trim()||'Folder':fname(cur);
-  {const pk=[['nb','Breakdown'],['st','Strategy'],['dia','Floor Plan'],['list','Shot List'],['bd','Storyboards']].filter(([k])=>o[k]);await save(base+(pk.length===1?' - '+pk[0][1]:'')+'.pdf',doc.output('blob'));}
- }catch(e){console.error(e);toast('PDF export failed. Try the image instead.');}finally{expProd=undefined;expNoDesc=false;}
+  {const pk=[['nb','Breakdown'],['st','Strategy'],['dia','Floor Plan'],['list','Shot List'],['bd','Storyboards']].filter(([k])=>o[k]);await save(base+(pk.length===1?' - '+pk[0][1]:'')+'.pdf',doc.output('blob'));
+   if(pdfLost&&(o.nb||o.st))setTimeout(()=>toast('PDF saved. Some letters or marks in the Breakdown or Strategy are in a script this PDF cannot print, and were left out or printed plain.',9000),700);}
+ }catch(e){console.error(e);toast('PDF export failed. Try the image instead.');}finally{expProd=undefined;expNoDesc=false;expAllPri=false;pdfUni=false;}
 }
 function prodSaved(){commit();detectChanges();saveLocal();schedulePush();}
 function folderPathName(f){const out=[];let x=f,g=0;while(x&&g++<40){out.unshift(x.name);x=x.parent?fById(x.parent):null;}return out.join(' › ');}
@@ -7871,7 +7946,11 @@ async function exportPNG(){const s=scene();try{const c=await rasterize(sheetSVG(
 async function backup(){try{flushNotes();if(txTimer)txFlush();}catch(e){}
  if(!imgReady){toast('Gathering your pictures…',22000);const t0=Date.now();while(!imgReady&&Date.now()-t0<21000)await new Promise(r=>setTimeout(r,150));}
  let miss=0;try{const need=new Set();for(const sc of P.scenes)for(const k of sceneImgs(sc))need.add(k);for(const k of need)if(!images[k])miss++;}catch(e){}
- const d=new Date().toISOString().slice(0,10);await save(`The Director’s Notebook backup ${d}.json`,JSON.stringify({app:'blocking-board',v:3,characters:P.characters,folders:P.folders,productions:P.productions||[],labels:P.labels||{},prefs:P.prefs||{},text:P.text||{},locations:P.locations||[],scenes:P.scenes.map(stripScene),images}));
+ const d=new Date().toISOString().slice(0,10);/* a picture is written when its name appears anywhere in the work being backed up (scenes, Trash, templates, plans, writing, locations, settings): nothing the file itself points at can be left out */
+ const body=JSON.stringify({app:'blocking-board',v:3,characters:P.characters,folders:P.folders,productions:P.productions||[],labels:P.labels||{},prefs:P.prefs||{},text:P.text||{},locations:P.locations||[],scenes:P.scenes.map(stripScene)}),used={};let left=0;
+ for(const k in images){if(body.includes(k))used[k]=images[k];else left++;}
+ await save(`The Director’s Notebook backup ${d}.json`,body.slice(0,-1)+',"images":'+JSON.stringify(used)+'}');
+ if(left&&!miss)setTimeout(()=>toast(`Backup saved. ${plural(left,'picture')} that nothing uses any more ${left===1?'was':'were'} left out of the file.`,7000),600);
  if(miss)setTimeout(()=>toast(`Backup saved, but ${plural(miss,'picture')} had not reached this device yet, so the file does not hold ${miss>1?'them':'it'}. Let sync finish, then back up again.`,10000),600);}
 $('#fJson').addEventListener('change',async e=>{
  const f=e.target.files[0];e.target.value='';if(!f)return;
@@ -7880,10 +7959,18 @@ $('#fJson').addEventListener('change',async e=>{
   for(const key of ['characters','folders','locations','productions'])if(o[key]!=null&&!Array.isArray(o[key]))throw 0;
   for(const key of ['labels','text','images'])if(o[key]!=null&&(typeof o[key]!=='object'||Array.isArray(o[key])))throw 0;
   {const test=clone(o.scenes);for(const sc of test){migrateScene(sc);if(!Array.isArray(sc.items)||!Array.isArray(sc.pages)||!sc.pages.length)throw 0;}} /* throws on a damaged file, before anything here changes; an older layout is converted when it is adopted */
-  confirmBox('Restore this backup?',`It replaces everything here with ${o.scenes.length} scene${o.scenes.length>1?'s':''} from the file, and syncs that to your other devices. Scenes here that aren’t in the file go to Trash.`,'Replace',()=>{
+  const nS=o.scenes.filter(z=>z&&!z.tpl).length;
+  confirmBox('Restore this backup?',`It replaces everything here with ${plural(nS,'scene')} from the file, and syncs that to your other devices. Scenes here that aren’t in the file go to Trash.`,'Replace',()=>{
    const keepIds=new Set(o.scenes.map(z=>z.id)),now=Date.now(),extra=P.scenes.filter(z=>!keepIds.has(z.id)).map(z=>{if(!z.trashed&&!z.tpl)z.trashed=now;return z;});
-   P.characters=o.characters||[];P.folders=o.folders||[];P.locations=o.locations||[];if(o.productions)P.productions=o.productions;if(o.labels)P.labels=o.labels;if(o.prefs&&typeof o.prefs==='object')P.prefs=o.prefs;const tx0=clone(P.text||{}),u0=undoS.length,j0=cur,g0=rgen,mk=rvMark();P.scenes=[...o.scenes,...extra];txAdopt(o.text||{},extra.map(z=>z.id));migrate();P.sceneId=P.scenes[0].id;ensureLive();
+   const oldC=P.characters||[];
+   P.characters=o.characters||[];P.folders=o.folders||[];P.locations=o.locations||[];
+   /* scenes that go to Trash keep the people they use: recovered later, they still have their characters */
+   {const have=new Set(P.characters.map(c=>c.id)),need=new Set(),eat=its=>{for(const it of its||[])if(it&&it.charId)need.add(it.charId);};
+    for(const z of extra){eat(z.items);for(const pl of z.plans||[])if(pl&&pl.d)eat(pl.d.items);for(const c of z.cast||[])need.add(typeof c==='string'?c:c&&c.id);}
+    for(const c of oldC)if(c&&need.has(c.id)&&!have.has(c.id)){P.characters.push(c);have.add(c.id);}}
+   if(o.productions)P.productions=o.productions;if(o.labels)P.labels=o.labels;if(o.prefs&&typeof o.prefs==='object')P.prefs=o.prefs;const tx0=clone(P.text||{}),u0=undoS.length,j0=cur,g0=rgen,mk=rvMark();P.scenes=[...o.scenes,...extra];txAdopt(o.text||{},extra.map(z=>z.id));migrate();P.sceneId=P.scenes[0].id;ensureLive();
    for(const k in (o.images||{})){if(!images[k]){images[k]=o.images[k];sync.stamps['img-'+k]=Date.now();markDirty('img-'+k);}}imgDirty=true;sel=null;rvBump(mk);commit();undoWithText(tx0,u0,j0,g0);txFlush();renderDocs(true);fit();
+   toast(`Backup restored: ${plural(nS,'scene')}. To go back, use Undo.`,7000);
   });
  }catch(err){toast('That file isn’t a backup from The Director’s Notebook.');}
 });
@@ -7919,19 +8006,26 @@ function menu(sub){
 
 /* ---------- shot numbering + reordering ---------- */
 const NUM_DEF={cam:'1A',ver:'1',auto:true,start:1};
-function numCfg(s){return Object.assign({},NUM_DEF,P.numDefault||{},(s&&s.numbering)||{});}
+/* a scene's own settings over the built-in ones. The default a person sets is copied into each NEW scene (blankScene); it never changes a scene that exists */
+function numCfg(s){return Object.assign({},NUM_DEF,(s&&s.numbering)||{});}
+const numStart=c=>{const n=parseInt(c&&c.start,10);return Number.isFinite(n)&&n>=0?n:1;};
 function byLetter(a,b){return natCmp(a.letter,b.letter);}
 function setupCams(s,id){return s.items.filter(c=>c.type==='cam'&&c.setupId===id).sort(byLetter);}
 function camSeq(s,it){let i=0;for(const st of s.setups)for(const c of setupCams(s,st.id)){if(c===it)return i;i++;}return 0;}
 function letterSeq(n){let r='';n++;while(n>0){const k=(n-1)%26;r=String.fromCharCode(65+k)+r;n=Math.floor((n-1)/26);}return r;}
 function roman(n){const t=[[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];let r='';for(const [v,l] of t)while(n>=v){r+=l;n-=v;}return r;}
-function shotCode(s,it){const st=setupIn(s,it.setupId),c=numCfg(s),num=st?st.num:'?',L=it.letter||'';
- switch(c.cam){case '1-A':return num+'-'+L;case 'A-1':return L+'-'+num;case '1':return String((+c.start||1)+camSeq(s,it));case '0001':return String((+c.start||1)+camSeq(s,it)).padStart(4,'0');case 'A':return letterSeq((+c.start||1)-1+camSeq(s,it));default:return num+L;}}
+function shotCode(s,it){const st=setupIn(s,it.setupId),c=numCfg(s),num=st?st.num:'?',L=it.letter||'',q=!c.auto&&it.fx!=null?+it.fx:numStart(c)+camSeq(s,it);
+ switch(c.cam){case '1-A':return num+'-'+L;case 'A-1':return L+'-'+num;case '1':return String(q);case '0001':return String(q).padStart(4,'0');case 'A':return letterSeq(Math.max(0,q-1));default:return num+L;}}
 function verCode(s,vi){const c=numCfg(s);return c.ver==='A'?letterSeq(vi):c.ver==='I'?roman(vi+1):String(vi+1);}
-function normShots(s){const used=new Set(s.items.filter(i=>i.type==='cam').map(i=>i.setupId));s.setups=s.setups.filter(st=>used.has(st.id));const c=numCfg(s);if(c.auto)s.setups.forEach((st,i)=>{st.num=(+c.start||1)+i;});}
+function normShots(s){const used=new Set(s.items.filter(i=>i.type==='cam').map(i=>i.setupId));s.setups=s.setups.filter(st=>used.has(st.id));const c=numCfg(s);
+ if(c.auto){s.setups.forEach((st,i)=>{st.num=numStart(c)+i;});for(const it of s.items)if(it.type==='cam'&&it.fx!=null)delete it.fx;}
+ else{ /* automatic numbering off: each shot keeps the number it has; a new shot takes the next one */
+  const cams=[];for(const st of s.setups)cams.push(...setupCams(s,st.id));
+  if(cams.every(it=>it.fx==null))cams.forEach((it,i)=>{it.fx=numStart(c)+i;});
+  else{let mx=numStart(c)-1;for(const it of cams)if(it.fx!=null)mx=Math.max(mx,+it.fx);for(const it of cams)if(it.fx==null)it.fx=++mx;}}}
 function moveSetup(s,id,to){const i=s.setups.findIndex(x=>x.id===id);if(i<0)return false;if(to===i||to===i+1)return false;const [st]=s.setups.splice(i,1);s.setups.splice(to>i?to-1:to,0,st);return true;}
 function moveCamIn(s,it,to){const list=setupCams(s,it.setupId),i=list.indexOf(it);if(i<0||to===i||to===i+1)return false;const letters=list.map(c=>c.letter);list.splice(i,1);list.splice(to>i?to-1:to,0,it);list.forEach((c,k)=>c.letter=letters[k]);return true;}
-function afterShotMove(s,it){commit();toast(`Shot moved. It’s now ${shotCode(s,it)}.`+(numCfg(s).auto?'':' (Automatic numbering is off, so numbers stayed put.)'));}
+function afterShotMove(s,it){commit();toast(`Shot moved. It’s now ${shotCode(s,it)}.`+(numCfg(s).auto?'':/A/.test(numCfg(s).cam)&&numCfg(s).cam!=='A'?' (Automatic numbering is off: setup numbers stayed put. Letters follow the order inside a setup.)':' (Automatic numbering is off, so numbers stayed put.)'));}
 function bindShotDrag(box,rowSel){
  box.addEventListener('pointerdown',e=>{const gp=e.target.closest('.grip');if(!gp||!box.contains(gp))return;e.preventDefault();e.stopPropagation();
   const row=gp.closest(rowSel),s=scene(),it=row&&itemById(row.dataset.id);if(!it)return;
@@ -8022,7 +8116,7 @@ function turnPlan(s,spread,pin){const S=TURN_SPREAD[spread||turnSpread]||60,R=ro
    order=bo;shown=[];for(const u of order){const r=shown[shown.length-1];if(r&&r.g===u.g)r.us.push(u);else shown.push({g:u.g,us:[u],dir:u.g.dir,col:u.g.col,name:u.g.name});}}}
  return {units,groups:shown,order,cur:turns(units),sug:turns(order),same:order.every((u,k)=>u===units[k]),pinned:shown!==ord};}
 /* the shot codes the suggested order would give, when numbers follow the order */
-function turnCodes(s,plan){const keep=s.setups.slice(),nums=keep.map(x=>x.num),out=new Map();try{const ids=new Set(plan.order.map(u=>u.st.id));s.setups=[...plan.order.map(u=>u.st),...keep.filter(x=>!ids.has(x.id))];const c=numCfg(s);if(c.auto)s.setups.forEach((st,i)=>{st.num=(+c.start||1)+i;});for(const u of plan.order)out.set(u.st.id,u.cams.map(c2=>shotCode(s,c2)).join(' · '));}finally{s.setups=keep;keep.forEach((x,i)=>{x.num=nums[i];});}return out;}
+function turnCodes(s,plan){const keep=s.setups.slice(),nums=keep.map(x=>x.num),out=new Map();try{const ids=new Set(plan.order.map(u=>u.st.id));s.setups=[...plan.order.map(u=>u.st),...keep.filter(x=>!ids.has(x.id))];const c=numCfg(s);if(c.auto)s.setups.forEach((st,i)=>{st.num=numStart(c)+i;});for(const u of plan.order)out.set(u.st.id,u.cams.map(c2=>shotCode(s,c2)).join(' · '));}finally{s.setups=keep;keep.forEach((x,i)=>{x.num=nums[i];});}return out;}
 function turnMini(s,plan){const its=pageItems(s);let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;const add=(x,y,p)=>{x0=Math.min(x0,x-p);y0=Math.min(y0,y-p);x1=Math.max(x1,x+p);y1=Math.max(y1,y+p);};
  for(const u of plan.units)for(const c of u.cams)add(c.marks[0].x,c.marks[0].y,40);
  const chars=its.filter(i=>i.type==='char'&&i.marks&&i.marks.length);for(const c of chars)add(c.marks[0].x,c.marks[0].y,40);
@@ -8190,16 +8284,16 @@ function numberingDialog(){const s=scene(),c=numCfg(s);
  const CAM=[['1A','1A, 1B, 2A','Setup number + camera letter'],['1-A','1-A, 1-B, 2-A','Same, with a dash'],['A-1','A-1, B-1, A-2','Camera letter first'],['1','1, 2, 3','Every camera gets its own number'],['0001','0001, 0002, 0003','Four-digit shot numbers'],['A','A, B, C','Every camera gets its own letter']],VER=[['1','Version 1, 2, 3'],['A','Version A, B, C'],['I','Version I, II, III']];
  const radio=(g,v,l,sub,on)=>`<button class="rrow" data-g="${g}" data-v="${v}"><span><b>${l}</b>${sub?`<small>${sub}</small>`:''}</span><i class="rad${on?' on':''}"></i></button>`;
  modal(`<h3>Shot numbering</h3><div class="lbl">Shots</div><div class="rgrp" data-grp="cam">${CAM.map(([v,l,sub])=>radio('cam',v,l,sub,c.cam===v)).join('')}</div><div class="lbl">Versions</div><div class="rgrp" data-grp="ver">${VER.map(([v,l])=>radio('ver',v,l,'',c.ver===v)).join('')}</div>
-  <label class="imopt"><input type="checkbox" id="nAuto"${c.auto?' checked':''}> Renumber automatically when shots are added, moved or deleted</label><label class="fld" style="max-width:180px">Start at<input id="nStart" type="number" min="0" value="${+c.start||1}"></label>
+  <label class="imopt"><input type="checkbox" id="nAuto"${c.auto?' checked':''}> Renumber automatically when shots are added, moved or deleted</label><label class="fld" style="max-width:180px">Start at<input id="nStart" type="number" min="0" value="${numStart(c)}"></label>
   <div class="btns end"><button data-x>Cancel</button><button id="nDef">Set as default</button><button class="pri" id="nOk">OK</button></div>`,card=>{
   const cur={cam:c.cam,ver:c.ver};card.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;cur[b.dataset.g]=b.dataset.v;card.querySelectorAll(`[data-g="${b.dataset.g}"] .rad`).forEach(x=>x.classList.toggle('on',x.parentNode===b));});
-  const val=()=>({cam:cur.cam,ver:cur.ver,auto:card.querySelector('#nAuto').checked,start:Math.max(0,parseInt(card.querySelector('#nStart').value,10)||1)});
+  const val=()=>({cam:cur.cam,ver:cur.ver,auto:card.querySelector('#nAuto').checked,start:numStart({start:card.querySelector('#nStart').value})});
   card.querySelector('#nOk').onclick=()=>{s.numbering=val();closeModal();commit();};
-  card.querySelector('#nDef').onclick=()=>{const v=val();s.numbering=v;P.numDefault={cam:v.cam,ver:v.ver,auto:v.auto};closeModal();commit();toast('Saved as the default for new scenes.');};
+  card.querySelector('#nDef').onclick=()=>{const v=val();s.numbering=v;prefSet('numDefault',{cam:v.cam,ver:v.ver,auto:v.auto});closeModal();commit();toast('Saved as the default for new scenes.');};
  },'numcard');}
 function renumberDialog(){const s=scene(),c=numCfg(s);
- modal(`<h3>Renumber shots</h3><p class="mut">Numbers this scene’s shots in their current order, top to bottom.</p><label class="fld" style="max-width:180px">Start at<input id="rStart" type="number" min="0" value="${+c.start||1}"></label><label class="imopt"><input type="checkbox" id="rLet" checked> Reset camera letters to A, B, C in each setup</label><div class="btns end"><button data-x>Cancel</button><button class="pri" id="rOk">Renumber</button></div>`,card=>{
-  card.querySelector('#rOk').onclick=()=>{const st0=Math.max(0,parseInt(card.querySelector('#rStart').value,10)||1);s.setups.forEach((st,i)=>{st.num=st0+i;});if(card.querySelector('#rLet').checked)for(const st of s.setups)setupCams(s,st.id).forEach((cm,k)=>cm.letter=letterSeq(k));s.numbering=Object.assign({},s.numbering||{},{start:st0});closeModal();commit();toast('Shots renumbered.');};});}
+ modal(`<h3>Renumber shots</h3><p class="mut">Numbers this scene’s shots in their current order, top to bottom.</p><label class="fld" style="max-width:180px">Start at<input id="rStart" type="number" min="0" value="${numStart(c)}"></label><label class="imopt"><input type="checkbox" id="rLet" checked> Reset camera letters to A, B, C in each setup</label><div class="btns end"><button data-x>Cancel</button><button class="pri" id="rOk">Renumber</button></div>`,card=>{
+  card.querySelector('#rOk').onclick=()=>{const st0=numStart({start:card.querySelector('#rStart').value});s.setups.forEach((st,i)=>{st.num=st0+i;});for(const it of s.items)if(it.type==='cam')delete it.fx;if(card.querySelector('#rLet').checked)for(const st of s.setups)setupCams(s,st.id).forEach((cm,k)=>cm.letter=letterSeq(k));s.numbering=Object.assign({},s.numbering||{},{start:st0});closeModal();commit();toast('Shots renumbered.');};});}
 
 /* ---------- animation: step through the blocking ---------- */
 let anim={step:0,frac:1,playing:false,raf:0,hold:0,base:null,speed:1,loop:false};
@@ -8559,7 +8653,7 @@ function shortcut(e){
  if(lk==='n'){newPageDialog();return true;}
  if(lk==='b'){$('#bFr').click();return true;}
  if(it&&!it.locked){
-  if(lk==='w'&&(it.marks||MOVABLE(it.type))){startTool({t:'move',id:it.id});return true;}
+  if(lk==='w'&&(it.marks||MOVABLE(it.type))){if(it.type==='cam'){const [,rb]=camRun(it,(sel&&sel.mark)||0);startTool({t:'move',id:it.id,tk:'to',at:rb});}else startTool({t:'move',id:it.id});return true;}
   if(it.type==='cam'&&lk==='r'){objAct('pan');return true;}
   if(it.type==='char'){if(lk==='f'){objAct('walkfrom');return true;}if(lk==='r'){objAct('turn');return true;}if(lk==='x'){objAct('axis');return true;}}
  }
@@ -8870,7 +8964,7 @@ addEventListener('keydown',e=>{
  if(e.key==='Escape'){if(lassoArmed){setLasso(false);return;}if(msel){clearMsel();return;}if(tool)endTool();else if(pop.classList.contains('on'))closePop();else if(sel)select(null);return;}
  if(e.key==='Enter'&&tool){endTool();return;}
  if((e.key==='Delete'||e.key==='Backspace')&&sel&&sel.frame){e.preventDefault();const it=itemById(sel.id);if(it&&!it.locked)sbDelete(it,sel.mark||0,sel.fk||0);}
- else if((e.key==='Delete'||e.key==='Backspace')&&sel&&sel.id!=='__bg'&&!sel.lab){const it=itemById(sel.id);if(it&&!it.locked){e.preventDefault();if(it.type==='cam'&&sel.pan)objAct('pdel');else if(it.marks&&it.marks.length>1&&(it.type!=='cam'||nVer(it)>1))act('delMark',{dataset:{}});else deleteSel(true);}}
+ else if((e.key==='Delete'||e.key==='Backspace')&&sel&&sel.id!=='__bg'&&!sel.lab){const it=itemById(sel.id);if(it&&!it.locked){e.preventDefault();if(it.type==='cam'&&sel.pan)objAct('pdel');else if(it.type==='cam'&&(sel.mark||0)>0&&it.marks[sel.mark]&&it.marks[sel.mark].tk){it.marks.splice(sel.mark,1);sel.mark=sel.mark-1;commit();}else if(it.marks&&it.marks.length>1&&(it.type!=='cam'||nVer(it)>1))act('delMark',{dataset:{}});else deleteSel(true);}}
 });
 
 function render(opt){opt=opt||{};refreshLists();if((mode==='list'||mode==='split')&&opt.list!==false)renderList();renderDocs();renderTop();renderCanvas();renderPageBits();renderShots();if(opt.insp!==false)renderInsp();updateStatus();if(setOn)renderSet();if(scoutOn)renderScout();try{phDraw();}catch(e){}try{renderLib();}catch(e){console.error(e);}}
