@@ -1,5 +1,5 @@
-// The Director’s Notebook offline cache. Version 20261127051951
-const V='bb-20261127051951';
+// The Director’s Notebook offline cache. Version 20261127061900
+const V='bb-20261127061900';
 const SHELL=["./", "index.html", "manifest.webmanifest", "vendor/firebase-app-compat.js", "vendor/firebase-auth-compat.js", "vendor/firebase-firestore-compat.js", "vendor/jspdf.umd.min.js", "vendor/pdf.min.js", "vendor/pdf.worker.min.js", "vendor/nb-uni.ttf", "vendor/nb-uni-b.ttf", "icons/dn-192.png", "icons/dn-512.png", "icons/dn-touch.png"];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('bb-')&&k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
@@ -9,7 +9,7 @@ self.addEventListener('fetch',e=>{
     // The Guide: fresh when online, its own saved copy when not. Kept apart from the app, and across app updates.
     e.respondWith((async()=>{
       const c=await caches.open('bbguide-1');
-      try{const res=await fetch(r,{cache:'no-cache'});if(res&&res.ok)c.put(r,res.clone());return res;}
+      try{const res=await fetch(r,{cache:'no-cache'});if(res&&res.ok)c.put(r,res.clone()).catch(()=>{});return res;}
       catch(err){const hit=await c.match(r,{ignoreSearch:true})||(r.mode==='navigate'?(await c.match(new URL('guide/',self.registration.scope).href)||await c.match(new URL('guide/index.html',self.registration.scope).href)):null);if(hit)return hit;throw err;}
     })());
     return;
@@ -18,17 +18,17 @@ self.addEventListener('fetch',e=>{
     // Online: always the newest app. Offline or very slow: the saved copy.
     e.respondWith((async()=>{
       const c=await caches.open(V);
-      const net=fetch(r,{cache:'no-store'}).then(res=>{if(res&&res.ok)c.put('./',res.clone());return res;});
+      const net=fetch(r,{cache:'no-store'}).then(res=>{if(res&&res.ok)c.put('./',res.clone()).catch(()=>{});return res;},()=>null); /* no connection: null, never an unhandled failure */
       const timeout=new Promise(res=>setTimeout(res,4000));
       let res=null;try{res=await Promise.race([net,timeout]);if(res&&res.ok)return res;}catch(err){}
       // a server error or no answer: the saved copy, if there is one
-      return (await c.match('./'))||res||net;
+      return (await c.match('./'))||res||(await net)||Response.error();
     })());
     return;
   }
   e.respondWith(caches.open(V).then(async c=>{
     const hit=await c.match(r,{ignoreSearch:true});
     if(hit)return hit;
-    const res=await fetch(r,{cache:'no-cache'});if(res&&res.ok)c.put(r,res.clone());return res;
+    try{const res=await fetch(r,{cache:'no-cache'});if(res&&res.ok)c.put(r,res.clone()).catch(()=>{});return res;}catch(err){return Response.error();}
   }));
 });
