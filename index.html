@@ -213,20 +213,35 @@ details.oth{margin-top:12px}details.oth summary{font-size:12.5px;font-weight:650
 .arch [data-arcgo]{margin-left:0}
 #main{position:relative}
 #scrView{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;background:light-dark(#e9e8e4,#1b1c20);color:var(--ink);color-scheme:light dark}#scrView[hidden]{display:none}
-#scrBar{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:center;gap:6px;padding:7px 10px;background:var(--panel);border-bottom:1px solid var(--line);min-height:52px}
+#scrBar{display:flex;flex-wrap:wrap;overflow:hidden;align-items:center;gap:6px;padding:7px 10px;background:var(--panel);border-bottom:1px solid var(--line);min-height:52px}
 #scrBar .scrnm{font-size:14px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#scrBar>button,#scrBar select{min-height:36px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:13.5px;color:inherit}#scrBar>button:disabled{opacity:.4}
-#scrBar .seg button{color:var(--mut)}#scrBar .seg button.on{background:var(--accent);color:#fff;box-shadow:none}#scrBar .sp{flex:1 1 4px;min-width:4px}#scrBar>*{flex:none}#scrBar::-webkit-scrollbar{display:none}
+:is(#scrBar,#scrBar .scrg2,#scrBar .scrnav)>button,#scrBar select{min-height:36px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:13.5px;color:inherit}:is(#scrBar,#scrBar .scrg2,#scrBar .scrnav)>button:disabled{opacity:.4}
+#scrBar .seg button{color:var(--mut)}#scrBar .seg button.on{background:var(--accent);color:#fff;box-shadow:none}#scrBar .sp{flex:1 1 4px;min-width:4px}.scrg2,.scrnav{display:flex;align-items:center;gap:6px;flex:none}.scrnav{margin-left:auto}#scrBar>*{flex:none}#scrBar::-webkit-scrollbar{display:none}
 .scrtl{display:flex;align-items:center;gap:1px;background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:2px}
-.scrtl .scric{width:32px;height:32px;padding:0;border:0;border-radius:7px;background:none;color:var(--mut);display:inline-flex;align-items:center;justify-content:center}
+.scrtl .scric{width:30px;height:32px;padding:0;border:0;border-radius:7px;background:none;color:var(--mut);display:inline-flex;align-items:center;justify-content:center}
 .scrtl .scric.on{background:var(--accent);color:#fff}.scrsep{width:1px;height:20px;background:var(--line);margin:0 3px}
-#scrBar .scrcol{gap:5px}#scrBar .scrcol button{width:26px;height:26px}
+#scrBar .scrcol{gap:4px}#scrBar .scrcol button{width:24px;height:24px}
 #scrWb{min-width:50px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-variant-numeric:tabular-nums}#scrWb i{border-radius:50%;background:currentColor;display:block;flex:none}#scrWb b{font-weight:700}
 #scrSc{width:48px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--chip);padding:0 8px;font-size:16px;color:inherit}
 #scrFq{flex:1 1 200px;min-width:130px;max-width:360px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--chip);padding:0 10px;font-size:16px;color:inherit}
 #scrFn{font-size:13px;color:var(--mut);white-space:nowrap;min-width:64px;font-variant-numeric:tabular-nums}.scrfi{display:inline-flex;color:var(--mut)}.scrfi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 #scrObjV{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
-#scrStage[data-tool=sel]{cursor:default}#scrStage[data-tool=tx]{cursor:text}
+#pnBtn{position:absolute;right:16px;bottom:16px;z-index:12;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.14)}#pnBtn[hidden]{display:none}
+#pnBtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}#pnBtn i{font-style:normal;min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;border-radius:10px;background:var(--accent);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+#app.scr-on #pnBtn{display:none}
+#app.mode-list:not(.set-on) #listView,#app.mode-nb #nbView,#app.mode-st #stView{padding-bottom:72px}  /* room to scroll the last lines clear of the button */
+.scrlay{margin-top:14px;padding:10px 12px 12px;border-radius:10px;background:var(--chip)}.scrlay b{font-size:13px;color:var(--mut);font-weight:600}.scrlay .imopt{margin-top:8px}
+.card.rpcard{width:min(640px,100%)}.rpbody{max-height:62vh;overflow:auto}.rph{margin:16px 0 6px;font-size:14px}.rpl{margin:0;padding-left:18px;font-size:14px;line-height:1.5}.rpl li{margin:2px 0}.rpl li.rpa b{color:#1e8e3e}.rpl li.rpx b,.rpl li.rpx{color:light-dark(#b3261e,#ff9a8f)}.rpg{font-size:13.5px}.rpl b{font-weight:650;margin-right:4px}
+.drwarn{background:#fff4d6;color:#4a3500;border:1px solid #f0c060;border-radius:10px;padding:10px 12px;font-size:14px;margin:0 0 6px}
+.drbar{height:6px;border-radius:3px;background:var(--chip);overflow:hidden;margin-top:10px}.drbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.drrow{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px}.drrow>span{flex:1;min-width:0}.drrow button{min-height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);font-size:13px;color:inherit}.drrow button.danger{color:light-dark(#b3261e,#ff9a8f)}
+.card.pncard{width:min(840px,100%)}.pnsub{font-weight:500;color:var(--mut);font-size:14px;margin-left:6px}
+.pnstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px}.pnth{flex:none;width:96px;height:64px;padding:0;border-radius:8px;border:1px solid var(--line);background:#fffdf6;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#6b6b6f;font-size:13px}.pnth canvas{width:100%;height:100%;display:block}.pnth.on{box-shadow:0 0 0 2px var(--accent)}
+.pnnew{flex:none;height:64px;padding:0 14px;border-radius:8px;border:1px dashed var(--line);background:none;color:var(--accent);font-weight:600;font-size:13.5px}
+.pnbar{display:flex;align-items:center;gap:10px;margin-bottom:8px}.pnbar>.scric{width:36px;height:36px;padding:0;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:inherit;display:inline-flex;align-items:center;justify-content:center}.pnbar>.scric:disabled{opacity:.4}
+.pnbar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pnpad{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fffdf6;line-height:0}#pnC{display:block;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#scrStage[data-tool=sel]{cursor:default}#scrStage[data-tool=sel].pan{cursor:grabbing}#scrStage[data-tool=tx]{cursor:text}
 #scrPopS,#scrPopB,#scrPopM{position:absolute;z-index:30;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);cursor:default}
 #scrPopM{display:flex;align-items:center;gap:8px;padding:6px 8px;white-space:nowrap}#scrPopM button[data-mm]{min-height:34px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:13.5px;color:inherit}#scrPopM button.danger{color:light-dark(#b3261e,#ff9a8f)}.scrgn{font-size:13px;color:var(--mut);padding:0 4px}
 #scrPopS{display:flex;align-items:center;gap:10px;padding:10px 14px}#scrPopS input{width:190px}#scrPopS output{font-size:13.5px;min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
@@ -243,7 +258,7 @@ details.oth{margin-top:12px}details.oth summary{font-size:12.5px;font-weight:650
 #scrStage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #scrWorld{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 .scrpg{position:absolute;left:0;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.2)}.scrpg canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}#scrPdfV,#scrInkV{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}#scrInkV{mix-blend-mode:multiply}
-#scrBar>button.scric{width:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}#scrBar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:is(#scrBar,#scrBar .scrg2,#scrBar .scrnav)>button.scric{width:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}#scrBar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #scrMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;cursor:default}#scrMsg[hidden]{display:none}
 .scrcard{max-width:440px;text-align:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:26px 24px}.scrcard b{display:block;font-size:18px;margin-bottom:8px}.scrcard p{margin:0 0 16px;color:var(--mut);line-height:1.5;font-size:14.5px}.scrcard p:last-child{margin-bottom:0}
 .scrcard button{min-height:42px;padding:0 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-weight:600;font-size:15px}
@@ -887,7 +902,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128043123';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_PDFLIB='vendor/pdf-lib.min.js';window.BB_VERSION='20261128060836';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -5992,10 +6007,12 @@ function sampleText(sc){const F=SAMPLE_FULL,x=txOf(sc.id,true);stOf(sc.id,true);
  for(const k in F.st.secs)txEdit(sc.id,'sec.'+k,c=>{const q=F.st.secs[k];c.title=q.title;c.box=q.box?1:0;c.h=q.h;delete c.del;});
  txEdit(sc.id,'order',c=>{c.v=F.st.order.slice();});txFlush();}
 const sampleScene=()=>P.scenes.find(x=>x.sample&&!x.trashed&&!x.tpl);
+const SAMPLE_PDF='JVBERi0xLjMKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvQ291cmllciAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjIgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iago0IDAgb2JqCjw8Ci9Db250ZW50cyA4IDAgUiAvTWVkaWFCb3ggWyAwIDAgNjEyIDc5MiBdIC9QYXJlbnQgNyAwIFIgL1Jlc291cmNlcyA8PAovRm9udCAxIDAgUiAvUHJvY1NldCBbIC9QREYgL1RleHQgL0ltYWdlQiAvSW1hZ2VDIC9JbWFnZUkgXQo+PiAvUm90YXRlIDAgL1RyYW5zIDw8Cgo+PiAKICAvVHlwZSAvUGFnZQo+PgplbmRvYmoKNSAwIG9iago8PAovUGFnZU1vZGUgL1VzZU5vbmUgL1BhZ2VzIDcgMCBSIC9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iago2IDAgb2JqCjw8Ci9BdXRob3IgKFRoZSBEaXJlY3RvclwyMjBzIE5vdGVib29rKSAvQ3JlYXRpb25EYXRlIChEOjIwMjYxMTI4MDUwNzE0KzAwJzAwJykgL0NyZWF0b3IgKGFub255bW91cykgL0tleXdvcmRzICgpIC9Nb2REYXRlIChEOjIwMjYxMTI4MDUwNzE0KzAwJzAwJykgL1Byb2R1Y2VyIChSZXBvcnRMYWIgUERGIExpYnJhcnkgLSBcKG9wZW5zb3VyY2VcKSkgCiAgL1N1YmplY3QgKHVuc3BlY2lmaWVkKSAvVGl0bGUgKFRoZSBMb25nIFdheSBIb21lIFwoc2FtcGxlXCkpIC9UcmFwcGVkIC9GYWxzZQo+PgplbmRvYmoKNyAwIG9iago8PAovQ291bnQgMSAvS2lkcyBbIDQgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDYwNQo+PgpzdHJlYW0KR2FzYW1fLz5gLSdZTlRaaypUKyMiXyVhI1xxOEZ0Kic5PHQuU0k9UkBJO2tocDAjIiM7PytBYWBDWyxRN19OYkNjJ3BZMUFqaDpgK1g2cmc+MlcmMTpRSCpeKSEpZ2QxbWsiQlUqc3NYSFtQP0gzYEFGVEw1LiRDZyNCSDEoS2RoQT9oJlFRYEkuVmBnbkZYc28jIVs6OFhvcUpxYlJ1MzdccTlWY1koPTFLTm5CWj1mZmFHUys5ZHQ9UTpYc2clTlNSLFMlLVtpZEhWR0E0PDslM1glI2pGVSVyalJLZ0gpMj4mOl0/RysnRUNWVkwmaTJGMUg6Kjo6KTFhRCdxa2ZHP2tVXmYqQVcvMkhBWjhjZl1tVz9EXDVDN25SZzIvKF9URyhCUl5zZCpdNlVgUmNPRDlCJT1adWwoTTZ1KTssNzBwQFxWQiRnS0tHY09EUGwuZylvNUJjMTU2YHQ9dGNpNWNwVEkvSHIkM0sjUyhxOGx0RVFjTktZMm4zOEVmaz8ua2ElOEAkSTdbYWAsST1bTmUjJl84M0pQaWZzLidpOi4rWVdfNENlaURJcipNa2ZpNDInTDEjYWwwQyhQPC1uV0RmUixTOFV0VUFFIy1yZ15cZjNFUEE7VkpeZiQ0PmlIWlJXPmBkXj9PITtxXEFSOSdCdS4lNlklTC45ODAoLyY5c2E+ayxnKy9MRTtkKCEiUjQqZm82T0NVb1s0KXUlLiUpPUY+K2xtMSVvXHAvKkIuRTFLdDAnaCI5NztySydGUGItP0U2QihrbDByOzVaLVMpOyJCLzVjfj5lbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA5CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDA2MSAwMDAwMCBuIAowMDAwMDAwMTAyIDAwMDAwIG4gCjAwMDAwMDAyMDkgMDAwMDAgbiAKMDAwMDAwMDMxNCAwMDAwMCBuIAowMDAwMDAwNTA3IDAwMDAwIG4gCjAwMDAwMDA1NzUgMDAwMDAgbiAKMDAwMDAwMDg3MyAwMDAwMCBuIAowMDAwMDAwOTMyIDAwMDAwIG4gCnRyYWlsZXIKPDwKL0lEIApbPDhkOGM0NmM3MmJmNmE3OGE1ZTVmYWNiYzU2ODRlODM2Pjw4ZDhjNDZjNzJiZjZhNzhhNWU1ZmFjYmM1Njg0ZTgzNj5dCiUgUmVwb3J0TGFiIGdlbmVyYXRlZCBQREYgZG9jdW1lbnQgLS0gZGlnZXN0IChvcGVuc291cmNlKQoKL0luZm8gNiAwIFIKL1Jvb3QgNSAwIFIKL1NpemUgOQo+PgpzdGFydHhyZWYKMTYyNwolJUVPRgo=';
+function sampleScript(){const f=P.folders.find(x=>x.sample);if(!f||f.script)return;try{const u=Uint8Array.from(atob(SAMPLE_PDF),c=>c.charCodeAt(0));scrAttach(f,u.buffer,'The Long Way Home (sample)',[{num:'1',heading:'INT. STUDIO - DAY',pos:[1,96]}]);}catch(e){console.warn(e);}}
 function sampleOpen(reset){let sc=sampleScene();
  if(!sc){let f=P.folders.find(x=>x.sample);if(!f){f={id:uid(),name:'The Long Way Home (sample)',parent:null,sample:1};P.folders.push(f);}sc=sampleFill(blankScene(1));sc.folder=f.id;P.scenes.push(sc);sampleText(sc);}
  else if(reset){sampleFill(sc);sampleText(sc);}
- commit();openScene(sc.id);if(setOn||scoutOn)setView('prep');try{fit();}catch(e){}toast(reset?'The sample is back as it was.':'The sample scene. Change anything in it; Menu › Import › Sample Scene… puts it back.');}
+ sampleScript();commit();openScene(sc.id);if(setOn||scoutOn)setView('prep');try{fit();}catch(e){}toast(reset?'The sample is back as it was.':'The sample scene. Change anything in it; Menu › Import › Sample Scene… puts it back.');}
 function sampleDialog(){const has=!!sampleScene();
  modal(`<h3>Sample scene</h3><p>An invented scene to look around in: “Maya Comes Back”, from <i>The Long Way Home</i>. It has a set, two characters and a camera, and sits in a folder of its own. It does not count toward the scenes you can make.</p><p class="mut">Change anything in it. Reset the Sample puts it back as it was.</p><div class="btns end"><button data-x>Cancel</button>${has?'<button id="smR">Reset the Sample</button>':''}<button class="pri" id="smO">Open the Sample Scene</button></div>`,c=>{c.querySelector('#smO').onclick=()=>sampleOpen(false);const r=c.querySelector('#smR');if(r)r.onclick=()=>sampleOpen(true);});}
 {const b=$('#emSample');if(b){b.addEventListener('pointerdown',e=>e.stopPropagation());b.addEventListener('click',e=>{e.stopPropagation();sampleOpen(false);});}}
@@ -6812,13 +6829,13 @@ function szStrip(S){const items=S.map(o=>{const a=cutShot(o.s,'in'),b=cutShot(o.
    cell a stroke, in that scene's text (P.text[sid].ink, key <script id>.<stroke id>), so two devices merge stroke by stroke. */
 const SCR_COLORS={pen:[['#1d1d1f','Black'],['#d93025','Red'],['#2f6fde','Blue'],['#1e8e3e','Green']],hl:[['#ffe45c','Yellow'],['#ffb3c7','Pink'],['#b8f0b0','Green'],['#b5daff','Blue']]};
 let scrOn=false;
-const SCR={z:1,tx:0,ty:0,R:1,pw:612,ph:792,n:0,doc:null,id:null,f:null,sc:null,marks:[],state:'',mounted:new Map(),idx:new Map(),sig:'',tool:'pen',color:{pen:'#1d1d1f',hl:'#ffe45c'},size:1,undo:[],redo:[],lastScene:null,loadSeq:0,saveT:0,saveT0:0,cur:null,drawId:null,drawSrc:null,t0:0,penDown:false,penLast:-1e9,bar:'',raf:0};
+const SCR={z:1,tx:0,ty:0,R:1,pw:612,ph:792,n:0,doc:null,id:null,f:null,sc:null,marks:[],state:'',mounted:new Map(),idx:new Map(),sig:'',tool:'sel',color:{pen:'#1d1d1f',hl:'#ffe45c'},size:1,undo:[],redo:[],lastScene:null,loadSeq:0,saveT:0,saveT0:0,cur:null,drawId:null,drawSrc:null,t0:0,penDown:false,penLast:-1e9,bar:'',raf:0};
 const scrCache=new WeakMap();
 const SCR_PART=240000,SCR_GAP=10;
-const SCR_TOOLS=[['sel','Select'],['pen','Pen'],['hl','Highlighter'],['er','Eraser'],null,['th','Highlight Text'],['ul','Underline Text'],['st','Strike Through Text'],null,['tx','Text'],['nt','Note with an Arrow'],['ar','Arrow'],['ln','Line'],['bx','Box']];
+const SCR_TOOLS=[['sel','Select'],['box','Select with a Box'],['pen','Pen'],['hl','Highlighter'],['er','Eraser'],null,['th','Highlight Text'],['ul','Underline Text'],['st','Strike Through Text'],null,['tx','Text'],['nt','Note with an Arrow'],['ar','Arrow'],['ln','Line'],['bx','Box']];
 const SCR_OBJ=new Set(['th','ul','st','tx','nt','ar','ln','bx','bm']),SCR_BMC=[['#d93025','Red'],['#f29900','Orange'],['#1e8e3e','Green'],['#2f6fde','Blue'],['#8e44ad','Purple']];
 const SCR_WR={pen:[.5,6,.1],hl:[4,24,.5],tx:[8,24,1]};
-const SCR_IC={sel:'<rect x="3.5" y="3.5" width="17" height="17" rx="2.5" stroke-dasharray="3.2 3.2"/>',
+const SCR_IC={sel:'<path d="M6 3.5l12 9-5.2 1.1 3 5.6-2.3 1.2-3-5.7L6 18.5z"/>',box:'<rect x="3.5" y="3.5" width="17" height="17" rx="2.5" stroke-dasharray="3.2 3.2"/>',
  pen:'<path d="M4 20l1.2-4.6L16.5 4.1a1.5 1.5 0 0 1 2.1 0l1.3 1.3a1.5 1.5 0 0 1 0 2.1L8.6 18.8z"/><path d="M14.5 6.1l3.4 3.4"/>',
  hl:'<path d="M14.5 3.8l5.7 5.7-8 8H8.4l-2.6-2.6v-3.1z"/><path d="M11.6 6.7l5.7 5.7"/><path d="M4 21h8"/>',
  er:'<path d="M8.5 19.5l-4-4a1.4 1.4 0 0 1 0-2l8.5-8.5a1.4 1.4 0 0 1 2 0l5 5a1.4 1.4 0 0 1 0 2l-7.5 7.5z"/><path d="M9.5 9l6 6"/><path d="M8.5 19.5H20"/>',
@@ -6896,6 +6913,20 @@ function scrObjDraw1(g,s,ghost,noText){g.globalAlpha=ghost?.6:1;g.strokeStyle=g.
  g.globalAlpha=1;}
 function scrMarkDraw(g,s){if(s.t==='th'){g.fillStyle=s.c;for(const r of s.q)g.fillRect(r[0]-1.5,r[1],r[2]+3,r[3]);}
  else{g.strokeStyle=s.c;g.lineWidth=1.25;g.lineCap='round';g.beginPath();for(const r of s.q){const y=r[1]+r[3]*(s.t==='ul'?.97:.57);g.moveTo(r[0],y);g.lineTo(r[0]+r[2],y);}g.stroke();}}
+/* the scenes in the pages: large numbers, rules, eighths */
+function scrLay(){const v=P.prefs&&P.prefs.scrLay&&P.prefs.scrLay.v;return {num:!v||v.num!==false,div:!v||v.div!==false,e8:!v||v.e8!==false};}
+const SCR_TOP=72,scrBot=()=>SCR.ph-60;
+function scrE8(i){const M=SCR.marks||[],m=M[i];if(!m)return 0;if(m.s&&m.s.pp){const e=ppParse(m.s.pp);if(e)return e;}
+ const B0=SCR_TOP,B1=scrBot(),H=B1-B0,c=y=>Math.max(B0,Math.min(B1,y)),nx=M[i+1],p2=nx?nx.p:SCR.n-1,y2=nx?nx.y-12:SCR.lastY?SCR.lastY+4:B1,y1=m.y-12;
+ let span=p2===m.p?(c(y2)-c(y1))/H:(B1-c(y1))/H+(p2-m.p-1)+(c(y2)-B0)/H;return Math.max(1,Math.round(span*8));}
+function scrLayDraw(g,i){const L=scrLay();if(!L.num&&!L.div&&!L.e8)return;const M=SCR.marks||[];
+ for(let j=0;j<M.length;j++){const m=M[j];if(m.p!==i)continue;const y=m.y,num=(m.s&&m.s.number)||m.n||'';
+  if(L.div&&y>SCR_TOP+6){g.save();g.strokeStyle='rgba(47,111,222,.55)';g.lineWidth=.8;g.setLineDash([]);g.beginPath();g.moveTo(14,y-17);g.lineTo(SCR.pw-14,y-17);g.stroke();g.restore();}
+  if(L.num&&num){g.save();let fs=19;g.font=`700 ${fs}px -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif`;let w=g.measureText(num).width;if(w>40){fs=Math.max(11,fs*40/w);g.font=`700 ${fs}px -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif`;w=g.measureText(num).width;}
+   const bw=Math.max(26,w+10),bh=fs+8,bx=6,by=y-12-bh/2-1;g.fillStyle='rgba(29,29,31,.88)';scrRR(g,bx,by,bw,bh,5);g.fill();g.fillStyle='#fff';g.textBaseline='middle';g.textAlign='center';g.fillText(num,bx+bw/2,by+bh/2+.5);
+   if(L.e8){const e=scrE8(j);if(e){g.font='600 9.5px -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif';g.fillStyle='#2f6fde';g.textBaseline='top';g.fillText(ppTxt(e),bx+bw/2,by+bh+3);}}
+   g.restore();}
+  else if(L.e8){const e=scrE8(j);if(e){g.save();g.font='600 9.5px -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif';g.fillStyle='#2f6fde';g.textBaseline='middle';g.textAlign='left';g.fillText(ppTxt(e),8,y-4);g.restore();}}}}
 function scrSelDraw(g,s){const b=scrBox(s),z=SCR.z;g.save();g.strokeStyle='#2f6fde';g.lineWidth=1.3/z;g.setLineDash([4/z,3/z]);scrRR(g,b[0]-3,b[1]-3,b[2]-b[0]+6,b[3]-b[1]+6,3);g.stroke();g.setLineDash([]);g.fillStyle='#fff';for(const h of scrHandles(s)){g.beginPath();g.arc(h.x,h.y,4.5/z,0,6.2832);g.fill();g.stroke();}g.restore();}
 /* both sharp layers over the window: the ink (which darkens the page it sits on) and, above it, the shapes, text, notes, bookmarks, what Find found and what is selected */
 function scrInkDraw(objOnly){const c=document.getElementById('scrInkV'),o=document.getElementById('scrObjV');cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;SCR.inkFull=false;clearTimeout(SCR.inkT);if(!c||!o||SCR.state!=='ok'||!scrOn)return;const G=scrVGeom();if(!G.w||!G.h)return;
@@ -6910,6 +6941,7 @@ function scrInkDraw(objOnly){const c=document.getElementById('scrInkV'),o=docume
    for(const q of L)if(q.s.t==='ul'||q.s.t==='st')scrMarkDraw(g,q.s);
    if(cur&&cur.p)scrStroke(g,cur);g.restore();}
   go.save();go.setTransform(k,0,0,k,ox,oy);go.beginPath();go.rect(0,0,SCR.pw,SCR.ph);go.clip();
+  scrLayDraw(go,i);
   for(const q of L){const s=q.s;if(!s.a||s.t==='th'||s.t==='ul'||s.t==='st')continue;if(E&&E.key===q.key){if(s.t==='nt')scrObjDraw1(go,s,false,true);continue;}scrObjDraw1(go,s);}
   if(E&&!E.key&&E.s.pg===i)scrObjDraw1(go,E.s,false,true);
   if(cur&&cur.shape&&cur.moved)scrObjDraw1(go,cur.shape,true,true);
@@ -6956,17 +6988,17 @@ function scrGroupMenu(){scrMenuClose();const G=scrGroup();if(!G)return;const st=
  const z=SCR.z,cx=SCR.tx+(G.b[0]+G.b[2])/2*z,top=SCR.ty+(G.pg*scrStep()+G.b[1])*z,bot=SCR.ty+(G.pg*scrStep()+G.b[3])*z,w=m.offsetWidth,h=m.offsetHeight;
  m.style.left=Math.max(6,Math.min(st.clientWidth-w-6,cx-w/2))+'px';m.style.top=(top-h-14>=6?top-h-14:Math.min(st.clientHeight-h-6,bot+14))+'px';SCR.menuView={tx:SCR.tx,ty:SCR.ty,z:SCR.z};
  m.addEventListener('click',e=>{if(e.target.closest('[data-mm="del"]'))scrDelSel();});}
-function scrBeginSel(e,onlySel,src){const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n)return false;
+function scrBeginSel(e,onlySel,src,boxing){const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n)return false;
  const G=scrGroup(),inG=!!G&&G.pg===i&&X>=G.b[0]-5&&X<=G.b[2]+5&&y>=G.b[1]-5&&y<=G.b[3]+5;
- const hd=inG?null:scrHandleHit(i,X,y),q=inG?null:(hd?hd.q:scrHit(i,X,y));if(onlySel&&!inG&&!(q&&SCR.sel&&q.key===SCR.sel.key))return false;
+ const hd=inG||boxing?null:scrHandleHit(i,X,y),q=inG||boxing?null:(hd?hd.q:scrHit(i,X,y));if(onlySel&&!inG&&!(q&&SCR.sel&&q.key===SCR.sel.key))return false;
  SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
  const base={pg:i,x0:X,y0:y,x1:X,y1:y,tl:'sel',sx:e.clientX,sy:e.clientY,sx0:e.clientX,sy0:e.clientY};
  if(inG){scrMenuClose();SCR.cur=Object.assign(base,{gmove:G.items.map(q=>{const c=txGet(q.sid,q.key,false);return {q,h0:c?c.h:'',a0:q.s.a?q.s.a.slice():null,p0:q.s.p?q.s.p.map(p=>p.slice()):null};})});}
  else if(q){SCR.msel=null;SCR.sel={key:q.key,sid:q.sid};const c=txGet(q.sid,q.key,false);SCR.cur=Object.assign(base,{move:{q,part:hd?hd.part:'body',h0:c?c.h:'',a0:q.s.a.slice()}});}
- else{SCR.sel=null;SCR.msel=null;if(y<0||y>SCR.ph||X<0||X>SCR.pw)SCR.cur=Object.assign(base,{pan:true});else SCR.cur=Object.assign(base,{marq:true});}
+ else{const had=SCR.sel||SCR.msel;SCR.sel=null;SCR.msel=null;if(had)scrObj();if(!boxing||y<0||y>SCR.ph||X<0||X>SCR.pw)SCR.cur=Object.assign(base,{pan:true});else SCR.cur=Object.assign(base,{marq:true});}
  scrObj();scrBarDraw();return true;}
 function scrBegin(e,src){if(SCR.state!=='ok')return false;if(SCR.edit){scrEdDone();return false;}scrMenuClose();const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep(),tl=SCR.tool;
- if(tl==='sel')return scrBeginSel(e,false,src);
+ if(tl==='sel'||tl==='box')return scrBeginSel(e,false,src,tl==='box');
  if(i<0||i>=SCR.n||y>SCR.ph||X<0||X>SCR.pw){if(SCR.sel||SCR.msel){SCR.sel=null;SCR.msel=null;scrObj();scrBarDraw();}return false;}
  const pen=e.pointerType==='pen',pr=pen&&e.pressure>0?e.pressure:.5;SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
  if(SCR.sel||SCR.msel){SCR.sel=null;SCR.msel=null;scrObj();scrBarDraw();}
@@ -7067,13 +7099,14 @@ function scrEdDone(){const E=SCR.edit;if(!E)return;SCR.edit=null;const s=E.s;s.x
  else if(s.x)scrPut(s);
  scrIndex();scrInk();scrBarDraw();}
 /* ----- the words on a page, where they are: for marking text, and for Find ----- */
-function scrText(i){const have=SCR.txt.get(i);if(have)return have.then?have:Promise.resolve(have);const doc=SCR.doc,pr=(async()=>{const pg=await doc.getPage(i+1),v1=pg.getViewport({scale:1}),k=Math.min(SCR.pw/v1.width,SCR.ph/v1.height),vp=pg.getViewport({scale:k}),tc=await pg.getTextContent(),rows=[];
+function scrTextAt(doc,i,PW,PH){return (async()=>{const pg=await doc.getPage(i+1),v1=pg.getViewport({scale:1}),k=Math.min(PW/v1.width,PH/v1.height),vp=pg.getViewport({scale:k}),tc=await pg.getTextContent(),rows=[];
   for(const it of tc.items){const str=it.str;if(!str||!str.trim())continue;const pt=vp.convertToViewportPoint(it.transform[4],it.transform[5]),x=pt[0],y=pt[1],fs=(Math.hypot(it.transform[2],it.transform[3])||it.height||12)*k,w=(it.width||str.length*fs*.6)*k,cw=w/str.length;
    let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r){r={y,fs,words:[]};rows.push(r);}r.fs=Math.max(r.fs,fs);const re=/\S+/g;let m;while((m=re.exec(str)))r.words.push({x0:x+m.index*cw,x1:x+(m.index+m[0].length)*cw,s:m[0]});}
   rows.sort((a,b)=>a.y-b.y);
   for(const r of rows){r.words.sort((a,b)=>a.x0-b.x0);const W=[];for(const w of r.words){const l=W[W.length-1];if(l&&w.x0-l.x1<r.fs*.16){l.s+=w.s;l.x1=Math.max(l.x1,w.x1);}else W.push(w);}r.words=W;
    r.top=r.y-r.fs*.8;r.h=r.fs*1.06;let t='';for(const w of W){w.o=t.length+(t?1:0);t+=(t?' ':'')+w.s;}r.text=t;r.low=t.toLowerCase();}
-  const T={rows};if(SCR.doc===doc)SCR.txt.set(i,T);return T;})();
+  return {rows};})();}
+function scrText(i){const have=SCR.txt.get(i);if(have)return have.then?have:Promise.resolve(have);const doc=SCR.doc,pr=scrTextAt(doc,i,SCR.pw,SCR.ph).then(T=>{if(SCR.doc===doc)SCR.txt.set(i,T);return T;});
  SCR.txt.set(i,pr);pr.catch(()=>{if(SCR.txt.get(i)===pr)SCR.txt.delete(i);});return pr;}
 /* the words between where the drag began and where it is, the way a text selection runs: to the line's end, whole lines, from the line's start */
 function scrMarkCalc(cur){const T=SCR.txt.get(cur.pg);if(!T||T.then)return;const R=T.rows;cur.rects=[];cur.words='';if(!R.length)return;
@@ -7190,7 +7223,7 @@ function scrDom(){if(document.getElementById('scrView'))return;const v=document.
  bar.addEventListener('pointerdown',e=>{held=false;clearTimeout(hold);const b=e.target.closest('button[aria-label]');if(!b||e.pointerType==='mouse')return;hold=setTimeout(()=>{held=true;toast(b.getAttribute('aria-label'));},550);});
  for(const ev of ['pointerup','pointercancel','pointerleave'])bar.addEventListener(ev,()=>clearTimeout(hold));
  bar.addEventListener('click',e=>{if(held){held=false;e.preventDefault();return;}const b=e.target.closest('[data-scr]');if(!b)return;const k=b.dataset.scr;
-  if(k.startsWith('t:')){if(SCR.edit)scrEdDone();scrMenuClose();scrPopsClose();SCR.tool=k.slice(2);if(SCR.tool!=='sel'&&(SCR.sel||SCR.msel)){SCR.sel=null;SCR.msel=null;scrObj();}}
+  if(k.startsWith('t:')){if(SCR.edit)scrEdDone();scrMenuClose();scrPopsClose();const t=k.slice(2);SCR.tool=t===SCR.tool&&t!=='sel'?'sel':t;if(SCR.tool!=='sel'&&SCR.tool!=='box'&&(SCR.sel||SCR.msel)){SCR.sel=null;SCR.msel=null;scrObj();}}
   else if(k.startsWith('c:')){SCR.color[scrGrp(SCR.tool)]=k.slice(2);scrToolSave();}
   else if(k==='undo')scrUndo(false);else if(k==='redo')scrUndo(true);else if(k==='scene')scrGoScene(scene());else if(k==='more'){scrPopsClose();scrInfoDialog();return;}
   else if(k==='size'){scrSizePop();return;}else if(k==='bm'){scrBmPop();return;}else if(k==='find'){scrFindOpen();return;}
@@ -7204,14 +7237,14 @@ function scrDom(){if(document.getElementById('scrView'))return;const v=document.
 function scrBarDraw(){const el=document.getElementById('scrBar');if(!el)return;const ok=SCR.state==='ok',sc=SCR.sc,tl=SCR.tool,s=scene(),st=document.getElementById('scrStage');if(st)st.dataset.tool=tl;let h;
  if(!ok)h=`<b class="scrnm">${sc?esc(sc.name):'Script'}</b>`;
  else if(SCR.find)h=`<span class="scrfi">${scrIc('find')}</span><input id="scrFq" type="search" placeholder="Find in the script" aria-label="Find in the script" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><span id="scrFn" aria-live="polite"></span><button class="scric" data-scr="fprev" aria-label="Previous" title="Previous">${scrIc('prev')}</button><button class="scric" data-scr="fnext" aria-label="Next" title="Next">${scrIc('next')}</button><span class="sp"></span><button data-scr="fdone">Done</button>`;
- else{const g=scrGrp(tl),set=tl==='er'||tl==='sel'?null:SCR_COLORS[g],cur=SCR.color[g],wg=scrWGrp(tl),go=s.number?'Go to Scene '+s.number:'Go to This Scene';
+ else{const g=scrGrp(tl),set=tl==='er'||tl==='sel'||tl==='box'?null:SCR_COLORS[g],cur=SCR.color[g],wg=scrWGrp(tl),go=s.number?'Go to Scene '+s.number:'Go to This Scene';
   h=`<div class="scrtl" role="toolbar" aria-label="Tools">${SCR_TOOLS.map(t=>t?`<button class="scric${tl===t[0]?' on':''}" data-scr="t:${t[0]}" aria-label="${t[1]}" title="${t[1]}" aria-pressed="${tl===t[0]}">${scrIc(t[0])}</button>`:'<i class="scrsep"></i>').join('')}</div>
-   <div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-scr="c:${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>
+   <div class="scrg2"><div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-scr="c:${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>
    <button id="scrWb" data-scr="size" aria-label="Size" title="Size"${wg?'':' style="visibility:hidden"'}></button>
-   <button class="scric" data-scr="undo" aria-label="Undo" title="Undo"${SCR.undo.length?'':' disabled'}>${scrIc('undo')}</button><button class="scric" data-scr="redo" aria-label="Redo" title="Redo"${SCR.redo.length?'':' disabled'}>${scrIc('redo')}</button><span class="sp"></span>
-   <button class="scric" data-scr="find" aria-label="Find in the script" title="Find in the script">${scrIc('find')}</button><button class="scric" data-scr="bm" aria-label="Bookmarks" title="Bookmarks">${scrIc('bm')}</button>
+   <button class="scric" data-scr="undo" aria-label="Undo" title="Undo"${SCR.undo.length?'':' disabled'}>${scrIc('undo')}</button><button class="scric" data-scr="redo" aria-label="Redo" title="Redo"${SCR.redo.length?'':' disabled'}>${scrIc('redo')}</button></div>
+   <div class="scrnav"><button class="scric" data-scr="find" aria-label="Find in the script" title="Find in the script">${scrIc('find')}</button><button class="scric" data-scr="bm" aria-label="Bookmarks" title="Bookmarks">${scrIc('bm')}</button>
    <input id="scrSc" placeholder="Sc." aria-label="Go to a scene: type its number, then Return" title="Go to a scene: type its number, then Return" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" maxlength="12"><button class="scric" data-scr="scene" aria-label="${esc(go)}" title="${esc(go)}">${scrIc('here')}</button>
-   <span id="scrPg"></span><button class="scric" data-scr="more" aria-label="Script…" title="Script…">${scrIc('more')}</button>`;}
+   <span id="scrPg"></span><button class="scric" data-scr="more" aria-label="Script…" title="Script…">${scrIc('more')}</button></div>`;}
  if(h===SCR.bar)return;const keep=document.activeElement&&document.activeElement.id==='scrSc'?document.activeElement.value:null;SCR.bar=h;el.innerHTML=h;scrPgLabel();scrSizeLabel();if(keep!=null){const i=document.getElementById('scrSc');if(i){i.value=keep;i.focus();}}}
 function scrB64(u8){let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s);}
 function scrAttach(f,buf,name,scenes){const u8=new Uint8Array(buf),parts=[];for(let i=0;i<u8.length;i+=SCR_PART)parts.push(addImage('data:application/x-nb-pdf;base64,'+scrB64(u8.subarray(i,i+SCR_PART))));
@@ -7304,7 +7337,7 @@ async function scrLoad(){const seq=++SCR.loadSeq,sc=SCR.sc;SCR.state='load';SCR.
  if(!u8){SCR.state='wait';scrMsg();try{for(const id of sc.parts)if(!images[id])imgTry[id]=0;imgPull();}catch(e){}clearTimeout(SCR.waitT);SCR.waitT=setTimeout(()=>{if(scrOn&&SCR.state==='wait'&&SCR.sc===sc)scrLoad();},2500);return;}
  try{const lib=await loadPdfJs(),doc=await lib.getDocument({data:u8}).promise;if(seq!==SCR.loadSeq||!scrOn){try{doc.destroy();}catch(e){}if(seq===SCR.loadSeq)SCR.state='';return;}
   const p1=await doc.getPage(1),vp=p1.getViewport({scale:1});SCR.doc=doc;SCR.n=doc.numPages;SCR.pw=vp.width;SCR.ph=vp.height;SCR.state='ok';SCR.R=0;
-  SCR.marks=scrMarks(SCR.f,sc);scrIndex();scrMsg();const st=scrStage();SCR.z=Math.max(.3,Math.min(2.4,(((st&&st.clientWidth)||800)-24)/SCR.pw));SCR.tx=0;SCR.ty=12;
+  SCR.marks=scrMarks(SCR.f,sc);scrIndex();scrMsg();SCR.lastY=0;{const n=SCR.n,d=SCR.doc;scrText(n-1).then(T=>{if(SCR.doc!==d)return;SCR.lastY=Math.max(0,...T.rows.map(r=>r.y));scrObj();},()=>{});}const st=scrStage();SCR.z=Math.max(.3,Math.min(2.4,(((st&&st.clientWidth)||800)-24)/SCR.pw));SCR.tx=0;SCR.ty=12;
   const s=scene();SCR.lastScene=s.id;if(!scrPosLoad())scrGoScene(s,true);scrClamp();scrPlace();scrRaster();scrUpdate();scrBarDraw();}
  catch(e){console.warn(e);if(seq===SCR.loadSeq){SCR.state='bad';scrMsg();}}}
 /* where you were, kept on this device */
@@ -7355,11 +7388,258 @@ async function scrAddFile(fid,fl){const f=fById(fid);if(!f)return;if(fl.size>40e
  catch(e){console.warn(e);toast('Couldn’t read that file.');}}
 function scrInfoDialog(){const sc=SCR.sc,f=SCR.f;if(!sc||!f)return;const mb=sc.size>=1e6?(sc.size/1e6).toFixed(1)+' MB':Math.max(1,Math.round(sc.size/1000))+' KB',n=scrIndex(true).split(':')[0];
  modal(`<h3>Script Pages</h3><p><b>${esc(sc.name)}</b><br><span class="mut">${SCR.n?plural(SCR.n,'page')+' · ':''}${mb} · added ${new Date(sc.at).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})} · for ${esc(f.name)}${+n?' · '+plural(+n,'mark'):''}</span></p>
+  <div class="scrlay"><b>On the pages</b>${[['num','Large scene numbers'],['div','A rule above each scene'],['e8','Each scene’s length, in eighths']].map(([k,l])=>`<label class="imopt"><input type="checkbox" data-lay="${k}"${scrLay()[k]?' checked':''}> ${l}</label>`).join('')}</div>
   <label class="imopt"><input type="checkbox" id="scrFg"${P.ui.scrFinger?' checked':''}> Draw with a finger <span class="mut">· for an iPad without a Pencil. Two fingers then move and zoom the page.</span></label>
-  <div class="btns"><button id="scrFitB">Fit the Page to the Width</button><button class="danger" id="scrRm">Remove the Script…</button></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,card=>{
+  <div class="btns"><button class="pri" id="scrEx">Export with Your Marks…</button><button class="pri" id="scrNd">New Draft…</button>${sc.rep?'<button id="scrRp">What Changed…</button>':''}<button id="scrFitB">Fit the Page to the Width</button></div>
+  ${scrPrevList(f).length?`<div class="scrlay"><b>Earlier Drafts</b>${scrPrevList(f).map((x,i)=>`<div class="drrow"><span>${esc(x.name)} <span class="mut">· ${new Date(x.at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span></span><button data-du="${i}">Use This Draft</button><button class="danger" data-dd="${i}">Remove…</button></div>`).join('')}</div>`:''}
+  <div class="btns"><button class="danger" id="scrRm">Remove the Script…</button></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,card=>{
+  card.querySelectorAll('[data-lay]').forEach(x=>x.onchange=()=>{const v=scrLay();v[x.dataset.lay]=x.checked;prefSet('scrLay',v);saveLocal();scrInk();});
   card.querySelector('#scrFg').onchange=e=>{if(e.target.checked)P.ui.scrFinger=1;else delete P.ui.scrFinger;saveLocal();};
+  card.querySelector('#scrEx').onclick=()=>{kidNext();const Ly=scrLay(),any=Ly.num||Ly.div||Ly.e8;modal(`<h3>Export with Your Marks</h3><p>A PDF of “${esc(sc.name)}” with every mark you made on it, drawn into the pages. The script’s words stay sharp and can still be searched.</p>${any?`<label class="imopt"><input type="checkbox" id="exLay" checked> Include the large scene numbers, rules and eighths</label>`:''}<div class="btns end"><button data-x>Cancel</button><button class="pri" id="exGo">Export PDF</button></div>`,c2=>{c2.querySelector('#exGo').onclick=()=>{const lay=!!(c2.querySelector('#exLay')||{}).checked;closeModal();scrExportGo(f,lay);};});};
+  card.querySelector('#scrNd').onclick=()=>{closeModal();scrDraftPick(f);};
+  {const b=card.querySelector('#scrRp');if(b)b.onclick=()=>{kidNext();scrRepDialog(f);};}
+  card.querySelectorAll('[data-du]').forEach(b=>b.onclick=()=>{closeModal();scrDraftUse(f,+b.dataset.du);});
+  card.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{const x=scrPrevList(f)[+b.dataset.dd];kidNext();confirmBox('Remove “'+x.name+'”?','The earlier draft’s pages and the marks on them are removed for good. The script you are using now is not touched.','Remove',()=>{scrDraftDrop(f,+b.dataset.dd);toast('The earlier draft is removed.');});});
   card.querySelector('#scrFitB').onclick=()=>{closeModal();scrFit();};
   card.querySelector('#scrRm').onclick=()=>{kidNext();confirmBox('Remove the script from '+f.name+'?','Its pages and the marks on them come off this folder. Undo brings them back.','Remove',()=>{delete f.script;commit();});};});}
+/* ---------- Pencil notes: a card to write on with the Pencil, kept with the scene, one set for each of Breakdown, Strategy and the Shot List.
+   The words on those tabs move when they are edited and sit differently on each device, so ink is not laid over them; a note is its own card.
+   Strokes are cells like the script's ink (P.text[sid].ink, key pn.<tab>.<note>.<stroke>), so they sync and merge the same way. ---------- */
+const PN={W:720,H:480,tab:'',sid:'',nid:'',tool:'pen',undo:[],redo:[],cur:null,penLast:-1e9,penDown:false,id:null},PN_NAME={nb:'Breakdown',st:'Strategy',list:'Shot List'};
+const pnTab=()=>scrOn||scoutOn?'':mode==='nb'?'nb':mode==='st'?'st':(mode==='list'||mode==='split')&&!setOn?'list':'';
+function pnNotes(sid,tab){const ink=(P.text&&P.text[sid]&&P.text[sid].ink)||{},pre='pn.'+tab+'.',N=new Map();
+ for(const k in ink){if(!k.startsWith(pre))continue;const c=ink[k];if(!c||c.del||!c.h)continue;const nid=k.slice(pre.length).split('.')[0];let n=N.get(nid);if(!n)N.set(nid,n={id:nid,t:1e18,L:[]});n.t=Math.min(n.t,c.t||0);const s=scrParse(c);if(s&&s.p)n.L.push({key:'ink.'+k,t:c.t||0,s});}
+ const out=[...N.values()].sort((a,b)=>a.t-b.t);for(const n of out)n.L.sort((a,b)=>a.t-b.t);return out;}
+function pnBtnDraw(){let b=document.getElementById('pnBtn');const tab=pnTab();if(!b){if(!tab)return;b=document.createElement('button');b.id='pnBtn';b.onclick=()=>pnOpen();$('#main').appendChild(b);}
+ b.hidden=!tab;if(!tab)return;const n=pnNotes(scene().id,tab).length,h=`${scrIc('pen')}<span>Pencil Notes</span>${n?`<i>${n}</i>`:''}`;if(b._h!==h){b._h=h;b.innerHTML=h;b.setAttribute('aria-label',n?`Pencil Notes, ${n}`:'Pencil Notes');}}
+function pnPaint(g,L,k,cur){g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.fillStyle='#fffdf6';g.fillRect(0,0,g.canvas.width,g.canvas.height);g.setTransform(k,0,0,k,0,0);
+ for(const q of L)if(q.s.t==='hl')scrStroke(g,q.s);for(const q of L)if(q.s.t!=='hl')scrStroke(g,q.s);if(cur&&cur.p)scrStroke(g,cur);g.globalCompositeOperation='source-over';}
+function pnOpen(){const tab=pnTab(),s=scene();if(!tab)return;PN.tab=tab;PN.sid=s.id;PN.undo=[];PN.redo=[];PN.cur=null;PN.id=null;const N0=pnNotes(s.id,tab);PN.nid=N0.length?N0[N0.length-1].id:uid();
+ modal(`<h3>Pencil Notes <span class="pnsub">${PN_NAME[tab]} · ${esc(sceneLabel(s))}</span></h3>
+  <div class="pnstrip" id="pnStrip"></div>
+  <div class="pnbar" id="pnBar"></div>
+  <div class="pnpad"><canvas id="pnC" aria-label="A card to write on with the Pencil"></canvas></div>
+  <div class="btns"><button class="danger" id="pnDel">Delete This Note</button><span style="flex:1"></span><button class="pri" data-x>Done</button></div>`,card=>{
+  const c=card.querySelector('#pnC'),g=c.getContext('2d');let L=[],k=1,delT=0;
+  const size=()=>{const w=Math.max(200,Math.floor(c.parentNode.clientWidth)),dpr=Math.min(3,window.devicePixelRatio||1);c.style.width=w+'px';c.style.height=Math.round(w*PN.H/PN.W)+'px';c.width=Math.round(w*dpr);c.height=Math.round(w*PN.H/PN.W*dpr);k=c.width/PN.W;};
+  const load=()=>{const n=pnNotes(PN.sid,PN.tab).find(v=>v.id===PN.nid);L=n?n.L:[];};
+  const paint=()=>pnPaint(g,L,k,PN.cur);
+  const strip=()=>{const N=pnNotes(PN.sid,PN.tab),have=N.some(v=>v.id===PN.nid),el=card.querySelector('#pnStrip');
+   el.innerHTML=N.map((v,i)=>`<button class="pnth${v.id===PN.nid?' on':''}" data-pn="${v.id}" aria-label="Note ${i+1}"${v.id===PN.nid?' aria-current="true"':''}><canvas width="180" height="120"></canvas></button>`).join('')+(have||!N.length?'':`<button class="pnth on" aria-label="New note" aria-current="true"><span>New</span></button>`)+`<button class="pnnew" data-pn="+">New Note</button>`;
+   el.querySelectorAll('.pnth canvas').forEach((cv,i)=>pnPaint(cv.getContext('2d'),N[i].L,180/PN.W));card.querySelector('#pnDel').disabled=!have;pnBtnDraw();};
+  const bar=()=>{const tl=PN.tool,grp=tl==='hl'?'hl':'pen',set=tl==='er'?null:SCR_COLORS[grp],cur=SCR.color[grp];
+   card.querySelector('#pnBar').innerHTML=`<div class="scrtl" role="toolbar" aria-label="Tools">${[['pen','Pen'],['hl','Highlighter'],['er','Eraser']].map(t=>`<button class="scric${tl===t[0]?' on':''}" data-pt="${t[0]}" aria-label="${t[1]}" title="${t[1]}" aria-pressed="${tl===t[0]}">${scrIc(t[0])}</button>`).join('')}</div>
+    <div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-pc="${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div><span style="flex:1"></span>
+    <button class="scric" data-pu="undo" aria-label="Undo" title="Undo"${PN.undo.length?'':' disabled'}>${scrIc('undo')}</button><button class="scric" data-pu="redo" aria-label="Redo" title="Redo"${PN.redo.length?'':' disabled'}>${scrIc('redo')}</button>`;};
+  const refresh=()=>{load();paint();strip();bar();};
+  const pt=e=>{const r=c.getBoundingClientRect();return [(e.clientX-r.left)*PN.W/r.width,(e.clientY-r.top)*PN.H/r.height];};
+  const erase=(x,y)=>{let hit=false;for(let i=L.length-1;i>=0;i--){const q=L[i],rr=9+q.s.w/2;if(q.s.p.some(p=>Math.hypot(p[0]-x,p[1]-y)<=rr)){const cl=txGet(PN.sid,q.key,false);PN.cur.erase.push({sid:PN.sid,key:q.key,h:cl?cl.h:''});scrCellDel(PN.sid,q.key);L.splice(i,1);hit=true;}}if(hit)paint();};
+  const finish=()=>{const cur=PN.cur;PN.cur=null;PN.id=null;if(!cur)return;
+   if(cur.erase){if(cur.erase.length){PN.undo.push({a:'del',items:cur.erase});PN.redo=[];}refresh();return;}
+   cur.p=scrThin(cur.p,cur.th);cur._w=null;const key='ink.pn.'+PN.tab+'.'+PN.nid+'.'+uid(),h=JSON.stringify({p:0,t:cur.t,c:cur.c,w:cur.w,d:scrEnc(cur.p)});scrCellPut(PN.sid,key,h);PN.undo.push({a:'add',items:[{sid:PN.sid,key,h}]});PN.redo=[];refresh();};
+  c.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(e.pointerType==='pen'){PN.penDown=true;if(PN.id!=null)finish();}else if(e.pointerType==='touch'&&(PN.penDown||performance.now()-PN.penLast<450))return;if(PN.id!=null)return;
+   e.preventDefault();try{c.setPointerCapture(e.pointerId);}catch(x){}PN.id=e.pointerId;const [x,y]=pt(e),pr=e.pointerType==='pen'&&e.pressure>0?e.pressure:.5,tl=PN.tool;
+   if(tl==='er'){PN.cur={erase:[]};erase(x,y);return;}
+   PN.cur={t:tl,c:SCR.color[tl==='hl'?'hl':'pen'],w:tl==='hl'?SCR.w.hl*1.7:SCR.w.pen*1.7,th:.5,p:[[scrR20(x),scrR20(y),scrR90(pr)]]};g.setTransform(k,0,0,k,0,0);scrStyle(g,PN.cur);scrSeg(g,PN.cur,0);});
+  c.addEventListener('pointermove',e=>{if(e.pointerId!==PN.id||!PN.cur)return;e.preventDefault();const cur=PN.cur,E=e.getCoalescedEvents?e.getCoalescedEvents():[],ev=E.length?E:[e],pen=e.pointerType==='pen';if(cur.p){g.setTransform(k,0,0,k,0,0);scrStyle(g,cur);}
+   for(const q of ev){const [x,y]=pt(q);if(cur.erase){erase(x,y);continue;}const P_=cur.p,l=P_[P_.length-1],rx=scrR20(Math.max(0,Math.min(PN.W,x))),ry=scrR20(Math.max(0,Math.min(PN.H,y)));if(Math.hypot(rx-l[0],ry-l[1])<cur.th)continue;P_.push([rx,ry,scrR90(pen&&q.pressure>0?q.pressure:.5)]);scrSeg(g,cur,P_.length-1);}});
+  const up=e=>{if(e.pointerType==='pen'){PN.penDown=false;PN.penLast=performance.now();}if(e.pointerId===PN.id)finish();};c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);
+  for(const ev of ['touchstart','touchmove','touchend','touchcancel'])c.addEventListener(ev,e=>e.preventDefault(),{passive:false});   /* iPad Safari drops quick Pencil strokes otherwise */
+  card.querySelector('#pnBar').addEventListener('click',e=>{const t=e.target.closest('[data-pt]'),cb=e.target.closest('[data-pc]'),u=e.target.closest('[data-pu]');
+   if(t)PN.tool=t.dataset.pt;else if(cb){SCR.color[PN.tool==='hl'?'hl':'pen']=cb.dataset.pc;scrToolSave();}
+   else if(u){const redo=u.dataset.pu==='redo',a=(redo?PN.redo:PN.undo).pop();if(a){const put=(a.a==='add')===redo;for(const it of a.items){if(put)scrCellPut(it.sid,it.key,it.h);else scrCellDel(it.sid,it.key);}(redo?PN.undo:PN.redo).push(a);}refresh();return;}
+   bar();});
+  card.querySelector('#pnStrip').addEventListener('click',e=>{const b=e.target.closest('[data-pn]');if(!b)return;PN.nid=b.dataset.pn==='+'?uid():b.dataset.pn;refresh();});
+  const del=card.querySelector('#pnDel');del.addEventListener('click',()=>{if(!delT){del.textContent='Tap Again to Delete';delT=setTimeout(()=>{delT=0;del.textContent='Delete This Note';},3000);return;}clearTimeout(delT);delT=0;del.textContent='Delete This Note';
+   const items=L.map(q=>{const cl=txGet(PN.sid,q.key,false);return {sid:PN.sid,key:q.key,h:cl?cl.h:''};});for(const it of items)scrCellDel(it.sid,it.key);if(items.length){PN.undo.push({a:'del',items});PN.redo=[];}const N=pnNotes(PN.sid,PN.tab);if(N.length)PN.nid=N[N.length-1].id;refresh();});
+  card.querySelector('[data-x]').addEventListener('click',()=>{try{if(PN.id!=null)finish();scrInkFlush();}catch(e){}setTimeout(pnBtnDraw,0);});
+  size();refresh();},'pncard');}
+/* ---------- a new draft: its pages replace the old, and every mark moves to the same words in the new pages ----------
+   The two drafts are read word by word and lined up (words found once in both anchor the rest; the gaps between are lined up
+   closely; whole passages that moved are found again). A mark follows the words it was made on, or the nearest words that are still
+   there. A mark whose words were all cut is removed from the new draft, as Scriptation does, and listed in the report. The old draft
+   and its marks are kept with the folder (f.scriptPrev) until they are removed, and either draft can be put back. */
+async function scrDocToks(doc,pw,ph,prog){const T=[];for(let i=0;i<doc.numPages;i++){const R=(await scrTextAt(doc,i,pw,ph)).rows;
+  for(let ri=0;ri<R.length;ri++){const r=R[ri];for(const w of r.words){const n=scrNorm(w.s);if(!n)continue;T.push({pg:i,x0:w.x0,x1:w.x1,top:r.top,h:r.h,y:r.y,s:w.s,w:n,row:i*10000+ri});}}
+  if(prog)prog(i+1,doc.numPages);}return T;}
+/* line up two lists of words; M[i] = index in B of A's i-th word, or -1 */
+function scrAlign(A,B){const M=new Int32Array(A.length).fill(-1),stack=[[0,A.length,0,B.length]];
+ const lcs=(a0,a1,b0,b1)=>{const n=a1-a0,m=b1-b0;if(!n||!m)return;if(n*m>360000)return;const W=m+1,D=new Uint16Array((n+1)*W);
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i*W+j]=A[a0+i].w===B[b0+j].w?D[(i+1)*W+j+1]+1:Math.max(D[(i+1)*W+j],D[i*W+j+1]);
+  let i=0,j=0;while(i<n&&j<m){if(A[a0+i].w===B[b0+j].w){M[a0+i]=b0+j;i++;j++;}else if(D[(i+1)*W+j]>=D[i*W+j+1])i++;else j++;}};
+ while(stack.length){let [a0,a1,b0,b1]=stack.pop();
+  while(a0<a1&&b0<b1&&A[a0].w===B[b0].w){M[a0]=b0;a0++;b0++;}while(a0<a1&&b0<b1&&A[a1-1].w===B[b1-1].w){M[a1-1]=b1-1;a1--;b1--;}if(a0>=a1||b0>=b1)continue;
+  const ca=new Map(),cb=new Map();for(let i=a0;i<a1;i++){const w=A[i].w,v=ca.get(w);ca.set(w,v===undefined?i:-1);}for(let j=b0;j<b1;j++){const w=B[j].w,v=cb.get(w);cb.set(w,v===undefined?j:-1);}
+  const pairs=[];for(const [w,i] of ca){if(i<0)continue;const j=cb.get(w);if(j!==undefined&&j>=0)pairs.push([i,j]);}
+  if(!pairs.length){lcs(a0,a1,b0,b1);continue;}
+  pairs.sort((x,y)=>x[0]-y[0]);const tails=[],prev=new Array(pairs.length);   /* the longest run of anchors in order in both */
+  for(let k=0;k<pairs.length;k++){const v=pairs[k][1];let lo=0,hi=tails.length;while(lo<hi){const md=(lo+hi)>>1;if(pairs[tails[md]][1]<v)lo=md+1;else hi=md;}prev[k]=lo?tails[lo-1]:-1;tails[lo]=k;}
+  const chain=[];for(let k=tails.length?tails[tails.length-1]:-1;k>=0;k=prev[k])chain.push(pairs[k]);chain.reverse();
+  let pa=a0,pb=b0;for(const [i,j] of chain){stack.push([pa,i,pb,j]);M[i]=j;pa=i+1;pb=j+1;}stack.push([pa,a1,pb,b1]);}
+ /* passages that moved: five words in a row found once among the words not yet lined up, then grown both ways */
+ const usedB=new Uint8Array(B.length);for(const j of M)if(j>=0)usedB[j]=1;const key=(L,i)=>L[i].w+' '+L[i+1].w+' '+L[i+2].w+' '+L[i+3].w+' '+L[i+4].w;
+ const fb=new Map();for(let j=0;j+4<B.length;j++){let ok=true;for(let k=0;k<5;k++)if(usedB[j+k]){ok=false;break;}if(!ok)continue;const kk=key(B,j);fb.set(kk,fb.has(kk)?-1:j);}
+ const fa=new Map();for(let i=0;i+4<A.length;i++){let ok=true;for(let k=0;k<5;k++)if(M[i+k]>=0){ok=false;break;}if(!ok)continue;const kk=key(A,i);fa.set(kk,fa.has(kk)?-1:i);}
+ for(const [kk,i] of fa){if(i<0)continue;const j=fb.get(kk);if(j===undefined||j<0||usedB[j]||M[i]>=0)continue;
+  let x=i,y=j;while(x<A.length&&y<B.length&&M[x]<0&&!usedB[y]&&A[x].w===B[y].w){M[x]=y;usedB[y]=1;x++;y++;}x=i-1;y=j-1;while(x>=0&&y>=0&&M[x]<0&&!usedB[y]&&A[x].w===B[y].w){M[x]=y;usedB[y]=1;x--;y--;}}
+ return M;}
+/* a page's words, the nearest first, to (x,y) */
+function scrNear(TP,x,y,maxd){const out=[];for(const t of TP){const dx=x<t.x0?t.x0-x:x>t.x1?x-t.x1:0,dy=y<t.top?t.top-y:y>t.top+t.h?y-(t.top+t.h):0,d=Math.hypot(dx,dy*1.4);if(d<=maxd)out.push([d,t]);}out.sort((a,b)=>a[0]-b[0]);return out.map(v=>v[1]);}
+function scrWordsNear(TP,x,y){return scrNear(TP,x,y,80).slice(0,4).sort((a,b)=>a.row-b.row||a.x0-b.x0).map(t=>t.s).join(' ');}
+/* what a mark is, in words, for the report */
+function scrDescribe(s,TP){const near=()=>{const b=s.p?scrItemBox(s):s.t==='bm'?[0,s.a[0],SCR.pw,s.a[0]+12]:scrBox(s),w=scrWordsNear(TP,(b[0]+b[2])/2,(b[1]+b[3])/2);return w?` near “${w.slice(0,60)}”`:'';};
+ const q=v=>`“${String(v).replace(/\s+/g,' ').slice(0,80)}${String(v).length>80?'…':''}”`;
+ return s.t==='th'?'Highlight on '+q(s.x):s.t==='ul'?'Underline on '+q(s.x):s.t==='st'?'Strike-through on '+q(s.x):s.t==='tx'?'Text '+q(s.x)+near():s.t==='nt'?'Note '+q(s.x)+near():s.t==='bm'?'Bookmark '+q(s.x)
+  :s.t==='pen'?'Pen mark'+near():s.t==='hl'?'Freehand highlight'+near():s.t==='ar'?'Arrow'+near():s.t==='ln'?'Line'+near():s.t==='bx'?'Box'+near():'Mark'+near();}
+/* where each mark goes in the new pages */
+function scrCarry(s,TA,TB,M,byPg){const TP=byPg.get(s.pg)||[];
+ const tryAt=(x,y,maxd)=>{for(const t of scrNear(TP,x,y,maxd).slice(0,10)){const j=M[t.i];if(j>=0)return {o:t,n:TB[j]};}return null;};
+ const shift=(o,n)=>({pg:n.pg,dx:n.x0-o.x0,dy:n.top-o.top});
+ if(s.t==='th'||s.t==='ul'||s.t==='st'){const cov=TP.filter(t=>s.q.some(r=>{const cx=(t.x0+t.x1)/2,cy=t.top+t.h/2;return cx>=r[0]-1&&cx<=r[0]+r[2]+1&&cy>=r[1]-1&&cy<=r[1]+r[3]+1;}));
+  const got=cov.map(t=>M[t.i]).filter(j=>j>=0).map(j=>TB[j]);if(!got.length)return null;
+  const pc=new Map();for(const t of got)pc.set(t.pg,(pc.get(t.pg)||0)+1);const pg=[...pc.entries()].sort((a,b)=>b[1]-a[1])[0][0],on=got.filter(t=>t.pg===pg).sort((a,b)=>a.row-b.row||a.x0-b.x0);
+  const rows=new Map();for(const t of on){let r=rows.get(t.row);if(!r)rows.set(t.row,r={x0:t.x0,x1:t.x1,top:t.top,h:t.h});else{r.x0=Math.min(r.x0,t.x0);r.x1=Math.max(r.x1,t.x1);}}
+  const n=Object.assign({},s,{pg,q:[...rows.values()].map(r=>[r.x0,r.top,r.x1-r.x0,r.h]),x:on.map(t=>t.s).join(' ')});
+  const moved=pg!==s.pg||n.q.length!==s.q.length||n.q.some((r,i)=>Math.abs(r[0]-s.q[i][0])>.6||Math.abs(r[1]-s.q[i][1])>.6||Math.abs(r[2]-s.q[i][2])>.6);
+  return {s:n,moved,part:got.length<cov.length};}
+ let ref;
+ if(s.p){const b=scrItemBox(s);ref=tryAt((b[0]+b[2])/2,(b[1]+b[3])/2,40)||tryAt(s.p[0][0],s.p[0][1],220);}
+ else if(s.t==='tx')ref=tryAt(s.a[0],s.a[1]+s.z*.6,220);
+ else if(s.t==='nt')ref=tryAt(s.a[0],s.a[1],220);
+ else if(s.t==='ar'||s.t==='ln'){const e=s.t==='ar'?[[s.a[2],s.a[3]],[s.a[0],s.a[1]]]:[[s.a[0],s.a[1]],[s.a[2],s.a[3]]];ref=tryAt(e[0][0],e[0][1],60)||tryAt(e[1][0],e[1][1],220);}
+ else if(s.t==='bx')ref=tryAt(s.a[0]+s.a[2]/2,s.a[1]+s.a[3]/2,220);
+ else if(s.t==='bm')ref=tryAt(SCR.pw/2,s.a[0]+6,400);
+ if(!ref)return null;const d=shift(ref.o,ref.n),n=Object.assign({},s,{pg:d.pg});
+ if(s.p)n.p=s.p.map(p=>[scrR20(p[0]+d.dx),scrR20(p[1]+d.dy),p[2]]);
+ else if(s.t==='bm')n.a=[s.a[0]+d.dy];
+ else if(s.t==='ln'||s.t==='ar')n.a=[s.a[0]+d.dx,s.a[1]+d.dy,s.a[2]+d.dx,s.a[3]+d.dy];
+ else if(s.t==='bx')n.a=[s.a[0]+d.dx,s.a[1]+d.dy,s.a[2],s.a[3]];
+ else if(s.t==='tx')n.a=[s.a[0]+d.dx,s.a[1]+d.dy].concat(s.a.slice(2));
+ else if(s.t==='nt')n.a=[s.a[0]+d.dx,s.a[1]+d.dy,s.a[2]+d.dx,s.a[3]+d.dy,s.a[4]];
+ n._b=null;n._w=null;n._k=null;return {s:n,moved:d.pg!==s.pg||Math.abs(d.dx)>.6||Math.abs(d.dy)>.6,part:false};}
+/* a scene's length in eighths, from where the scenes start */
+function scrE8Of(M,i,np,ph,endY){const m=M[i];if(!m)return 0;const B0=SCR_TOP,B1=ph-60,H=B1-B0,c=y=>Math.max(B0,Math.min(B1,y)),nx=M[i+1],p2=nx?nx.p:np-1,y2=nx?nx.y-12:endY?endY+4:B1,y1=m.y-12;
+ return Math.max(1,Math.round((p2===m.p?(c(y2)-c(y1))/H:(B1-c(y1))/H+(p2-m.p-1)+(c(y2)-B0)/H)*8));}
+const scrSkey=(m,k)=>scrNorm(m.n)||('H:'+scrNorm(m.h)+'#'+k);
+const scrSname=m=>(m.n?'Scene '+m.n:'The scene')+(m.h?' · '+m.h:'');
+/* compare the folder's script with a new PDF; returns the plan, applied by scrDraftApply */
+async function scrDraftPlan(f,buf,name,scenes,prog){const old=f.script,lib=await loadPdfJs(),u8o=scrBytes(old);if(!u8o)throw new Error('pieces');
+ const da=await lib.getDocument({data:u8o}).promise,db=await lib.getDocument({data:new Uint8Array(buf.slice(0))}).promise;
+ try{const va=(await da.getPage(1)).getViewport({scale:1}),vb=(await db.getPage(1)).getViewport({scale:1}),na=da.numPages,nb=db.numPages;
+  const TA=await scrDocToks(da,va.width,va.height,(i)=>prog&&prog(i,na+nb)),TB=await scrDocToks(db,vb.width,vb.height,(i)=>prog&&prog(na+i,na+nb));
+  TA.forEach((t,i)=>t.i=i);TB.forEach((t,i)=>t.i=i);const M=scrAlign(TA,TB),hitB=new Uint8Array(TB.length);for(const j of M)if(j>=0)hitB[j]=1;
+  const byPg=new Map();for(const t of TA){let L=byPg.get(t.pg);if(!L)byPg.set(t.pg,L=[]);L.push(t);}
+  const pw0=SCR.pw,ph0=SCR.ph;SCR.pw=va.width;SCR.ph=va.height;
+  /* every live mark of the old draft */
+  const pre=old.id+'.',items=[];for(const sid in P.text||{}){const ink=P.text[sid]&&P.text[sid].ink;if(!ink)continue;for(const k in ink){if(!k.startsWith(pre))continue;const c=ink[k];if(!c||c.del||!c.h)continue;const s=scrParse(c);if(s)items.push({sid,key:'ink.'+k,sub:k.slice(pre.length),s});}}
+  const carry=[],gone=[];let moved=0,same=0,part=0;
+  for(const it of items){let r=null;try{r=scrCarry(it.s,TA,TB,M,byPg);}catch(e){console.warn(e);}
+   if(!r){gone.push({t:it.s.t,d:scrDescribe(it.s,byPg.get(it.s.pg)||[]),p:it.s.pg+1});continue;}if(r.moved)moved++;else same++;if(r.part)part++;carry.push({sub:it.sub,s:r.s,from:it.s});}
+  SCR.pw=pw0;SCR.ph=ph0;
+  /* the scenes */
+  const MA=(old.marks||[]).map(m=>({n:m.n||'',h:m.h||'',p:m.p-1,y:m.y})).sort((a,b)=>a.p-b.p||a.y-b.y),MB=(scenes||[]).filter(q=>q.pos).map(q=>({n:q.num||'',h:q.heading||'',p:q.pos[0]-1,y:q.pos[1]})).sort((a,b)=>a.p-b.p||a.y-b.y);
+  const kA=new Map(),kB=new Map(),cnt=new Map();for(const [L,K] of [[MA,kA],[MB,kB]]){cnt.clear();L.forEach((m,i)=>{const h=scrNorm(m.h),k=cnt.get(h)||0;cnt.set(h,k+1);K.set(scrSkey(m,k),i);});}
+  const span=(L,i,T)=>{const m=L[i],nx=L[i+1];return T.filter(t=>(t.pg>m.p||(t.pg===m.p&&t.y>=m.y-4))&&(!nx||t.pg<nx.p||(t.pg===nx.p&&t.y<nx.y-4)));};
+  const added=[],cut=[],changed=[],heads=[],endA=Math.max(0,...TA.filter(t=>t.pg===na-1).map(t=>t.y)),endB=Math.max(0,...TB.filter(t=>t.pg===nb-1).map(t=>t.y));
+  const omit=m=>/\bOMIT/.test(scrNorm(m.h)),cutK=new Set();
+  for(const [k,j] of kB){const i=kA.get(k),m=MB[j];if(omit(m)){if(i!==undefined&&!omit(MA[i])){cut.push({name:scrSname(MA[i]),p:MA[i].p+1,omitted:true});cutK.add(k);}continue;}if(i===undefined){added.push({name:scrSname(m),p:m.p+1,e8:scrE8Of(MB,j,nb,vb.height,endB)});continue;}
+   const a=MA[i];if(scrNorm(a.h)!==scrNorm(m.h))heads.push({n:m.n,from:a.h,to:m.h});
+   const sA=span(MA,i,TA),sB=span(MB,j,TB),rem=sA.filter(t=>M[t.i]<0).length,add=sB.filter(t=>!hitB[t.i]).length,e0=scrE8Of(MA,i,na,va.height,endA),e1=scrE8Of(MB,j,nb,vb.height,endB);
+   if(rem||add||e0!==e1)changed.push({name:scrSname(m),add,rem,e0,e1,p:m.p+1});}
+  for(const [k,i] of kA)if(!kB.has(k)&&!cutK.has(k)&&!omit(MA[i]))cut.push({name:scrSname(MA[i]),p:MA[i].p+1});
+  const words={a:TA.length,b:TB.length,kept:TA.filter(t=>M[t.i]>=0).length};
+  return {name,buf,scenes,carry,gone,moved,same,part,added,cut,changed,heads,words,pages:[na,nb],total:items.length};}
+ finally{try{da.destroy();}catch(e){}try{db.destroy();}catch(e){}}}
+function scrDraftApply(f,pl){const old=f.script,ns=scrAttach(f,pl.buf,pl.name,pl.scenes);f.script=old;      /* scrAttach makes the new one; put the old back until all is ready */
+ const M=scrMarks(f,ns),at=(pg,y)=>{let hit=null;for(const m of M){if(m.p<pg||(m.p===pg&&m.y<=y+4)){if(m.s)hit=m.s;}else break;}return hit||(M.find(m=>m.s)||{}).s||folderScenes(f.id).filter(x=>!x.scout)[0]||null;};
+ let put=0;const lost=[];
+ for(const c of pl.carry){const s=c.s,y=s.t==='bm'?s.a[0]:s.p?s.p[0][1]:scrBox(s)[1],sc=at(s.pg,y);if(!sc){lost.push(c);continue;}
+  const h=s.p?JSON.stringify({p:s.pg,t:s.t,c:s.c,w:s.w,d:scrEnc(s.p)}):scrObjH(s);scrCellPut(sc.id,'ink.'+ns.id+'.'+c.sub,h);put++;}
+ ns.rep={at:Date.now(),from:old.name,to:ns.name,pages:pl.pages,moved:pl.moved,same:pl.same,part:pl.part,total:pl.total,
+  gone:pl.gone.concat(lost.map(c=>({t:c.s.t,d:scrDescribe(c.from,[]),p:c.from.pg+1}))).slice(0,500),added:pl.added,cut:pl.cut,changed:pl.changed.slice(0,400),heads:pl.heads};
+ f.scriptPrev=[old].concat(f.scriptPrev||[]);f.script=ns;scrInkFlush();commit();return ns;}
+function scrRepHtml(r){if(!r)return '<p>No report for this draft.</p>';const pl=(n,w)=>plural(n,w),gone=r.gone||[];
+ const sc=[...(r.added||[]).map(x=>`<li class="rpa"><b>New</b> ${esc(x.name)} <span class="mut">· p. ${x.p}${x.e8?' · '+ppTxt(x.e8):''}</span></li>`),
+  ...(r.cut||[]).map(x=>`<li class="rpx"><b>${x.omitted?'Omitted':'Cut'}</b> ${esc(x.name)} <span class="mut">· was p. ${x.p}</span></li>`),
+  ...(r.heads||[]).map(x=>`<li><b>Heading</b> Scene ${esc(x.n)}: ${esc(x.from)} → ${esc(x.to)}</li>`),
+  ...(r.changed||[]).map(x=>`<li><b>Changed</b> ${esc(x.name)} <span class="mut">· ${[x.add?pl(x.add,'word')+' new':'',x.rem?pl(x.rem,'word')+' cut':'',x.e0!==x.e1?ppTxt(x.e0)+' → '+ppTxt(x.e1)+' pages':''].filter(Boolean).join(' · ')}</span></li>`)];
+ return `<p class="mut">${esc(r.from||'')} → <b>${esc(r.to||'')}</b> · ${new Date(r.at).toLocaleString(undefined,{month:'long',day:'numeric',hour:'numeric',minute:'2-digit'})} · ${r.pages?r.pages[0]+' → '+r.pages[1]+' pages':''}</p>
+  <h4 class="rph">Your marks</h4><ul class="rpl"><li>${pl(r.moved,'mark')} moved with ${r.moved===1?'its':'their'} words to where ${r.moved===1?'they are':'they are'} now.</li><li>${pl(r.same,'mark')} stayed where ${r.same===1?'it was':'they were'}.</li>${r.part?`<li>${pl(r.part,'text mark')} kept only the words still in the script.</li>`:''}<li${gone.length?' class="rpx"':''}>${gone.length?pl(gone.length,'mark')+' removed, because the words they were on were cut:':'None removed.'}</li></ul>
+  ${gone.length?`<ul class="rpl rpg">${gone.map(g=>`<li>${esc(g.d)} <span class="mut">· was p. ${g.p}</span></li>`).join('')}</ul>`:''}
+  <h4 class="rph">The scenes</h4>${sc.length?`<ul class="rpl">${sc.join('')}</ul>`:'<p class="mut">No scene was added, cut or changed.</p>'}
+  <p class="mut" style="margin-top:10px">The earlier draft and its marks are kept under Script… › Earlier Drafts until you remove them.</p>`;}
+function scrRepDialog(f,sc){sc=sc||f.script;modal(`<h3>What Changed in This Draft</h3><div class="rpbody">${scrRepHtml(sc.rep)}</div><div class="btns end"><button class="pri" data-x>Done</button></div>`,null,'rpcard');}
+/* choose the new draft's PDF, compare, show what will change, then replace */
+function scrDraftPick(f){const inp=document.createElement('input');inp.type='file';inp.accept='application/pdf,.pdf';inp.style.display='none';document.body.appendChild(inp);
+ inp.onchange=async()=>{const fl=inp.files[0];inp.remove();if(!fl)return;if(fl.size>40e6){toast('That PDF is over 40 MB. Export a smaller one and try again.');return;}
+  try{const buf=await fl.arrayBuffer();if(!new TextDecoder().decode(buf.slice(0,8)).startsWith('%PDF')){toast('That isn’t a PDF.');return;}let ps={scenes:[]};try{ps=await parsePDF(buf.slice(0));}catch(e){}scrDraftRun(f,buf,fl.name,ps.scenes);}catch(e){console.warn(e);toast('Couldn’t read that file.');}};inp.click();}
+async function scrDraftRun(f,buf,name,scenes,stacked){if(!f.script){scrAttach(f,buf,name,scenes);commit();toast('The PDF’s pages are now this folder’s script.');return;}
+ if(stacked)kidNext();modal(`<h3>Comparing the Drafts</h3><p id="drP">Reading the pages…</p><div class="drbar"><i id="drB"></i></div>`,null,'hold');
+ let pl;try{pl=await scrDraftPlan(f,buf,name,scenes,(i,n)=>{const p=document.getElementById('drP'),b=document.getElementById('drB');if(p)p.textContent=`Reading page ${Math.min(i,n)} of ${n}…`;if(b)b.style.width=Math.round(i/n*100)+'%';});}
+ catch(e){console.warn(e);closeModal();toast(e&&e.message==='pieces'?'The current script’s pages are still on their way from your other device. Try again when they have arrived.':'Couldn’t compare the drafts.');return;}
+ const W=pl.words,noText=W.a<30||W.b<30,share=W.a?W.kept/W.a:0,odd=!noText&&share<.35;
+ if(noText){closeModal();modal(`<h3>The New Draft</h3><p>${W.b<30?'The new draft’s':'The current draft’s'} pages have no text the notebook can read. It may be a scan, or a PDF made from pictures. Without the words, your marks can’t be matched to the new pages.</p><p>You can still use the new pages. Your marks stay with the earlier draft, under Script… › Earlier Drafts, where you can go back to them.</p><div class="btns end"><button data-x>Cancel</button><button class="pri" id="drGo0">Use the New Pages Without the Marks</button></div>`,card=>{
+   card.querySelector('#drGo0').onclick=()=>{const was=scrOn;closeModal();const p0=Object.assign({},pl,{carry:[],gone:[],moved:0,same:0,part:0});scrDraftApply(f,p0);if(was){SCR.id=null;scrSync(true);}toast('The new pages are in. Your marks are with the earlier draft.');};},'rpcard');return;}
+ const r={from:f.script.name,to:String(name||'').replace(/\.pdf$/i,''),at:Date.now(),pages:pl.pages,moved:pl.moved,same:pl.same,part:pl.part,gone:pl.gone,added:pl.added,cut:pl.cut,changed:pl.changed,heads:pl.heads};
+ closeModal();modal(`<h3>The New Draft</h3>${odd?`<p class="drwarn">Only ${Math.round(share*100)}% of the words in the current draft are in this one. It may be a different script. Check it is the right file before you use it.</p>`:''}<div class="rpbody">${scrRepHtml(r)}</div><div class="btns end"><button data-x>Cancel</button><button class="pri" id="drGo">Use the New Draft</button></div>`,card=>{
+  card.querySelector('#drGo').onclick=()=>{const was=scrOn;closeModal();const ns=scrDraftApply(f,pl);if(was){SCR.id=null;scrSync(true);}toast(`The new draft is in. ${plural(pl.moved+pl.same,'mark')} carried over${pl.gone.length?', '+pl.gone.length+' removed':''}.`);};},'rpcard');}
+/* the earlier drafts: put one back, or remove it and its marks */
+function scrPrevList(f){return (f.scriptPrev||[]).filter(x=>x&&Array.isArray(x.parts));}
+function scrDraftUse(f,i){const L=scrPrevList(f),x=L[i];if(!x)return;f.scriptPrev=[f.script].concat(L.filter((_,k)=>k!==i));f.script=x;commit();SCR.id=null;scrSync(true);toast(`“${x.name}” is the script again. The other draft is under Earlier Drafts.`);}
+function scrDraftDrop(f,i){const L=scrPrevList(f),x=L[i];if(!x)return;const pre=x.id+'.';for(const sid in P.text||{}){const ink=P.text[sid]&&P.text[sid].ink;if(!ink)continue;for(const k in ink)if(k.startsWith(pre)&&ink[k]&&!ink[k].del)scrCellDel(sid,'ink.'+k);}
+ f.scriptPrev=L.filter((_,k)=>k!==i);scrInkFlush();commit();}
+/* ---------- the script with its marks, as a PDF: the script's own pages, with every mark drawn into them as lines and shapes, so the
+   words stay sharp and can still be searched. pdf-lib writes into the PDF itself. ---------- */
+let pdflibP=null;
+function loadPdfLib(){if(window.PDFLib)return Promise.resolve(window.PDFLib);if(!pdflibP)pdflibP=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=window.BB_PDFLIB||(location.protocol==='file:'?'pdf-lib.min.js':'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js');sc.onload=()=>window.PDFLib?res(window.PDFLib):rej(new Error('load'));sc.onerror=()=>{pdflibP=null;rej(new Error('load'));};document.head.appendChild(sc);});return pdflibP;}
+const scrRGB=(L,h)=>{const n=parseInt(String(h).slice(1),16);return L.rgb((n>>16&255)/255,(n>>8&255)/255,(n&255)/255);};
+async function scrExport(f,opt){opt=opt||{};const sc=f.script,u8=scrBytes(sc);if(!u8)throw new Error('pieces');const L=await loadPdfLib(),lib=await loadPdfJs();
+ const pj=await lib.getDocument({data:u8.slice(0)}).promise,v1=(await pj.getPage(1)).getViewport({scale:1}),PW=v1.width,PH=v1.height,ks=[];
+ for(let i=0;i<pj.numPages;i++){const v=(await pj.getPage(i+1)).getViewport({scale:1});ks.push(Math.min(PW/v.width,PH/v.height));}try{pj.destroy();}catch(e){}
+ let doc=await L.PDFDocument.load(u8,{ignoreEncryption:true}),pict=false;
+ if(doc.isEncrypted){pict=true;doc=await L.PDFDocument.create();const pj2=await lib.getDocument({data:u8.slice(0)}).promise;
+  try{for(let i=0;i<pj2.numPages;i++){const pg=await pj2.getPage(i+1),v=pg.getViewport({scale:1}),r=Math.min(2.4,Math.sqrt(6e6/(v.width*v.height))),vp=pg.getViewport({scale:r}),c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:g,viewport:vp}).promise;const url=c.toDataURL('image/jpeg',.9);c.width=0;
+    const jp=await doc.embedJpg(Uint8Array.from(atob(url.slice(url.indexOf(',')+1)),ch=>ch.charCodeAt(0))),np=doc.addPage([v.width,v.height]);np.drawImage(jp,{x:0,y:0,width:v.width,height:v.height});if(opt.prog)opt.prog(i+1,pj2.numPages);}}
+  finally{try{pj2.destroy();}catch(e){}}}
+ const font=await doc.embedFont(L.StandardFonts.Helvetica),bold=await doc.embedFont(L.StandardFonts.HelveticaBold),pages=doc.getPages();
+ const safe=t=>{let o='';for(const ch of String(t||'').replace(/[\u2028\u2029]/g,' ')){try{font.encodeText(ch);o+=ch;}catch(e){o+=ch==='\t'?' ':'?';}}return o;};
+ /* this script's marks, page by page, oldest first */
+ const pre=sc.id+'.',by=new Map();for(const sid in P.text||{}){const ink=P.text[sid]&&P.text[sid].ink;if(!ink)continue;for(const k in ink){if(!k.startsWith(pre))continue;const c=ink[k];if(!c||c.del||!c.h)continue;const s=scrParse(c);if(!s)continue;let A=by.get(s.pg);if(!A)by.set(s.pg,A=[]);A.push({t:c.t||0,s});}}
+ const pw0=SCR.pw,ph0=SCR.ph,M0=SCR.marks,n0=SCR.n;SCR.pw=PW;SCR.ph=PH;SCR.n=pages.length;SCR.marks=scrMarks(f,sc);let count=0;
+ try{for(let i=0;i<pages.length;i++){const pg=pages[i],cb=pg.getCropBox(),k=ks[i]||1,X=x=>cb.x+x/k,Y=y=>cb.y+cb.height-y/k,W=w=>w/k;
+   const A=(by.get(i)||[]).sort((a,b)=>a.t-b.t).map(v=>v.s);
+   const line=(x0,y0,x1,y1,w,c,op)=>pg.drawLine({start:{x:X(x0),y:Y(y0)},end:{x:X(x1),y:Y(y1)},thickness:W(w),color:scrRGB(L,c),lineCap:L.LineCapStyle.Round,opacity:op==null?1:op});
+   const poly=(pts,w,c,blend,op)=>{if(pts.length<2)return;let d='M '+pts[0][0].toFixed(2)+' '+pts[0][1].toFixed(2);for(let j=1;j<pts.length;j++)d+=' L '+pts[j][0].toFixed(2)+' '+pts[j][1].toFixed(2);
+    pg.drawSvgPath(d,{x:cb.x,y:cb.y+cb.height,scale:1/k,borderColor:scrRGB(L,c),borderWidth:w,borderLineCap:L.LineCapStyle.Round,borderOpacity:op==null?1:op,blendMode:blend||L.BlendMode.Normal});};
+   const text=(lines,x,y,z,c,lh)=>{lines.forEach((t,j)=>{const s=safe(t);if(s.trim())pg.drawText(s,{x:X(x),y:Y(y+j*lh+(lh-z)/2+z*.8),size:W(z),font,color:scrRGB(L,c)});});};
+   const arrowHead=(x0,y0,x1,y1,w,c)=>{const a=Math.atan2(y1-y0,x1-x0),l=5+w*2.4;line(x1,y1,x1-l*Math.cos(a-.42),y1-l*Math.sin(a-.42),w,c);line(x1,y1,x1-l*Math.cos(a+.42),y1-l*Math.sin(a+.42),w,c);};
+   const under=[],over=[];for(const s of A)((s.t==='hl'||s.t==='th')?under:over).push(s);
+   for(const s of under){count++;if(s.t==='th'){for(const r of s.q)pg.drawRectangle({x:X(r[0]-1.5),y:Y(r[1]+r[3]),width:W(r[2]+3),height:W(r[3]),color:scrRGB(L,s.c),blendMode:L.BlendMode.Multiply});}
+    else if(s.p.length===1)pg.drawCircle({x:X(s.p[0][0]),y:Y(s.p[0][1]),size:W(s.w/2),color:scrRGB(L,s.c),blendMode:L.BlendMode.Multiply});else poly(s.p,s.w,s.c,L.BlendMode.Multiply);}
+   for(const s of over){count++;const t=s.t,a=s.a;
+    if(t==='pen'){const Wd=scrWs(s);if(s.p.length===1){pg.drawCircle({x:X(s.p[0][0]),y:Y(s.p[0][1]),size:W(Wd[0]/2),color:scrRGB(L,s.c)});continue;}
+     let run=[s.p[0]],rw=Wd[0];for(let j=1;j<s.p.length;j++){const w=(Wd[j-1]+Wd[j])/2;if(Math.abs(w-rw)>.12&&run.length>1){poly(run,rw,s.c);run=[s.p[j-1]];rw=w;}run.push(s.p[j]);rw=run.length===2?w:rw;}poly(run,rw,s.c);}
+    else if(t==='ul'||t==='st'){for(const r of s.q){const y=r[1]+r[3]*(t==='ul'?.97:.57);line(r[0],y,r[0]+r[2],y,1.25,s.c);}}
+    else if(t==='ln'||t==='ar'){line(a[0],a[1],a[2],a[3],s.w,s.c);if(t==='ar')arrowHead(a[0],a[1],a[2],a[3],s.w,s.c);}
+    else if(t==='bx')pg.drawRectangle({x:X(a[0]),y:Y(a[1]+a[3]),width:W(a[2]),height:W(a[3]),borderColor:scrRGB(L,s.c),borderWidth:W(s.w)});
+    else if(t==='tx'){text(scrWrap(s),a[0],a[1]+2,s.z,s.c,scrLH(s));}
+    else if(t==='nt'){const b=scrNtBox(s),ar=scrNtArrow(s);if(Math.hypot(ar[2]-ar[0],ar[3]-ar[1])>3){line(ar[0],ar[1],ar[2],ar[3],1.3,s.c);arrowHead(ar[0],ar[1],ar[2],ar[3],1.3,s.c);}
+     pg.drawRectangle({x:X(b[0]),y:Y(b[1]+b[3]),width:W(b[2]),height:W(b[3]),color:L.rgb(1,.992,.949),borderColor:scrRGB(L,s.c),borderWidth:W(1.3)});text(scrWrap(s),b[0]+5,b[1]+4.5,s.z,'#1d1d1f',scrLH(s));}
+    else if(t==='bm'){const y=a[0],x=PW;pg.drawSvgPath(`M ${x} ${y} L ${x-22} ${y} L ${x-16} ${y+7} L ${x-22} ${y+14} L ${x} ${y+14} Z`,{x:cb.x,y:cb.y+cb.height,scale:1/k,color:scrRGB(L,s.c)});
+     const nm=safe(s.x).slice(0,40);if(nm)pg.drawText(nm,{x:X(x-26)-font.widthOfTextAtSize(nm,W(7.5)),y:Y(y+10),size:W(7.5),font,color:scrRGB(L,s.c)});}}
+   /* the scene numbers, rules and eighths, when they are on */
+   if(opt.lay){const Ly=scrLay();for(let j=0;j<SCR.marks.length;j++){const m=SCR.marks[j];if(m.p!==i)continue;const y=m.y,num=String((m.s&&m.s.number)||m.n||'');
+     if(Ly.div&&y>SCR_TOP+6)line(14,y-17,PW-14,y-17,.8,'#2f6fde',.55);
+     if(Ly.num&&num){const s=safe(num);let fs=19,w=bold.widthOfTextAtSize(s,fs);if(w>40){fs=Math.max(11,fs*40/w);w=bold.widthOfTextAtSize(s,fs);}const bw=Math.max(26,w+10),bh=fs+8,bx=6,by=y-12-bh/2-1;
+      pg.drawRectangle({x:X(bx),y:Y(by+bh),width:W(bw),height:W(bh),color:L.rgb(.114,.114,.122),opacity:.88});pg.drawText(s,{x:X(bx+bw/2)-W(w/2),y:Y(by+bh/2+fs*.36),size:W(fs),font:bold,color:L.rgb(1,1,1)});
+      if(Ly.e8){const e=scrE8(j);if(e){const t=ppTxt(e),tw=bold.widthOfTextAtSize(t,9.5);pg.drawText(t,{x:X(bx+bw/2)-W(tw/2),y:Y(by+bh+3+8),size:W(9.5),font:bold,color:scrRGB(L,'#2f6fde')});}}}}}}
+ }finally{SCR.pw=pw0;SCR.ph=ph0;SCR.marks=M0;SCR.n=n0;}
+ doc.setTitle((sc.name||'Script')+' · with marks');doc.setProducer('The Director’s Notebook');doc.setCreator('The Director’s Notebook');
+ return {bytes:await doc.save(),count,pages:pages.length,pict};}
+async function scrExportGo(f,lay){toast('Making the PDF…',20000);try{const r=await scrExport(f,{lay});const name=(f.script.name||'Script').replace(/[^\w\- ]+/g,'').trim()+' - with marks.pdf';
+  await save(name,new Blob([r.bytes],{type:'application/pdf'}));if(r.pict)setTimeout(()=>toast('This script’s PDF is protected, so its pages are drawn as pictures in the export. Your marks are drawn as usual.',7000),2500);}
+ catch(e){console.warn(e);toast(e&&e.message==='load'?'The PDF maker couldn’t load. Connect once, then try again.':e&&e.message==='pieces'?'The script’s pages are still on their way from your other device.':'Couldn’t make the PDF.');}}
 /* ---------- the blocking as a video ---------- */
 let vidStop=false;
 async function exportVideo(){const s=scene(),mx=maxStep(s);stopPlay();
@@ -7685,7 +7965,7 @@ function importReview(ps,chars,fname,into){
  const nextCol=fid=>{const f=fById(fid),h=(f&&f.revs)||[];const i=h.length?REV_COLS.findIndex(x=>x[0]===h[h.length-1].c):0;return REV_COLS[Math.min(REV_COLS.length-1,i+1)][0];};
  modal(`<h3>Import ${esc(ps.title)}</h3><p class="mut">Found ${plural(ps.scenes.length,'scene')} and ${plural(chars.length,'character')} in ${esc(fname)}.</p>
   ${RF.length?`<div class="pgck immode"><button data-mode="new">New folder</button><button data-mode="rev">Revised draft of a folder</button></div>`:''}
-  ${ps.pdf?'<p class="mut" id="imPdf" style="margin-top:-4px">The PDF’s pages are kept with a new folder, to read and mark up under Script.</p>':''}
+  ${ps.pdf?'<p class="mut" id="imPdf" style="margin-top:-4px">The PDF’s pages are kept with a new folder, to read and mark up under Script.</p><p class="mut" id="imPdfR" style="margin-top:-4px" hidden>The PDF’s pages become the folder’s new script draft. Your marks on the script move to it, and you see what changed before it is used.</p>':''}
   <div id="imNew"><div class="imgrid"><label class="fld">New folder<input id="imN" value="${esc(ps.title)}" autocomplete="off"></label><label class="fld">Inside<select id="imP"><option value="">Top level</option>${folderOpts(null,0)}</select></label></div></div>
   <div id="imRev" hidden><div class="imgrid"><label class="fld">Folder to update<select id="imF">${RF.map(f=>`<option value="${f.id}">${esc(pathTxt(f.id))}</option>`).join('')}</select></label><label class="fld">Revision color<select id="imC">${REV_COLS.map(([c])=>`<option>${c}</option>`).join('')}</select></label></div><div id="imRS" class="imrs"></div></div>
   <details class="oth" id="imScs"><summary>Scenes (${ps.scenes.length})</summary><div class="imsc">${ps.scenes.map((s,i)=>`<div><b>${esc(s.num||String(i+1))}</b>${esc(s.heading)}<small>${s.present.length?esc(s.present.join(', ')):'No characters found'}</small></div>`).join('')}</div></details>
@@ -7701,7 +7981,7 @@ function importReview(ps,chars,fname,into){
    return new Set(P.characters.filter(c=>!c.extra&&!c.tpl&&(ids.has(c.id)||c.home===root)).map(c=>c.name.toUpperCase()));};
   let plan=null;
   const show=()=>{const rv=mode==='rev';card.querySelectorAll('.immode button').forEach(b=>b.classList.toggle('on',b.dataset.mode===mode));
-   card.querySelector('#imNew').hidden=rv;card.querySelector('#imRev').hidden=!rv;{const pn=card.querySelector('#imPdf');if(pn)pn.hidden=rv;}card.querySelector('#imScs').hidden=rv;card.querySelector('#imX').hidden=rv;
+   card.querySelector('#imNew').hidden=rv;card.querySelector('#imRev').hidden=!rv;{const pn=card.querySelector('#imPdf');if(pn)pn.hidden=rv;const pr=card.querySelector('#imPdfR');if(pr)pr.hidden=!rv;}card.querySelector('#imScs').hidden=rv;card.querySelector('#imX').hidden=rv;
    const K=known();card.querySelectorAll('.imch .imr[data-i]').forEach(r=>{const c=chars[+r.dataset.i];r.hidden=rv&&K.has(c.name.toUpperCase());});
    if(rv){plan=revPlan(fS.value,ps);const N=plan.n,col=revHex(cS.value),line=(r,k,t)=>`<div class="imrv"><i class="rvc" style="--rc:${col}">${k}</i><b>${esc(r.sc?r.sc.num||String(r.i+1):r.number)}</b>${esc(t)}</div>`;
     card.querySelector('#imRS').innerHTML=`<p class="imrsum"><b>${N.changed}</b> changed · <b>${N.new}</b> new · <b>${N.gone}</b> omitted${N.renum?` · <b>${N.renum}</b> renumbered`:''} · ${N.same} unchanged</p>
@@ -7718,7 +7998,8 @@ function importReview(ps,chars,fname,into){
    if(b&&b.dataset.act==='g'){c.g=b.dataset.v;c.guess=false;}else c.on=!c.on;r.outerHTML=row(c,+r.dataset.i);});
   show();
   card.querySelector('#imGo').onclick=()=>{
-   if(mode==='rev'){const pl=revPlan(fS.value,ps);if(pl.n.new&&acctWall(pl.n.new))return;revApply(fS.value,cS.value,pl,chars,card.querySelector('#imPl').checked,!!(card.querySelector('#imTp')||{}).checked,known());return;}
+   if(mode==='rev'){const pl=revPlan(fS.value,ps);if(pl.n.new&&acctWall(pl.n.new))return;const rfid=fS.value;revApply(rfid,cS.value,pl,chars,card.querySelector('#imPl').checked,!!(card.querySelector('#imTp')||{}).checked,known());
+     if(ps.pdf){const fo=fPath(rfid).slice().reverse().find(x=>x.script&&Array.isArray(x.script.parts)&&x.script.parts.length)||fById(rfid);if(fo)setTimeout(()=>scrDraftRun(fo,ps.pdf.buf,ps.pdf.name,ps.scenes),400);}return;}
    if(acctWall(ps.scenes.length,false,true))return;
    const name=card.querySelector('#imN').value.trim()||ps.title,par=sel.value||null,place=card.querySelector('#imPl').checked,useTpl=!!(card.querySelector('#imTp')||{}).checked;
    const fo={id:uid(),name:fFree(name,par),parent:par};P.folders.push(fo);
@@ -7878,7 +8159,7 @@ $('#fSb').addEventListener('change',async e=>{
 /* ---------- full shot list view ---------- */
 let mode='diagram';
 const offCanvas=()=>mode==='list'||mode==='nb'||mode==='st';
-function setMode(m){if(scrOn)scrClose();const was=mode,wasOff=offCanvas(),doc=m==='nb'||m==='st';if(txTimer)txFlush();mode=m;closePop();closeDocPop();endTool();if(doc){sel=null;msel=null;inspOpen=false;}const a=$('#app');a.classList.toggle('mode-list',m==='list');a.classList.toggle('mode-split',m==='split');a.classList.toggle('mode-nb',m==='nb');a.classList.toggle('mode-st',m==='st');$('#mDia').classList.toggle('on',m==='diagram');$('#mList').classList.toggle('on',m==='list');$('#mNb').classList.toggle('on',m==='nb');$('#mSt').classList.toggle('on',m==='st');if(m==='split')a.style.setProperty('--lh',(P.ui.splitH||38)+'%');if(m==='list'||m==='split')renderList();if(doc)renderDocs(true);if(m!=='list'&&!doc)requestAnimationFrame(()=>{renderUI();renderInsp();if(wasOff||m==='split'||was==='split')fit();});P.ui.mode=m;saveLocal();try{scrTabs();phDraw();}catch(e){}}
+function setMode(m){if(scrOn)scrClose();const was=mode,wasOff=offCanvas(),doc=m==='nb'||m==='st';if(txTimer)txFlush();mode=m;closePop();closeDocPop();endTool();if(doc){sel=null;msel=null;inspOpen=false;}const a=$('#app');a.classList.toggle('mode-list',m==='list');a.classList.toggle('mode-split',m==='split');a.classList.toggle('mode-nb',m==='nb');a.classList.toggle('mode-st',m==='st');$('#mDia').classList.toggle('on',m==='diagram');$('#mList').classList.toggle('on',m==='list');$('#mNb').classList.toggle('on',m==='nb');$('#mSt').classList.toggle('on',m==='st');if(m==='split')a.style.setProperty('--lh',(P.ui.splitH||38)+'%');if(m==='list'||m==='split')renderList();if(doc)renderDocs(true);if(m!=='list'&&!doc)requestAnimationFrame(()=>{renderUI();renderInsp();if(wasOff||m==='split'||was==='split')fit();});P.ui.mode=m;saveLocal();try{scrTabs();phDraw();pnBtnDraw();}catch(e){}}
 $('#mSc').onclick=()=>{if(!scrOn)scrOpen();};$('#setSw').onclick=e=>{const b=e.target.closest('[data-ssw]');if(!b)return;const k=b.dataset.ssw;if(k==='script')scrOpen();else setMode(k==='nb'?'nb':k==='st'?'st':'diagram');};$('#mDia').onclick=()=>setMode('diagram');$('#mList').onclick=()=>setMode('list');$('#mNb').onclick=()=>setMode('nb');$('#mSt').onclick=()=>setMode('st');$('#bFull').onclick=e=>shotMenu(e.currentTarget);
 let listKey='';
 function refreshLists(){const used={type:new Set(),angle:new Set(),move:new Set()};for(const sc of P.scenes)for(const it of sc.items)if(it.type==='cam')for(const m of it.marks)for(const k in used)if(m[k]&&!(k==='type'&&m.on)&&!PRESET[k].includes(m[k].trim()))used[k].add(m[k].trim());const key=JSON.stringify([...used.type,'|',...used.angle,'|',...used.move,'|',prefGet('lists')||0]);if(key===listKey)return;listKey=key;for(const k in used)document.getElementById('dl-'+k).innerHTML=[...PRESET[k],...new Set([...ownList(k),...[...used[k]].sort()])].map(v=>`<option value="${esc(v)}">`).join('');}
@@ -9889,6 +10170,8 @@ $('#bLasso').onclick=()=>{setLasso(!lassoArmed);if(lassoArmed){endTool();closePo
 
 /* ---------- pointer input (mouse, Pencil, fingers) ---------- */
 const pointers=new Map();let gesture=null,lastTap={id:null,t:0};
+/* while the Draw tool is on, iPad Safari's Scribble and double-tap watchers can swallow quick Pencil strokes; refusing the touch events their default stops that */
+for(const ev of ['touchstart','touchmove','touchend'])svg.addEventListener(ev,e=>{if(tool&&tool.t==='pen'&&e.cancelable)e.preventDefault();},{passive:false});
 svg.addEventListener('pointerdown',e=>{
  if(e.button>0)return;
  if(tool&&tool.t==='pen'){const now=Date.now(),g0=gesture;
@@ -10116,7 +10399,7 @@ addEventListener('keydown',e=>{
 });
 
 function render(opt){opt=opt||{};refreshLists();if((mode==='list'||mode==='split')&&opt.list!==false)renderList();renderDocs();renderTop();renderCanvas();renderPageBits();renderShots();if(opt.insp!==false)renderInsp();updateStatus();if(setOn)renderSet();if(scoutOn)renderScout();try{phDraw();}catch(e){}try{renderLib();}catch(e){console.error(e);}
- try{if(!SCR.boot){SCR.boot=1;if(P.ui.scr&&!scoutOn)setTimeout(()=>{try{scrOpen();}catch(e){console.error(e);}},0);}scrSync();}catch(e){console.error(e);}}
+ try{if(!SCR.boot){SCR.boot=1;if(P.ui.scr&&!scoutOn)setTimeout(()=>{try{scrOpen();}catch(e){console.error(e);}},0);}scrSync();}catch(e){console.error(e);}try{pnBtnDraw();}catch(e){}}
 
 function stgFill(){const el=document.getElementById('stgTxt');if(!el||!navigator.storage||!navigator.storage.estimate)return;const f=n=>n>=1073741824?(n/1073741824).toFixed(n<10737418240?1:0)+' GB':n>=1048576?(n/1048576).toFixed(n<10485760?1:0)+' MB':Math.max(1,Math.round(n/1024))+' KB';
  navigator.storage.estimate().then(e=>{if(e&&e.quota&&document.body.contains(el))el.textContent=` Storage on this device: ${f(e.usage||0)} used of about ${f(e.quota)} the app can use.`;}).catch(()=>{});}
