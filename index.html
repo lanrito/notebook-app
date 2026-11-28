@@ -887,7 +887,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128020658';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128033208';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -6929,8 +6929,17 @@ function scrMarks(f,sc){const S=folderScenes(f.id).filter(x=>!x.scout),byN=new M
  for(const x of S){const n=scrNorm(x.number);if(n&&!byN.has(n))byN.set(n,x);const h=scrNorm(x.heading);if(h){if(!byH.has(h))byH.set(h,[]);byH.get(h).push(x);}}
  return (sc.marks||[]).map(m=>{const h=scrNorm(m.h),k=seen.get(h)||0;seen.set(h,k+1);const x=(m.n&&byN.get(scrNorm(m.n)))||(byH.get(h)||[])[k]||null;return {p:m.p-1,y:m.y,s:x,n:m.n||'',h:m.h||''};}).sort((a,b)=>a.p-b.p||a.y-b.y);}
 /* type a scene's number: the pages go there (the scene that is open does not change) */
-function scrGoNum(v){const n=scrNorm(v);if(!n)return false;const M=SCR.marks||[],m=M.find(q=>scrNorm(q.n)===n)||M.find(q=>scrNorm(q.n).startsWith(n))||M.find(q=>scrNorm(q.h).includes(n));
- if(!m){toast(`Scene ${String(v).trim()} isn’t in the script’s pages.`);return false;}cancelAnimationFrame(SCR.raf);SCR.ty=-(m.p*scrStep()+m.y-46)*SCR.z;scrClamp();scrPlace();scrUpdate();scrPosSave();return true;}
+function scrGoMark(m){cancelAnimationFrame(SCR.raf);SCR.ty=-(m.p*scrStep()+m.y-46)*SCR.z;scrClamp();scrPlace();scrUpdate();scrPosSave();return true;}
+function scrNumFind(n){const M=SCR.marks||[],own=q=>scrNorm(q.n),fol=q=>q.s?scrNorm(q.s.number):'';
+ return M.find(q=>own(q)===n)||M.find(q=>fol(q)===n)||M.find(q=>{const h=' '+scrNorm(q.h)+' ';return h.startsWith(' '+n+' ')||h.endsWith(' '+n+' ');})
+  ||(/^\d+$/.test(n)&&!M.some(q=>own(q)||fol(q))?M[+n-1]:null)||M.find(q=>own(q).startsWith(n))||M.find(q=>fol(q).startsWith(n))||(/[A-Z]{3}/.test(n)?M.find(q=>scrNorm(q.h).includes(n)):null)||null;}
+function scrGoNum(v){const n=scrNorm(v);if(!n)return false;const M=SCR.marks||[],m=scrNumFind(n);if(m)return scrGoMark(m);
+ if(!M.length){toast('No scene headings were found in this script’s pages, so there is no scene to go to. Find still works.');return false;}
+ /* last, the page itself: a number standing at either end of a heading's own line */
+ const id=SCR.id,say=()=>toast(`Scene ${String(v).trim()} isn’t in the script’s pages.`);
+ (async()=>{for(const q of M){let T;try{T=await scrText(q.p);}catch(e){continue;}if(SCR.id!==id)return;
+   for(const r of T.rows){if(Math.abs(r.y-q.y)>16&&Math.abs(r.top-q.y)>16)continue;const W=r.words;if(!W.length)continue;if(scrNorm(W[0].s)===n||scrNorm(W[W.length-1].s)===n){scrGoMark(q);return;}}}
+  say();})();return true;}
 /* ----- drawing, placing, moving ----- */
 function scrBeginSel(e,onlySel,src){const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n)return false;
  const hd=scrHandleHit(i,X,y),q=hd?hd.q:scrHit(i,X,y);if(onlySel&&!(q&&SCR.sel&&q.key===SCR.sel.key))return false;
@@ -7085,6 +7094,8 @@ function scrSizePop(){let p=document.getElementById('scrPopS');if(p){scrPopsClos
  const out=()=>{p.querySelector('#scrWo').textContent=(g==='pen'?SCR.w[g].toFixed(1):Math.round(SCR.w[g]))+' pt';};out();
  p.querySelector('#scrW').addEventListener('input',e=>{SCR.w[g]=+e.target.value;out();scrSizeLabel();scrToolSave();});scrPopAt(p,document.getElementById('scrWb'));}
 function scrFingerTap(e){if(P.ui.scrFinger)return;const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep(),q=i>=0&&i<SCR.n?scrHit(i,X,y):null,now=performance.now();scrMenuClose();
+ {const tl=SCR.tool;if((tl==='tx'||tl==='nt')&&i>=0&&i<SCR.n&&y<=SCR.ph&&X>=0&&X<=SCR.pw&&(!q||q.s.t==='tx'||q.s.t==='nt')){SCR.lastEmpty=0;if(SCR.sel){SCR.sel=null;scrBarDraw();}
+   SCR.cur={pg:i,x0:X,y0:y,x1:X,y1:y,tl,text:tl==='tx',shape:tl==='nt'?{pg:i,t:'nt',c:SCR.color.pen,w:1.3,a:[X,y,X,y,150],q:[],x:'',z:SCR.w.tx}:null};scrFinish();return;}}
  if(q){SCR.lastEmpty=0;scrTapObj(q);return;}if(SCR.sel){SCR.sel=null;scrObj();scrBarDraw();}
  if(now-SCR.lastEmpty<420){SCR.lastEmpty=0;scrFit();}else SCR.lastEmpty=now;}
 function scrBind(st){const touches=new Map();let gest=null,zoomed=false,fingerT=0,vel=[],tap0=null;
