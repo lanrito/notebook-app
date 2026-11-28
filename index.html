@@ -213,16 +213,37 @@ details.oth{margin-top:12px}details.oth summary{font-size:12.5px;font-weight:650
 .arch [data-arcgo]{margin-left:0}
 #main{position:relative}
 #scrView{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;background:light-dark(#e9e8e4,#1b1c20);color:var(--ink);color-scheme:light dark}#scrView[hidden]{display:none}
-#scrBar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;padding:7px 10px;background:var(--panel);border-bottom:1px solid var(--line);min-height:52px}
+#scrBar{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:center;gap:6px;padding:7px 10px;background:var(--panel);border-bottom:1px solid var(--line);min-height:52px}
 #scrBar .scrnm{font-size:14px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #scrBar>button,#scrBar select{min-height:36px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:13.5px;color:inherit}#scrBar>button:disabled{opacity:.4}
-#scrBar .seg button{color:var(--mut)}#scrBar .seg button.on{background:var(--accent);color:#fff;box-shadow:none}#scrBar .sp{flex:1}
+#scrBar .seg button{color:var(--mut)}#scrBar .seg button.on{background:var(--accent);color:#fff;box-shadow:none}#scrBar .sp{flex:1 1 4px;min-width:4px}#scrBar>*{flex:none}#scrBar::-webkit-scrollbar{display:none}
+.scrtl{display:flex;align-items:center;gap:1px;background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:2px}
+.scrtl .scric{width:32px;height:32px;padding:0;border:0;border-radius:7px;background:none;color:var(--mut);display:inline-flex;align-items:center;justify-content:center}
+.scrtl .scric.on{background:var(--accent);color:#fff}.scrsep{width:1px;height:20px;background:var(--line);margin:0 3px}
+#scrBar .scrcol{gap:5px}#scrBar .scrcol button{width:26px;height:26px}
+#scrWb{min-width:50px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-variant-numeric:tabular-nums}#scrWb i{border-radius:50%;background:currentColor;display:block;flex:none}#scrWb b{font-weight:700}
+#scrSc{width:48px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--chip);padding:0 8px;font-size:16px;color:inherit}
+#scrFq{flex:1 1 200px;min-width:130px;max-width:360px;min-height:36px;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--chip);padding:0 10px;font-size:16px;color:inherit}
+#scrFn{font-size:13px;color:var(--mut);white-space:nowrap;min-width:64px;font-variant-numeric:tabular-nums}.scrfi{display:inline-flex;color:var(--mut)}.scrfi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+#scrObjV{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}
+#scrStage[data-tool=sel]{cursor:default}#scrStage[data-tool=tx]{cursor:text}
+#scrPopS,#scrPopB,#scrPopM{position:absolute;z-index:30;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);cursor:default}
+#scrPopM{display:flex;align-items:center;gap:8px;padding:6px 8px;white-space:nowrap}#scrPopM button[data-mm]{min-height:34px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--chip);font-size:13.5px;color:inherit}#scrPopM button.danger{color:light-dark(#b3261e,#ff9a8f)}
+#scrPopS{display:flex;align-items:center;gap:10px;padding:10px 14px}#scrPopS input{width:190px}#scrPopS output{font-size:13.5px;min-width:46px;text-align:right;font-variant-numeric:tabular-nums}
+#scrPopB{width:min(340px,calc(100% - 16px));padding:12px;max-height:70%;overflow:auto}
+.bmh{display:flex;align-items:center;justify-content:space-between;gap:10px}.bmh b{font-size:15px}.bmh button{min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-weight:600;font-size:13.5px}
+.bml{margin-top:10px;display:flex;flex-direction:column;gap:2px}.bmr{display:flex;align-items:center;gap:8px;min-height:40px}
+.bmc{width:20px;height:20px;border-radius:5px;border:0;padding:0;flex:none}.bmg{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;text-align:left;border:0;background:none;color:inherit;font-size:14.5px;padding:8px 4px;border-radius:7px}.bmg span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bmg i{font-style:normal;color:var(--mut);font-size:12.5px;white-space:nowrap}
+.bmn{flex:1;min-width:0;min-height:34px;box-sizing:border-box;border:1px solid var(--accent);border-radius:7px;background:var(--panel);color:inherit;font-size:16px;padding:0 8px}
+.bmr .scric{width:32px;height:32px;padding:0;border:0;background:none;color:var(--mut);display:inline-flex;align-items:center;justify-content:center;border-radius:7px;flex:none}.bmr .scric svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bme{margin:10px 0 2px;color:var(--mut);font-size:13.5px;line-height:1.45}
+#scrEd{position:absolute;z-index:25;margin:0;padding:0;border:0;border-radius:0;outline:1.5px dashed var(--accent);outline-offset:3px;background:rgba(255,255,255,.72);resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;-webkit-user-select:text;user-select:text;box-sizing:content-box;cursor:text}#scrEd.nt{background:transparent;outline:0}
 .scrcol{display:flex;gap:6px}.scrcol button{width:28px;height:28px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);padding:0}.scrcol button.on{box-shadow:0 0 0 2px var(--accent)}
 #scrPg{font-size:12.5px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
 #scrStage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #scrWorld{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 .scrpg{position:absolute;left:0;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.2)}.scrpg canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}#scrPdfV,#scrInkV{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}#scrInkV{mix-blend-mode:multiply}
-#scrBar>button.scric{width:38px;padding:0;display:inline-flex;align-items:center;justify-content:center}#scrBar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#scrBar>button.scric{width:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}#scrBar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #scrMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;cursor:default}#scrMsg[hidden]{display:none}
 .scrcard{max-width:440px;text-align:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:26px 24px}.scrcard b{display:block;font-size:18px;margin-bottom:8px}.scrcard p{margin:0 0 16px;color:var(--mut);line-height:1.5;font-size:14.5px}.scrcard p:last-child{margin-bottom:0}
 .scrcard button{min-height:42px;padding:0 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-weight:600;font-size:15px}
@@ -802,7 +823,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
   <button id="bMenu" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="brand"><img alt="" width="26" height="26" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAIAAADajyQQAAAIWklEQVR42u1ae4xUVxn/vu+cO899wlpY0mi1kFYT7EtNSgXKgqxAoQUK0qKFYkMrBqSxvmKCkmpaq1FjqDWWUIqFAkVXWqq2CSkFKa2JhVLQQtNqdhFmX+xjHndm7jnn8487u/PYXbp3dqY1dX65mdy5jzn3O985v/P7fncAKqigggoqqKCCCiqooIIPB7DI2xDH3jYzly8w8cH2qxAkhChJN5UmY8Fg0LJk0V3ODEqpZDKZH6QwxpQqjei9j4XWevvWR+ctXJCO9wkS7tB0Hxg4O1gzESACMwACArinGRggnXb6+qOtbef+fvzkSy8deeXYa0qpwd//QAaPAIDnWnYyO5zsZOdiZlMDn7k7uVvBQd3D3MccZ06x6XvzxLGNG9aFw6HBJt7vOUZEzLxs6a1Xf+qqtB1HZtY6f1OszZCDmc0M7iht0o5OJ3UqAVpNvLzxi/MWLl08v6313D/fOktEYwyMimZFRCTMAQ1s+Ycx/1IauIwQiUgIIaVEJGXb6WjHVVdP/uOz+x55eLMxZozcW2RgWhuttdaagQEvPVU5c3bwMgYYQhCEJC1LJWwn3vut73z/6ae2EWU6o7gnlF7HoZQSEetqa4SoErUE6YRWComAR+YnzomcL9UDRATAqf7IipWrtHK+vPpeKYXWxVCl8Lqkaq2NMfXjxkVjfW+dPn3FRy/3h8JGOThIjLnpw5wdzokgL8VccKkQIp3su+5zM006fujwUSmE8R4Yjj5XxpiPX/GxNXd/JeC37EQChYxE2o+fOPlsy+76+hpWKic2yBl2o2mi8DJmNszSH55xc/Nfjx4rYg3wFtjhgwemNy0AiAJIAAmgwuGGh3+8af3Gb6ZjHVKIwnjwkmOvMDbIvUtrbYWq3zz++mdvmus4DjN7GpDeyCMWi+fcxQCaGfw+C8C4j8UZAHP+LsDADo8AGDznxiikcBJ9U2+YtvquO4wxQlBZMoaIzPyRhoYVK5YF/JZy0iSt7q6LkfbI3qe3h0J+MMYYI4nQXYIyymPYFhjAlSMFKUVAYMNKK0ECEIwxwh985+zbU6+fnkqlPOnmIsn0e9/eOLOpSbBqmjmNpKUdBwEoFNa2bdtJpIHndh98UF7lzb2hrIIM7LMsX1WNsaPulcZoGa5fctuylv0HpBRK6bLQPSL6fD6tddOsGXOaFwJEjW1rx2FmEaz6wzMtm374UH9/lLNh5PceDwQylFlcOYno9/vXr7tnwzfWKTtBRIaBAVbecXvL/gPlrHIGhNzv9zypVMzua1PxiIpHTKqzr7u1Yfz4UrVy9vTfWPc4sQsqHmGnu/M/Z+rqaj1pkbFIspzJIWR/z0U7aVMeMOeThuwPewrd8qy9owtIMjAiqlS6oXHSdddMdcm5LIEhopRSSllbUy1EVaCmjghdziMhEMktqEwGnPNphuwPe4rdX5A5At8YA+i/9pqpnjImvSoPl51ePHg4qVGCmj1rurSsTJ1VukmQ91OIADxlyuSyaEWX7idOuGz5l5YFfSKZSh46eLCjs+tnv3h0394dtbW15Z3ZYBonXuap77wF9uS2X8+dvxQgCiAAJEAqFJqwa+eer61/QGtVLr8JAcBUVYU8BeZtjlmWNcDf7o2CEF0VV96EeV9ypScOXPXVr69e9arfomQqTYidXd03XH/tnXcuA92fMT9KmqYcH4VisVhZyMMYBoC2tnMP/ughALh/w32fn3kzmfTPH9kcCAaAFVJpLbQ8OQJAkfbOMrIiIVo+n9Z6wfy5s5sXA8QhmXBSaSsYyOvlsWYLXU8LeDBjeObM22WsoA2zUkpr3dfbr3XMifValoXkildjDLu6ZCy8T4RKaZVDRUQEnDpx8lRZWLGwU7OGDQAjO6q2flxtTfWFSGKsvG4AACdNagTtuFQs/b7uyIUTb5zKLNZlEsGu5xEOh4jC/hql7SQAaKWra+t2bP/N5gd/0tPbj8UlDREBAsHA+nX3fGLylcqOEwmtNcnQkaN/6u3tFYK0NuVVHq++9nqwepxgZ9qNnwEAo5RJxuc0z57zhVkmlXbzOAJBZ23hwcosyxUMZEmQPp2IUoZmGQF3720BAEQaqGhLXWjW19ctWbzI77OYQUjZ1dVt2/au320N+IQrEQnd5od1bHCUfWeMceeqYSN8gXOtbZ/89I2JRNyt0MuiPLZv3bJoyUoAtwq0QCcD4Ym7d+9ds/a+dKxbDmdNc9Z/y83VSKU1I2LG4kYwSktZ9astj8fjcU9Vpueh2NAwfiDPFoAAEbAsGY3GAQgK+xKhwJ3JWw5whPGTPW60sYJV/zp76rHfbiPyMLuKcammTL5y7do1AZ8Vj8eJqKOz6/CRowf27xk/vp6Vg0jZxIw8xzLP/15jShntC49beMttB57/SxnttwKsu/fum6bPQJ1aML+5pr5OJ5OYLQF5OD9gpJnGWQ2VE6rjOP6axi2//On6+79b3Isl9GpxW5altX7h+X1Nc28FSAxjcQ+TDfbUkOOk/TUTX/zzcwsWLXe5pIjFw6PyMMZVHj09vVnlgfnG/XtExSOaxAjGGKO1v6bx0MEXbl9+l9Yai9UxRXoegkgIQaN6fYwjfC30tJWjpOXzVU94ascT825ZGo3FENEUq85k0aW7McyGDXHWAMUcg60glhEGqmv9EqEMBISoipxv3fSDBx7f+oQrGkcvoEoWmM9nEQX8QT+M5bUqEYAEsADUv999d+euZ7ZseSzS3uG+NHULpfc7sAvtna2t7ziJ/uz7Ys6h8lFk3DDEE/b585E3Tv3j8JFXXn75iFtKlurlepF0b1mWIOIx+VCQTqf+h/4OUVq4XmnRnP7/+JejCiqooIIKKqigggoqqODDgv8Cc08Qlhev0OkAAAAASUVORK5CYII=">The Director’s Notebook</div>
   <button id="sceneBtn" aria-label="Scenes in this folder" aria-haspopup="menu" title="The scenes in this folder (⌘O shows the Library)"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="#e9c46a" stroke="#b8902f" stroke-width="1.2"/></svg><span id="sceneBtnT"></span><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
-  <div class="seg" id="tabs"><button id="mNb">Breakdown</button><button id="mSt">Strategy</button><button id="mDia" class="on">Floor Plan</button><button id="mList">Shot List</button><button id="mSc">Script</button></div>
+  <div class="seg" id="tabs"><button id="mSc">Script</button><button id="mNb">Breakdown</button><button id="mSt">Strategy</button><button id="mDia" class="on">Floor Plan</button><button id="mList">Shot List</button></div>
   <div class="seg" id="setSw" role="group" aria-label="Beside the shots"><button data-ssw="plan" class="on">Floor Plan</button><button data-ssw="script">Script</button></div>
   <span class="sp"></span>
   <div class="seg" id="mdSw" title="Prep: plan everything. Set: shots, blocking and notes on the day, nothing to bump by accident."><button data-md="prep" class="on">Prep</button><button data-md="scout">Scout</button><button data-md="set">Set</button></div>
@@ -866,7 +887,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128005719';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128020658';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -5880,7 +5901,7 @@ const phOn=()=>{try{return matchMedia('(max-width:640px)').matches;}catch(e){ret
 function phDraw(){const el=$('#phSw'),A=$('#app');if(!el)return;
  const k=setOn?'set':scoutOn?(scene().scout?'scout':'pick'):'prep',cur=k==='prep'?(scrOn?'sc':mode==='nb'?'nb':mode==='st'?'st':mode==='list'?'list':'dia'):(scrOn&&k==='set'?'sc':phPlan?'plan':'words');
  A.classList.toggle('ph-plan',phPlan&&(k==='set'||k==='scout'));
- const B=k==='prep'?[['nb','Breakdown'],['st','Strategy'],['dia','Plan'],['list','Shots'],['sc','Script']]:k==='set'?[['words','Shot'],['plan','Plan'],['sc','Script']]:k==='scout'?[['words','Place'],['plan','Plan']]:[];
+ const B=k==='prep'?[['sc','Script'],['nb','Breakdown'],['st','Strategy'],['dia','Plan'],['list','Shots']]:k==='set'?[['words','Shot'],['plan','Plan'],['sc','Script']]:k==='scout'?[['words','Place'],['plan','Plan']]:[];
  const sig=k+'|'+cur;if(sig===phSig)return;phSig=sig;el.hidden=!B.length;
  el.innerHTML=B.map(([v,l])=>`<button data-phv="${v}"${v===cur?' class="on" aria-current="true"':''}>${l}</button>`).join('');}
 /* a panel button that acts on the floor plan: on a phone, go to the plan first */
@@ -6789,11 +6810,373 @@ function szStrip(S){const items=S.map(o=>{const a=cutShot(o.s,'in'),b=cutShot(o.
    that holds the pictures, so it is saved, synced, sealed and backed up the way they are. marks: where each scene starts
    (its number, its heading, the page, how far down in points). A mark made on a page is kept with the scene it sits in, one
    cell a stroke, in that scene's text (P.text[sid].ink, key <script id>.<stroke id>), so two devices merge stroke by stroke. */
-const SCR_PART=240000,SCR_GAP=10,SCR_PENW=[1.1,1.8,2.9],SCR_HLW=[7.5,11,16.5];
 const SCR_COLORS={pen:[['#1d1d1f','Black'],['#d93025','Red'],['#2f6fde','Blue'],['#1e8e3e','Green']],hl:[['#ffe45c','Yellow'],['#ffb3c7','Pink'],['#b8f0b0','Green'],['#b5daff','Blue']]};
 let scrOn=false;
 const SCR={z:1,tx:0,ty:0,R:1,pw:612,ph:792,n:0,doc:null,id:null,f:null,sc:null,marks:[],state:'',mounted:new Map(),idx:new Map(),sig:'',tool:'pen',color:{pen:'#1d1d1f',hl:'#ffe45c'},size:1,undo:[],redo:[],lastScene:null,loadSeq:0,saveT:0,saveT0:0,cur:null,drawId:null,drawSrc:null,t0:0,penDown:false,penLast:-1e9,bar:'',raf:0};
 const scrCache=new WeakMap();
+const SCR_PART=240000,SCR_GAP=10;
+const SCR_TOOLS=[['sel','Select'],['pen','Pen'],['hl','Highlighter'],['er','Eraser'],null,['th','Highlight Text'],['ul','Underline Text'],['st','Strike Through Text'],null,['tx','Text'],['nt','Note with an Arrow'],['ar','Arrow'],['ln','Line'],['bx','Box']];
+const SCR_OBJ=new Set(['th','ul','st','tx','nt','ar','ln','bx','bm']),SCR_BMC=[['#d93025','Red'],['#f29900','Orange'],['#1e8e3e','Green'],['#2f6fde','Blue'],['#8e44ad','Purple']];
+const SCR_WR={pen:[.5,6,.1],hl:[4,24,.5],tx:[8,24,1]};
+const SCR_IC={sel:'<path d="M6 3.5l12 9-5.2 1.1 3 5.6-2.3 1.2-3-5.7L6 18.5z"/>',
+ pen:'<path d="M4 20l1.2-4.6L16.5 4.1a1.5 1.5 0 0 1 2.1 0l1.3 1.3a1.5 1.5 0 0 1 0 2.1L8.6 18.8z"/><path d="M14.5 6.1l3.4 3.4"/>',
+ hl:'<path d="M14.5 3.8l5.7 5.7-8 8H8.4l-2.6-2.6v-3.1z"/><path d="M11.6 6.7l5.7 5.7"/><path d="M4 21h8"/>',
+ er:'<path d="M8.5 19.5l-4-4a1.4 1.4 0 0 1 0-2l8.5-8.5a1.4 1.4 0 0 1 2 0l5 5a1.4 1.4 0 0 1 0 2l-7.5 7.5z"/><path d="M9.5 9l6 6"/><path d="M8.5 19.5H20"/>',
+ th:'<rect x="3" y="4" width="18" height="16" rx="3" fill="currentColor" stroke="none" opacity=".24"/><path d="M8 17l4-10 4 10"/><path d="M9.6 13.5h4.8"/>',
+ ul:'<path d="M8 15l4-10 4 10"/><path d="M9.6 11.5h4.8"/><path d="M5 20h14"/>',
+ st:'<path d="M8 18l4-12 4 12"/><path d="M4 13h16"/>',
+ tx:'<path d="M5 6.5v-2h14v2"/><path d="M12 4.5v15"/><path d="M9.5 19.5h5"/>',
+ nt:'<rect x="9" y="3.5" width="12" height="9" rx="2"/><path d="M12 6.8h6M12 9.4h4"/><path d="M10.5 12.5L4 20"/><path d="M4 15.5V20h4.5"/>',
+ ar:'<path d="M5 19L19 5"/><path d="M10.5 5H19v8.5"/>',ln:'<path d="M5 19L19 5"/>',bx:'<rect x="4.5" y="5.5" width="15" height="13" rx="1.5"/>',
+ find:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',bm:'<path d="M7 3.5h10v17l-5-4-5 4z"/>',
+ here:'<circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>',
+ more:'<circle cx="5.5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="18.5" cy="12" r="1.3" fill="currentColor"/>',
+ prev:'<path d="M14.5 6l-6 6 6 6"/>',next:'<path d="M9.5 6l6 6-6 6"/>',x:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+ undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',redo:'<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/>'};
+const scrIc=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${SCR_IC[k]}</svg>`;
+Object.assign(SCR,{w:{pen:1.8,hl:11,tx:11},sel:null,txt:new Map(),find:null,edit:null,lastTap:null,lastEmpty:0,bms:[],bmEdit:null,menuView:null});
+try{const o=JSON.parse(localStorage.getItem('blk.scrtool')||'null');if(o){for(const k of ['pen','hl'])if(o.color&&/^#[0-9a-f]{6}$/i.test(o.color[k]))SCR.color[k]=o.color[k];for(const k in SCR_WR)if(o.w&&+o.w[k]>=SCR_WR[k][0]&&+o.w[k]<=SCR_WR[k][1])SCR.w[k]=+o.w[k];}}catch(e){}
+function scrToolSave(){try{localStorage.setItem('blk.scrtool',JSON.stringify({color:SCR.color,w:SCR.w}));}catch(e){}}
+const scrGrp=t=>t==='hl'||t==='th'?'hl':'pen';
+const scrWGrp=t=>t==='pen'||t==='ln'||t==='ar'||t==='bx'?'pen':t==='hl'?'hl':t==='tx'||t==='nt'?'tx':null;
+const scrT10=v=>Math.round(v*10);
+/* a piece that is not ink (a marked run of words, a shape, text, a note, a bookmark): a (numbers, in points), q (the words' boxes), x (its words) */
+function scrParse(c){const q=scrCache.get(c);if(q&&q.h===c.h)return q.s;let s=null;
+ try{const o=JSON.parse(c.h),t=o.t==='hl'?'hl':SCR_OBJ.has(o.t)?o.t:'pen',col=/^#[0-9a-f]{6}$/i.test(o.c)?o.c:'#1d1d1f',w=Math.min(40,Math.max(.3,+o.w||1.5));
+  if(t==='pen'||t==='hl'){s={pg:o.p|0,t,c:col,w,p:scrDec(o.d)};if(!s.p.length)s=null;}
+  else{const a=(Array.isArray(o.a)?o.a:[]).map(v=>(+v||0)/10),qq=(Array.isArray(o.q)?o.q:[]).filter(r=>Array.isArray(r)&&r.length>=4).map(r=>r.slice(0,4).map(v=>(+v||0)/10));
+   s={pg:o.p|0,t,c:col,w,a,q:qq,x:String(o.x==null?'':o.x).slice(0,4000),z:Math.min(48,Math.max(6,+o.z||11))};
+   if(a.length<{th:0,ul:0,st:0,tx:2,nt:5,ar:4,ln:4,bx:4,bm:1}[t]||((t==='th'||t==='ul'||t==='st')&&!qq.length))s=null;}
+ }catch(e){}scrCache.set(c,{h:c.h,s});return s;}
+function scrObjH(s){const o={p:s.pg,t:s.t,c:s.c,w:s.w};if(s.a&&s.a.length)o.a=s.a.map(scrT10);if(s.q&&s.q.length)o.q=s.q.map(r=>r.map(scrT10));if(s.x)o.x=s.x;if(s.t==='tx'||s.t==='nt')o.z=s.z;return JSON.stringify(o);}
+function scrIndex(dry){const idx=new Map(),pre=SCR.id+'.',bms=[];let n=0,mx=0;
+ for(const sid in P.text||{}){const ink=P.text[sid]&&P.text[sid].ink;if(!ink)continue;for(const k in ink){if(!k.startsWith(pre))continue;const c=ink[k];if(!c)continue;mx=Math.max(mx,c.t||0);if(c.del||!c.h)continue;n++;if(dry)continue;const s=scrParse(c);if(!s)continue;let L=idx.get(s.pg);if(!L)idx.set(s.pg,L=[]);const q={key:'ink.'+k,sid,t:c.t||0,s};L.push(q);if(s.t==='bm')bms.push(q);}}
+ const sig=n+':'+mx;if(dry)return sig;for(const L of idx.values())L.sort((a,b)=>a.t-b.t);SCR.idx=idx;SCR.sig=sig;SCR.bms=bms;if(SCR.sel&&!(P.text[SCR.sel.sid]&&txGet(SCR.sel.sid,SCR.sel.key,false)&&!txGet(SCR.sel.sid,SCR.sel.key,false).del))SCR.sel=null;if(document.getElementById('scrPopB'))scrBmList();return sig;}
+/* ----- text, shapes and notes: how big they are, and how they are drawn ----- */
+let scrMc=null;
+const scrFont=z=>`500 ${z}px -apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif`,scrLH=s=>s.z*1.28;
+function scrWrap(s){const W=Math.max(20,s.t==='nt'?s.a[4]-10:(s.a[2]||200)),k=s.x+'|'+s.z+'|'+W;if(s._k===k)return s._L;if(!scrMc)scrMc=document.createElement('canvas').getContext('2d');scrMc.font=scrFont(s.z);const out=[];let mw=0;
+ const put=l=>{l=l.replace(/\s+$/,'');mw=Math.max(mw,scrMc.measureText(l).width);out.push(l);};
+ for(const para of s.x.split('\n')){let line='';for(const word of para.split(/(\s+)/)){if(!word)continue;const t=line+word;
+   if(line&&word.trim()&&scrMc.measureText(t).width>W){put(line);line=word;}else line=t;
+   while(line.length>1&&scrMc.measureText(line).width>W){let n=line.length-1;while(n>1&&scrMc.measureText(line.slice(0,n)).width>W)n--;put(line.slice(0,n));line=line.slice(n);}}
+  put(line);}
+ s._k=k;s._L=out;s._W=mw;return out;}
+function scrNtBox(s){const L=scrWrap(s);return [s.a[2],s.a[3],s.a[4],Math.max(1,L.length)*scrLH(s)+9];}
+function scrNtArrow(s){const b=scrNtBox(s);return [Math.min(b[0]+b[2],Math.max(b[0],s.a[0])),Math.min(b[1]+b[3],Math.max(b[1],s.a[1])),s.a[0],s.a[1]];}
+function scrNtPlace(tx,ty,X,y,bw){return [Math.max(4,Math.min(SCR.pw-bw-4,X>=tx?X:X-bw)),Math.max(4,Math.min(SCR.ph-30,y-10))];}
+function scrBox(s){const t=s.t,a=s.a;
+ if(t==='th'||t==='ul'||t==='st'){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const r of s.q){x0=Math.min(x0,r[0]);y0=Math.min(y0,r[1]);x1=Math.max(x1,r[0]+r[2]);y1=Math.max(y1,r[1]+r[3]);}return [x0,y0,x1,y1];}
+ if(t==='ln'||t==='ar')return [Math.min(a[0],a[2]),Math.min(a[1],a[3]),Math.max(a[0],a[2]),Math.max(a[1],a[3])];
+ if(t==='bx')return [a[0],a[1],a[0]+a[2],a[1]+a[3]];
+ if(t==='tx'){const L=scrWrap(s);return [a[0],a[1],a[0]+Math.max(16,s._W||0),a[1]+Math.max(1,L.length)*scrLH(s)+4];}
+ if(t==='nt'){const b=scrNtBox(s);return [b[0],b[1],b[0]+b[2],b[1]+b[3]];}
+ if(t==='bm')return [SCR.pw-24,a[0]-1,SCR.pw,a[0]+15];
+ return [0,0,0,0];}
+const scrSegD=(x,y,a)=>{const dx=a[2]-a[0],dy=a[3]-a[1],l=dx*dx+dy*dy,t=l?Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/l)):0;return Math.hypot(x-a[0]-t*dx,y-a[1]-t*dy);};
+function scrHit(pg,x,y,only){const L=SCR.idx.get(pg)||[],tol=6/SCR.z+2;let best=null,ba=1e12;
+ for(const q of L){const s=q.s;if(!s.a)continue;if(only&&!only.includes(s.t))continue;if(SCR.edit&&SCR.edit.key===q.key)continue;let hit=false;const b=scrBox(s);
+  if(s.t==='ln'||s.t==='ar')hit=scrSegD(x,y,s.a)<=tol+s.w/2;
+  else if(s.t==='th'||s.t==='ul'||s.t==='st')hit=s.q.some(r=>x>=r[0]-2&&x<=r[0]+r[2]+2&&y>=r[1]-1&&y<=r[1]+r[3]+1);
+  else{hit=x>=b[0]-tol&&x<=b[2]+tol&&y>=b[1]-tol&&y<=b[3]+tol;if(!hit&&s.t==='nt')hit=scrSegD(x,y,scrNtArrow(s))<=tol;}
+  if(hit){const ar=(b[2]-b[0]+4)*(b[3]-b[1]+4);if(ar<=ba){ba=ar;best=q;}}}
+ return best;}
+function scrHandles(s){const a=s.a,t=s.t;if(t==='ln'||t==='ar')return [{part:'p1',x:a[0],y:a[1]},{part:'p2',x:a[2],y:a[3]}];if(t==='bx')return [{part:'br',x:a[0]+a[2],y:a[1]+a[3]}];
+ const b=scrBox(s);if(t==='tx')return [{part:'w',x:b[2]+4,y:(b[1]+b[3])/2}];if(t==='nt')return [{part:'tip',x:a[0],y:a[1]},{part:'w',x:b[2],y:(b[1]+b[3])/2}];return [];}
+function scrHandleHit(pg,x,y){if(!SCR.sel)return null;const q=(SCR.idx.get(pg)||[]).find(v=>v.key===SCR.sel.key);if(!q)return null;const r=10/SCR.z+2;for(const h of scrHandles(q.s))if(Math.hypot(x-h.x,y-h.y)<=r)return {q,part:h.part};return null;}
+function scrRR(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.lineTo(x+w-r,y);g.quadraticCurveTo(x+w,y,x+w,y+r);g.lineTo(x+w,y+h-r);g.quadraticCurveTo(x+w,y+h,x+w-r,y+h);g.lineTo(x+r,y+h);g.quadraticCurveTo(x,y+h,x,y+h-r);g.lineTo(x,y+r);g.quadraticCurveTo(x,y,x+r,y);g.closePath();}
+function scrArrowHead(g,x0,y0,x1,y1,w){const a=Math.atan2(y1-y0,x1-x0),L=5+w*2.4;g.beginPath();g.moveTo(x1-L*Math.cos(a-.42),y1-L*Math.sin(a-.42));g.lineTo(x1,y1);g.lineTo(x1-L*Math.cos(a+.42),y1-L*Math.sin(a+.42));g.stroke();}
+function scrObjDraw1(g,s,ghost,noText){g.globalAlpha=ghost?.6:1;g.strokeStyle=g.fillStyle=s.c;g.lineCap='round';g.lineJoin='round';g.lineWidth=s.w;const a=s.a;
+ if(s.t==='ln'||s.t==='ar'){g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(a[2],a[3]);g.stroke();if(s.t==='ar')scrArrowHead(g,a[0],a[1],a[2],a[3],s.w);}
+ else if(s.t==='bx')g.strokeRect(a[0],a[1],a[2],a[3]);
+ else if(s.t==='tx'){if(!noText){const L=scrWrap(s),lh=scrLH(s);g.font=scrFont(s.z);g.textBaseline='top';L.forEach((t,i)=>g.fillText(t,a[0],a[1]+2+i*lh+(lh-s.z)/2));}}
+ else if(s.t==='nt'){const b=scrNtBox(s),ar=scrNtArrow(s);g.lineWidth=1.3;if(Math.hypot(ar[2]-ar[0],ar[3]-ar[1])>3){g.beginPath();g.moveTo(ar[0],ar[1]);g.lineTo(ar[2],ar[3]);g.stroke();scrArrowHead(g,ar[0],ar[1],ar[2],ar[3],1.3);}
+  g.fillStyle='#fffdf2';scrRR(g,b[0],b[1],b[2],b[3],4);g.fill();g.stroke();if(!noText){g.fillStyle='#1d1d1f';g.font=scrFont(s.z);g.textBaseline='top';const L=scrWrap(s),lh=scrLH(s);L.forEach((t,i)=>g.fillText(t,b[0]+5,b[1]+4.5+i*lh+(lh-s.z)/2));}}
+ else if(s.t==='bm'){const y=a[0],x=SCR.pw;g.beginPath();g.moveTo(x,y);g.lineTo(x-22,y);g.lineTo(x-16,y+7);g.lineTo(x-22,y+14);g.lineTo(x,y+14);g.closePath();g.fill();}
+ g.globalAlpha=1;}
+function scrMarkDraw(g,s){if(s.t==='th'){g.fillStyle=s.c;for(const r of s.q)g.fillRect(r[0]-1.5,r[1],r[2]+3,r[3]);}
+ else{g.strokeStyle=s.c;g.lineWidth=1.25;g.lineCap='round';g.beginPath();for(const r of s.q){const y=r[1]+r[3]*(s.t==='ul'?.97:.57);g.moveTo(r[0],y);g.lineTo(r[0]+r[2],y);}g.stroke();}}
+function scrSelDraw(g,s){const b=scrBox(s),z=SCR.z;g.save();g.strokeStyle='#2f6fde';g.lineWidth=1.3/z;g.setLineDash([4/z,3/z]);scrRR(g,b[0]-3,b[1]-3,b[2]-b[0]+6,b[3]-b[1]+6,3);g.stroke();g.setLineDash([]);g.fillStyle='#fff';for(const h of scrHandles(s)){g.beginPath();g.arc(h.x,h.y,4.5/z,0,6.2832);g.fill();g.stroke();}g.restore();}
+/* both sharp layers over the window: the ink (which darkens the page it sits on) and, above it, the shapes, text, notes, bookmarks, what Find found and what is selected */
+function scrInkDraw(objOnly){const c=document.getElementById('scrInkV'),o=document.getElementById('scrObjV');cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;SCR.inkFull=false;clearTimeout(SCR.inkT);if(!c||!o||SCR.state!=='ok'||!scrOn)return;const G=scrVGeom();if(!G.w||!G.h)return;
+ const v=SCR.inkView;if(objOnly&&(!v||v.tx!==SCR.tx||v.ty!==SCR.ty||v.z!==SCR.z||c.width!==G.W||c.height!==G.H))objOnly=false;
+ scrVSize(o,G);const go=o.getContext('2d');go.setTransform(1,0,0,1,0,0);go.clearRect(0,0,G.W,G.H);let g=null;
+ if(!objOnly){scrVSize(c,G);g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,G.W,G.H);}
+ const k=SCR.z*G.s,a=Math.max(0,Math.floor((-SCR.ty-G.oy)/SCR.z/scrStep())),b=Math.min(SCR.n-1,Math.floor((-SCR.ty+G.h+G.oy)/SCR.z/scrStep())),F=SCR.find&&SCR.find.hits,E=SCR.edit;
+ for(let i=a;i<=b;i++){const L=SCR.idx.get(i)||[],cur=SCR.cur&&SCR.cur.pg===i?SCR.cur:null,ox=SCR.tx*G.s,oy=(SCR.ty+G.oy+i*scrStep()*SCR.z)*G.s;
+  if(g&&(L.length||(cur&&cur.p))){g.save();g.setTransform(k,0,0,k,ox,oy);g.beginPath();g.rect(0,0,SCR.pw,SCR.ph);g.clip();
+   for(const q of L){if(q.s.t==='hl')scrStroke(g,q.s);else if(q.s.t==='th')scrMarkDraw(g,q.s);}
+   for(const q of L)if(q.s.t==='pen')scrStroke(g,q.s);
+   for(const q of L)if(q.s.t==='ul'||q.s.t==='st')scrMarkDraw(g,q.s);
+   if(cur&&cur.p)scrStroke(g,cur);g.restore();}
+  go.save();go.setTransform(k,0,0,k,ox,oy);go.beginPath();go.rect(0,0,SCR.pw,SCR.ph);go.clip();
+  for(const q of L){const s=q.s;if(!s.a||s.t==='th'||s.t==='ul'||s.t==='st')continue;if(E&&E.key===q.key){if(s.t==='nt')scrObjDraw1(go,s,false,true);continue;}scrObjDraw1(go,s);}
+  if(E&&!E.key&&E.s.pg===i)scrObjDraw1(go,E.s,false,true);
+  if(cur&&cur.shape&&cur.moved)scrObjDraw1(go,cur.shape,true,true);
+  if(cur&&cur.mark&&cur.rects&&cur.rects.length){go.globalAlpha=.55;scrMarkDraw(go,{t:cur.mark,c:cur.c,q:cur.rects});go.globalAlpha=1;}
+  if(F)for(let n=0;n<F.length;n++){const h=F[n];if(h.pg!==i)continue;const on=n===SCR.find.i;go.fillStyle=on?'rgba(255,140,0,.42)':'rgba(255,214,10,.4)';go.fillRect(h.r[0],h.r[1],h.r[2],h.r[3]);if(on){go.strokeStyle='#e8590c';go.lineWidth=1.2;go.strokeRect(h.r[0],h.r[1],h.r[2],h.r[3]);}}
+  if(SCR.sel){const q=L.find(x=>x.key===SCR.sel.key);if(q)scrSelDraw(go,q.s);}
+  go.restore();}
+ if(!objOnly){SCR.inkView={tx:SCR.tx,ty:SCR.ty,z:SCR.z,oy:G.oy,s:G.s};SCR.inkAt=performance.now();c.style.transform='';}o.style.transform=c.style.transform;}
+function scrInk(){SCR.inkFull=true;if(!SCR.inkQ)SCR.inkQ=requestAnimationFrame(()=>scrInkDraw(!SCR.inkFull));}
+function scrObj(){if(!SCR.inkQ)SCR.inkQ=requestAnimationFrame(()=>scrInkDraw(!SCR.inkFull));}
+function scrInkMove(){const c=document.getElementById('scrInkV');if(!c)return;scrVFollow(c,SCR.inkView);const o=document.getElementById('scrObjV');if(o)o.style.transform=c.style.transform;scrEdPlace();
+ if(SCR.menuView&&(SCR.menuView.tx!==SCR.tx||SCR.menuView.ty!==SCR.ty||SCR.menuView.z!==SCR.z))scrMenuClose();
+ if(SCR.inkQ){SCR.inkFull=true;return;}const d=performance.now()-(SCR.inkAt||0);if(d>70)scrInk();else{clearTimeout(SCR.inkT);SCR.inkT=setTimeout(()=>scrInkDraw(),75-d);}}
+function scrFree(){for(const i of [...SCR.mounted.keys()])scrUnmount(i);cancelAnimationFrame(SCR.raf);cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;clearTimeout(SCR.inkT);SCR.inkView=null;scrDetailOff();for(const id of ['scrInkV','scrObjV']){const c=document.getElementById(id);if(c){c.width=0;c.height=0;}}}
+function scrPgLabel(){const e=document.getElementById('scrPg');if(e){const on=SCR.state==='ok'&&SCR.n;e.textContent=on?`${scrPgNow()+1} / ${SCR.n}`:'';if(on)e.setAttribute('aria-label',`Page ${scrPgNow()+1} of ${SCR.n}`);}}
+function scrMarks(f,sc){const S=folderScenes(f.id).filter(x=>!x.scout),byN=new Map(),byH=new Map(),seen=new Map();
+ for(const x of S){const n=scrNorm(x.number);if(n&&!byN.has(n))byN.set(n,x);const h=scrNorm(x.heading);if(h){if(!byH.has(h))byH.set(h,[]);byH.get(h).push(x);}}
+ return (sc.marks||[]).map(m=>{const h=scrNorm(m.h),k=seen.get(h)||0;seen.set(h,k+1);const x=(m.n&&byN.get(scrNorm(m.n)))||(byH.get(h)||[])[k]||null;return {p:m.p-1,y:m.y,s:x,n:m.n||'',h:m.h||''};}).sort((a,b)=>a.p-b.p||a.y-b.y);}
+/* type a scene's number: the pages go there (the scene that is open does not change) */
+function scrGoNum(v){const n=scrNorm(v);if(!n)return false;const M=SCR.marks||[],m=M.find(q=>scrNorm(q.n)===n)||M.find(q=>scrNorm(q.n).startsWith(n))||M.find(q=>scrNorm(q.h).includes(n));
+ if(!m){toast(`Scene ${String(v).trim()} isn’t in the script’s pages.`);return false;}cancelAnimationFrame(SCR.raf);SCR.ty=-(m.p*scrStep()+m.y-46)*SCR.z;scrClamp();scrPlace();scrUpdate();scrPosSave();return true;}
+/* ----- drawing, placing, moving ----- */
+function scrBeginSel(e,onlySel,src){const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n)return false;
+ const hd=scrHandleHit(i,X,y),q=hd?hd.q:scrHit(i,X,y);if(onlySel&&!(q&&SCR.sel&&q.key===SCR.sel.key))return false;
+ SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
+ const base={pg:i,x0:X,y0:y,x1:X,y1:y,tl:'sel',sx:e.clientX,sy:e.clientY,sx0:e.clientX,sy0:e.clientY};
+ if(q){SCR.sel={key:q.key,sid:q.sid};const c=txGet(q.sid,q.key,false);SCR.cur=Object.assign(base,{move:{q,part:hd?hd.part:'body',h0:c?c.h:'',a0:q.s.a.slice()}});}
+ else{SCR.sel=null;SCR.cur=Object.assign(base,{pan:true});}
+ scrObj();scrBarDraw();return true;}
+function scrBegin(e,src){if(SCR.state!=='ok')return false;if(SCR.edit){scrEdDone();return false;}scrMenuClose();const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep(),tl=SCR.tool;
+ if(tl==='sel')return scrBeginSel(e,false,src);
+ if(i<0||i>=SCR.n||y>SCR.ph||X<0||X>SCR.pw){if(SCR.sel){SCR.sel=null;scrObj();scrBarDraw();}return false;}
+ const pen=e.pointerType==='pen',pr=pen&&e.pressure>0?e.pressure:.5;SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
+ if(SCR.sel){SCR.sel=null;scrObj();scrBarDraw();}
+ if(tl==='er'){SCR.cur={erase:[],pg:i};scrErase(X,y);return true;}
+ if(tl==='pen'||tl==='hl'){SCR.cur={pg:i,t:tl,c:SCR.color[tl],w:SCR.w[tl],p:[[X,y,pr]]};const g=scrLive();if(g){scrStyle(g,SCR.cur);scrSeg(g,SCR.cur,0);g.restore();}return true;}
+ const cur=SCR.cur={pg:i,x0:X,y0:y,x1:X,y1:y,tl,sx:e.clientX,sy:e.clientY,sx0:e.clientX,sy0:e.clientY};
+ if(tl==='th'||tl==='ul'||tl==='st'){cur.mark=tl;cur.c=SCR.color[scrGrp(tl)];cur.rects=null;scrText(i).then(()=>{if(SCR.cur===cur&&cur.moved){scrMarkCalc(cur);scrObj();}},()=>{});}
+ else if(tl==='tx')cur.text=true;
+ else if(tl==='nt')cur.shape={pg:i,t:'nt',c:SCR.color.pen,w:1.3,a:[X,y,X,y,150],q:[],x:'',z:SCR.w.tx};
+ else cur.shape={pg:i,t:tl,c:SCR.color.pen,w:SCR.w.pen,a:tl==='bx'?[X,y,0,0]:[X,y,X,y],q:[],x:'',z:11};
+ return true;}
+function scrMoveApply(cur){const m=cur.move,s=m.q.s,a0=m.a0,dx=cur.x1-cur.x0,dy=cur.y1-cur.y0,t=s.t;
+ if(m.part==='body'){if(t==='ln'||t==='ar')s.a=[a0[0]+dx,a0[1]+dy,a0[2]+dx,a0[3]+dy];else if(t==='bx')s.a=[a0[0]+dx,a0[1]+dy,a0[2],a0[3]];else if(t==='tx')s.a=[a0[0]+dx,a0[1]+dy].concat(a0.slice(2));else if(t==='nt')s.a=[a0[0],a0[1],a0[2]+dx,a0[3]+dy,a0[4]];else if(t==='bm')s.a=[Math.max(4,Math.min(SCR.ph-20,a0[0]+dy))];}
+ else if(m.part==='p1')s.a=[cur.x1,cur.y1,a0[2],a0[3]];else if(m.part==='p2')s.a=[a0[0],a0[1],cur.x1,cur.y1];
+ else if(m.part==='tip')s.a=[cur.x1,cur.y1,a0[2],a0[3],a0[4]];
+ else if(m.part==='br')s.a=[a0[0],a0[1],Math.max(6,cur.x1-a0[0]),Math.max(6,cur.y1-a0[1])];
+ else if(m.part==='w'){if(t==='tx')s.a=[a0[0],a0[1],Math.max(40,cur.x1-a0[0])];else s.a=[a0[0],a0[1],a0[2],a0[3],Math.max(50,cur.x1-a0[2])];}
+ s._k=null;}
+function scrShapeSet(cur){const s=cur.shape;if(s.t==='bx')s.a=[Math.min(cur.x0,cur.x1),Math.min(cur.y0,cur.y1),Math.abs(cur.x1-cur.x0),Math.abs(cur.y1-cur.y0)];
+ else if(s.t==='nt'){const p=scrNtPlace(cur.x0,cur.y0,cur.x1,cur.y1,s.a[4]);s.a=[cur.x0,cur.y0,p[0],p[1],s.a[4]];}else s.a=[cur.x0,cur.y0,cur.x1,cur.y1];}
+function scrExtend(e){const cur=SCR.cur;if(!cur)return;
+ if(!cur.p&&!cur.erase){const [X,Y]=scrPt(e),y=Y-cur.pg*scrStep();if(!cur.moved&&Math.hypot(e.clientX-cur.sx0,e.clientY-cur.sy0)>(e.pointerType==='touch'?8:4))cur.moved=true;
+  if(cur.pan){SCR.tx+=e.clientX-cur.sx;SCR.ty+=e.clientY-cur.sy;cur.sx=e.clientX;cur.sy=e.clientY;scrClamp();scrPlace();scrUpdate();return;}
+  cur.x1=Math.max(0,Math.min(SCR.pw,X));cur.y1=Math.max(0,Math.min(SCR.ph,y));if(!cur.moved)return;
+  if(cur.move)scrMoveApply(cur);else if(cur.mark)scrMarkCalc(cur);else if(cur.shape)scrShapeSet(cur);
+  scrObj();return;}
+ const L=e.getCoalescedEvents?e.getCoalescedEvents():[],ev=L.length?L:[e],pen=e.pointerType==='pen',g=cur.p?scrLive():null;if(g)scrStyle(g,cur);
+ for(const q of ev){const [X,Y]=scrPt(q),y=Y-cur.pg*scrStep();if(cur.erase){scrErase(X,y);continue;}
+  const P_=cur.p,l=P_[P_.length-1];if(Math.hypot(X-l[0],y-l[1])<.25/SCR.z)continue;P_.push([X,y,pen&&q.pressure>0?q.pressure:.5]);if(g)scrSeg(g,cur,P_.length-1);}if(g)g.restore();}
+/* a new piece goes in with the scene it sits in, like a stroke */
+function scrPut(s){const y=s.t==='bm'?s.a[0]:scrBox(s)[1],sc=scrSceneAt(s.pg,y);if(!sc){toast('Add a scene to this folder first, so your marks have somewhere to be kept.');scrInk();return null;}
+ const key='ink.'+SCR.id+'.'+uid(),h=scrObjH(s);scrCellPut(sc.id,key,h);SCR.undo.push({a:'add',items:[{sid:sc.id,key,h}]});SCR.redo=[];if(SCR.undo.length>300)SCR.undo.shift();scrIndex();scrInk();scrBarDraw();return {sid:sc.id,key};}
+function scrSet(q,h0,h1){if(h1===h0)return;scrCellPut(q.sid,q.key,h1);SCR.undo.push({a:'set',items:[{sid:q.sid,key:q.key,h0,h1}]});SCR.redo=[];}
+/* one tap chooses a piece; a second, straight after, opens its menu */
+function scrTapObj(q){const now=performance.now();if(SCR.lastTap&&SCR.lastTap.key===q.key&&now-SCR.lastTap.t<480){SCR.lastTap=null;SCR.sel={key:q.key,sid:q.sid};scrInkDraw(true);scrMenuOpen(q);}else{SCR.sel={key:q.key,sid:q.sid};SCR.lastTap={key:q.key,t:now};scrObj();}scrBarDraw();}
+function scrFinish(){const cur=SCR.cur;SCR.cur=null;SCR.drawId=null;SCR.drawSrc=null;if(!cur)return;
+ if(cur.erase){if(cur.erase.length){SCR.undo.push({a:'del',items:cur.erase});SCR.redo=[];}scrBarDraw();return;}
+ if(!cur.p){const tap=!cur.moved;
+  if(cur.pan){scrPosSave();return;}
+  if(cur.move){const q=cur.move.q;if(tap){scrTapObj(q);return;}scrSet(q,cur.move.h0,scrObjH(q.s));scrIndex();scrInk();scrBarDraw();return;}
+  if(cur.text){const q=scrHit(cur.pg,cur.x0,cur.y0,['tx','nt']);if(q)scrEdOpen(q);else{const z=SCR.w.tx,x=Math.min(cur.x0,SCR.pw-70);scrEdOpen(null,{pg:cur.pg,t:'tx',c:SCR.color.pen,w:1,a:[x,Math.max(2,cur.y0-z*.75),Math.max(60,Math.min(260,SCR.pw-x-14))],q:[],x:'',z});}return;}
+  if(cur.tl==='nt'){const s=cur.shape;if(tap){const q=scrHit(cur.pg,cur.x0,cur.y0,['tx','nt']);if(q){scrEdOpen(q);return;}const p=scrNtPlace(cur.x0,cur.y0,cur.x0+40,cur.y0-40,s.a[4]);s.a=[cur.x0,cur.y0,p[0],p[1],s.a[4]];}scrEdOpen(null,s);return;}
+  if(cur.mark){if(tap){const q=scrHit(cur.pg,cur.x0,cur.y0);if(q){scrTapObj(q);return;}}
+   scrText(cur.pg).then(T=>{scrMarkCalc(cur);if(cur.rects&&cur.rects.length)scrPut({pg:cur.pg,t:cur.mark,c:cur.c,w:1,a:[],q:cur.rects,x:(cur.words||'').slice(0,600),z:11});else{if(!T.rows.length)toast('This page has no text to mark. Use the Highlighter or the Pen on it.');scrObj();}},()=>scrObj());return;}
+  if(cur.shape){const a=cur.shape.a,big=cur.shape.t==='bx'?(a[2]>3&&a[3]>3):Math.hypot(a[2]-a[0],a[3]-a[1])>4;if(!tap&&big)scrPut(cur.shape);else{const q=tap&&scrHit(cur.pg,cur.x0,cur.y0);if(q)scrTapObj(q);else scrObj();}return;}
+  return;}
+ cur.p=scrThin(cur.p);const sc=scrSceneAt(cur.pg,cur.p[0][1]);
+ if(!sc){toast('Add a scene to this folder first, so your marks have somewhere to be kept.');scrInk();return;}
+ /* two quick taps of the pen on a piece are not two dots: they open its menu */
+ let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const p of cur.p){x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1]);}
+ const isTap=cur.p.length<=4&&Math.hypot(x1-x0,y1-y0)<2.5,hit=isTap?scrHit(cur.pg,cur.p[0][0],cur.p[0][1]):null,now=performance.now();
+ if(hit&&SCR.lastTap&&SCR.lastTap.key===hit.key&&now-SCR.lastTap.t<480){const d=SCR.lastTap.dot;if(d){scrCellDel(d.sid,d.key);const ix=SCR.undo.findIndex(u=>u.items[0]&&u.items[0].key===d.key);if(ix>=0)SCR.undo.splice(ix,1);}
+  SCR.lastTap=null;SCR.sel={key:hit.key,sid:hit.sid};scrIndex();scrInkDraw();scrMenuOpen(hit);scrBarDraw();return;}
+ const key='ink.'+SCR.id+'.'+uid(),h=JSON.stringify({p:cur.pg,t:cur.t,c:cur.c,w:cur.w,d:scrEnc(cur.p)});scrCellPut(sc.id,key,h);SCR.undo.push({a:'add',items:[{sid:sc.id,key,h}]});SCR.redo=[];if(SCR.undo.length>300)SCR.undo.shift();
+ SCR.lastTap=hit?{key:hit.key,t:now,dot:{sid:sc.id,key}}:null;
+ scrIndex();scrInk();scrBarDraw();}
+/* the Eraser takes out ink: pen and freehand highlighter. Everything else is chosen, then deleted */
+function scrErase(X,y){const cur=SCR.cur,L=SCR.idx.get(cur.pg)||[],r=9/SCR.z;let hit=false;
+ for(let i=L.length-1;i>=0;i--){const q=L[i];if(!q.s.p)continue;const rr=r+q.s.w/2;if(q.s.p.some(p=>Math.hypot(p[0]-X,p[1]-y)<=rr)){const c=txGet(q.sid,q.key,false);cur.erase.push({sid:q.sid,key:q.key,h:c?c.h:''});scrCellDel(q.sid,q.key);L.splice(i,1);hit=true;}}
+ if(hit){SCR.sig=scrIndex(true);scrInk();}}
+function scrUndo(redo){const a=(redo?SCR.redo:SCR.undo).pop();if(!a)return;scrMenuClose();
+ if(a.a==='set'){for(const it of a.items)scrCellPut(it.sid,it.key,redo?it.h1:it.h0);}
+ else{const put=(a.a==='add')===!!redo;for(const it of a.items){if(put)scrCellPut(it.sid,it.key,it.h);else scrCellDel(it.sid,it.key);}}
+ (redo?SCR.undo:SCR.redo).push(a);SCR.sel=null;scrIndex();scrInk();scrBarDraw();}
+function scrSelQ(){if(!SCR.sel)return null;for(const L of SCR.idx.values()){const q=L.find(v=>v.key===SCR.sel.key);if(q)return q;}return null;}
+function scrDelSel(){const q=scrSelQ();if(!q)return false;scrMenuClose();const c=txGet(q.sid,q.key,false);SCR.undo.push({a:'del',items:[{sid:q.sid,key:q.key,h:c?c.h:''}]});SCR.redo=[];scrCellDel(q.sid,q.key);SCR.sel=null;scrIndex();scrInk();scrBarDraw();return true;}
+/* ----- the menu on a chosen piece ----- */
+function scrMenuClose(){const m=document.getElementById('scrPopM');if(m)m.remove();SCR.menuView=null;}
+function scrMenuOpen(q){scrMenuClose();const s=q.s,st=scrStage(),b=scrBox(s),m=document.createElement('div');m.id='scrPopM';m.setAttribute('role','menu');
+ const pal=s.t==='bm'?SCR_BMC:SCR_COLORS[s.t==='th'?'hl':'pen'];
+ m.innerHTML=`<div class="scrcol" role="group" aria-label="Color">${pal.map(([v,n])=>`<button data-mc="${v}" style="background:${v}" aria-label="${n}"${s.c===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>${s.t==='tx'||s.t==='nt'?'<button data-mm="edit">Edit Text</button>':''}${s.t==='bm'?'<button data-mm="ren">Rename…</button>':''}<button data-mm="del" class="danger">Delete</button>`;
+ st.appendChild(m);const z=SCR.z,cx=SCR.tx+(b[0]+b[2])/2*z,top=SCR.ty+(s.pg*scrStep()+b[1])*z,bot=SCR.ty+(s.pg*scrStep()+b[3])*z,w=m.offsetWidth,h=m.offsetHeight;
+ m.style.left=Math.max(6,Math.min(st.clientWidth-w-6,cx-w/2))+'px';m.style.top=(top-h-12>=6?top-h-12:Math.min(st.clientHeight-h-6,bot+12))+'px';SCR.menuView={tx:SCR.tx,ty:SCR.ty,z:SCR.z};
+ m.addEventListener('click',e=>{const cb=e.target.closest('[data-mc]'),mb=e.target.closest('[data-mm]'),cq=scrSelQ();if(!cq){scrMenuClose();return;}
+  if(cb){const c=txGet(cq.sid,cq.key,false),h0=c?c.h:'';cq.s.c=cb.dataset.mc;scrSet(cq,h0,scrObjH(cq.s));scrIndex();scrInkDraw();m.querySelectorAll('[data-mc]').forEach(x=>{const on=x===cb;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on);});scrBarDraw();return;}
+  if(!mb)return;const k=mb.dataset.mm;if(k==='del')scrDelSel();else if(k==='edit'){scrMenuClose();scrEdOpen(cq);}else if(k==='ren'){scrMenuClose();SCR.bmEdit=cq.key;scrBmPop(true);}});}
+/* ----- typing: a box on the page, where the words will sit ----- */
+function scrEdPlace(){const E=SCR.edit;if(!E)return;const s=E.s,z=SCR.z,ta=E.ta,L=scrWrap(s),n=Math.max(1,L.length)+(/\n$/.test(s.x)?1:0),y0=SCR.ty+s.pg*scrStep()*z;
+ if(s.t==='nt'){const b=scrNtBox(s);ta.style.left=(SCR.tx+(b[0]+5)*z)+'px';ta.style.top=(y0+(b[1]+4.5)*z)+'px';ta.style.width=((b[2]-10)*z)+'px';ta.style.color='#1d1d1f';}
+ else{ta.style.left=(SCR.tx+s.a[0]*z)+'px';ta.style.top=(y0+(s.a[1]+2)*z)+'px';ta.style.width=((s.a[2]||200)*z)+'px';ta.style.color=s.c;}
+ ta.style.font=scrFont(s.z*z);ta.style.lineHeight=(scrLH(s)*z)+'px';ta.style.height=(n*scrLH(s)*z+2)+'px';}
+function scrEdOpen(q,draft){scrEdDone();scrMenuClose();const s=q?q.s:draft,st=scrStage(),ta=document.createElement('textarea');ta.id='scrEd';ta.className=s.t==='nt'?'nt':'';ta.value=s.x||'';ta.setAttribute('aria-label',s.t==='nt'?'Note':'Text');ta.setAttribute('autocapitalize','sentences');ta.rows=1;
+ SCR.sel=null;SCR.edit={key:q?q.key:null,sid:q?q.sid:null,s,ta,h0:q?scrObjH(s):null,x0:s.x||''};st.appendChild(ta);scrEdPlace();
+ ta.addEventListener('input',()=>{s.x=ta.value;s._k=null;scrEdPlace();scrObj();});
+ ta.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'||(e.key==='Enter'&&(e.metaKey||e.ctrlKey))){e.preventDefault();scrEdDone();}});
+ ta.addEventListener('blur',()=>setTimeout(()=>{if(SCR.edit&&SCR.edit.ta===ta)scrEdDone();},0));
+ try{ta.focus({preventScroll:true});ta.setSelectionRange(ta.value.length,ta.value.length);}catch(e){}scrInkDraw(true);scrBarDraw();}
+function scrEdDone(){const E=SCR.edit;if(!E)return;SCR.edit=null;const s=E.s;s.x=E.ta.value.replace(/\s+$/,'');s._k=null;E.ta.remove();
+ if(E.key){const q={sid:E.sid,key:E.key,s};if(!s.x){SCR.undo.push({a:'del',items:[{sid:E.sid,key:E.key,h:E.h0}]});SCR.redo=[];scrCellDel(E.sid,E.key);}else scrSet(q,E.h0,scrObjH(s));}
+ else if(s.x)scrPut(s);
+ scrIndex();scrInk();scrBarDraw();}
+/* ----- the words on a page, where they are: for marking text, and for Find ----- */
+function scrText(i){const have=SCR.txt.get(i);if(have)return have.then?have:Promise.resolve(have);const doc=SCR.doc,pr=(async()=>{const pg=await doc.getPage(i+1),v1=pg.getViewport({scale:1}),k=Math.min(SCR.pw/v1.width,SCR.ph/v1.height),vp=pg.getViewport({scale:k}),tc=await pg.getTextContent(),rows=[];
+  for(const it of tc.items){const str=it.str;if(!str||!str.trim())continue;const pt=vp.convertToViewportPoint(it.transform[4],it.transform[5]),x=pt[0],y=pt[1],fs=(Math.hypot(it.transform[2],it.transform[3])||it.height||12)*k,w=(it.width||str.length*fs*.6)*k,cw=w/str.length;
+   let r=rows.find(r=>Math.abs(r.y-y)<2.5);if(!r){r={y,fs,words:[]};rows.push(r);}r.fs=Math.max(r.fs,fs);const re=/\S+/g;let m;while((m=re.exec(str)))r.words.push({x0:x+m.index*cw,x1:x+(m.index+m[0].length)*cw,s:m[0]});}
+  rows.sort((a,b)=>a.y-b.y);
+  for(const r of rows){r.words.sort((a,b)=>a.x0-b.x0);const W=[];for(const w of r.words){const l=W[W.length-1];if(l&&w.x0-l.x1<r.fs*.16){l.s+=w.s;l.x1=Math.max(l.x1,w.x1);}else W.push(w);}r.words=W;
+   r.top=r.y-r.fs*.8;r.h=r.fs*1.06;let t='';for(const w of W){w.o=t.length+(t?1:0);t+=(t?' ':'')+w.s;}r.text=t;r.low=t.toLowerCase();}
+  const T={rows};if(SCR.doc===doc)SCR.txt.set(i,T);return T;})();
+ SCR.txt.set(i,pr);pr.catch(()=>{if(SCR.txt.get(i)===pr)SCR.txt.delete(i);});return pr;}
+/* the words between where the drag began and where it is, the way a text selection runs: to the line's end, whole lines, from the line's start */
+function scrMarkCalc(cur){const T=SCR.txt.get(cur.pg);if(!T||T.then)return;const R=T.rows;cur.rects=[];cur.words='';if(!R.length)return;
+ const rowAt=y=>{let b=-1,bd=1e9;for(let i=0;i<R.length;i++){const r=R[i],d=y<r.top?r.top-y:y>r.top+r.h?y-(r.top+r.h):0;if(d<bd){bd=d;b=i;}}return bd<=14?b:-1;};
+ let ra=rowAt(cur.y0),rb=rowAt(cur.y1),xa=cur.x0,xb=cur.x1;if(ra<0||rb<0)return;if(ra>rb||(ra===rb&&xa>xb)){[ra,rb]=[rb,ra];[xa,xb]=[xb,xa];}const txt=[];
+ for(let i=ra;i<=rb;i++){const r=R[i],W=r.words.filter(w=>(i>ra||w.x1>xa)&&(i<rb||w.x0<xb));if(!W.length)continue;cur.rects.push([W[0].x0,r.top,W[W.length-1].x1-W[0].x0,r.h]);txt.push(W.map(w=>w.s).join(' '));}
+ cur.words=txt.join(' ');}
+/* ----- Find ----- */
+function scrOffX(r,off){let w=r.words[0];for(const v of r.words){if(v.o<=off)w=v;else break;}const d=Math.min(w.s.length,Math.max(0,off-w.o));return w.x0+(w.x1-w.x0)*d/w.s.length;}
+function scrFindOpen(){if(SCR.state!=='ok')return;scrPopsClose();scrMenuClose();if(!SCR.find)SCR.find={q:'',hits:null,i:-1,seq:0,busy:false};SCR.bar='';scrBarDraw();const i=document.getElementById('scrFq');if(i){i.value=SCR.find.q;try{i.focus();i.select();}catch(e){}}scrFindLabel();}
+function scrFindClose(){if(!SCR.find)return;SCR.find=null;SCR.bar='';scrBarDraw();scrObj();}
+function scrFindLabel(){const e=document.getElementById('scrFn'),F=SCR.find;if(!e||!F)return;e.textContent=F.busy?'Looking…':!F.q.trim()?'':!F.hits||!F.hits.length?'Not found':`${F.i+1} of ${F.hits.length}`;}
+async function scrFindRun(qs){const F=SCR.find;if(!F)return;F.q=qs;const seq=++F.seq,ql=qs.trim().toLowerCase();if(!ql){F.hits=null;F.i=-1;F.busy=false;scrFindLabel();scrObj();return;}
+ F.busy=true;scrFindLabel();const hits=[];
+ for(let i=0;i<SCR.n;i++){let T;try{T=await scrText(i);}catch(e){continue;}if(SCR.find!==F||F.seq!==seq)return;
+  for(const r of T.rows){let p=0;while((p=r.low.indexOf(ql,p))>=0){const e=p+ql.length,xa=scrOffX(r,p),xb=scrOffX(r,e);hits.push({pg:i,r:[xa-1,r.top,Math.max(3,xb-xa)+2,r.h]});p=e;}}}
+ F.busy=false;F.hits=hits;const st=scrStage(),here=(-SCR.ty+((st&&st.clientHeight)||600)*.1)/SCR.z;F.i=hits.length?Math.max(0,hits.findIndex(h=>h.pg*scrStep()+h.r[1]>=here)):-1;scrFindShow();}
+function scrFindShow(){const F=SCR.find;if(!F)return;scrFindLabel();const h=F.hits&&F.hits[F.i];if(h){const st=scrStage(),H=(st&&st.clientHeight)||600;cancelAnimationFrame(SCR.raf);SCR.ty=-(h.pg*scrStep()+h.r[1])*SCR.z+H*.35;scrClamp();scrPlace();scrUpdate();}scrInk();}
+function scrFindStep(d){const F=SCR.find;if(!F||!F.hits||!F.hits.length)return;F.i=(F.i+d+F.hits.length)%F.hits.length;scrFindShow();}
+/* ----- bookmarks: a place in the pages, with a name and a color ----- */
+function scrPopsClose(keep){for(const id of ['scrPopS','scrPopB'])if(id!==keep){const p=document.getElementById(id);if(p)p.remove();}if(keep!=='scrPopB')SCR.bmEdit=null;}
+function scrPopAt(p,btn){const v=document.getElementById('scrView'),r=btn?btn.getBoundingClientRect():null,vr=v.getBoundingClientRect(),bar=document.getElementById('scrBar').getBoundingClientRect();p.style.top=(bar.bottom-vr.top+6)+'px';const w=p.offsetWidth;p.style.left=Math.max(8,Math.min(vr.width-w-8,(r?r.left+r.width/2:vr.right-20)-vr.left-w/2))+'px';}
+function scrBmAdd(){const st=scrStage(),pg=scrPgNow(),top=(-SCR.ty+12)/SCR.z-pg*scrStep(),y=Math.max(8,Math.min(SCR.ph-24,top+18)),sc=scrSceneAt(pg,y),n=SCR.bms.length;
+ const r=scrPut({pg,t:'bm',c:SCR_BMC[n%SCR_BMC.length][0],w:1,a:[y],q:[],x:sc&&sc.number?`Scene ${sc.number}`:`Page ${pg+1}`,z:11});if(r){SCR.bmEdit=r.key;scrBmList();}}
+function scrBmList(){const p=document.getElementById('scrPopB');if(!p)return;const B=SCR.bms.slice().sort((a,b)=>a.s.pg-b.s.pg||a.s.a[0]-b.s.a[0]);
+ p.innerHTML=`<div class="bmh"><b>Bookmarks</b><button class="pri" data-bm="add">Bookmark This Page</button></div>`+(B.length?`<div class="bml">${B.map(q=>`<div class="bmr" data-k="${q.key}"><button class="bmc" data-bm="col" style="background:${q.s.c}" aria-label="Label color: tap to change" title="Label color"></button>${SCR.bmEdit===q.key?`<input class="bmn" value="${esc(q.s.x)}" maxlength="60" aria-label="Bookmark name" enterkeyhint="done">`:`<button class="bmg" data-bm="go"><span>${esc(q.s.x||'Bookmark')}</span><i>p. ${q.s.pg+1}</i></button>`}<button class="scric" data-bm="ren" aria-label="Rename" title="Rename">${scrIc('pen')}</button><button class="scric" data-bm="del" aria-label="Delete" title="Delete">${scrIc('x')}</button></div>`).join('')}</div>`:'<p class="bme">None yet. A bookmark keeps your place on a page, with a name and a color you choose.</p>');
+ const i=p.querySelector('.bmn');if(i){try{i.focus();i.select();}catch(e){}}}
+function scrBmName(key,v){const q=SCR.bms.find(b=>b.key===key);SCR.bmEdit=null;if(q){const c=txGet(q.sid,q.key,false),h0=c?c.h:'';q.s.x=String(v||'').trim().slice(0,60)||'Bookmark';scrSet(q,h0,scrObjH(q.s));scrIndex();scrInk();scrBarDraw();}scrBmList();}
+function scrBmPop(keepOpen){let p=document.getElementById('scrPopB');if(p&&!keepOpen){scrPopsClose();return;}scrPopsClose('scrPopB');if(!p){p=document.createElement('div');p.id='scrPopB';p.setAttribute('role','dialog');p.setAttribute('aria-label','Bookmarks');document.getElementById('scrView').appendChild(p);
+  p.addEventListener('click',e=>{const b=e.target.closest('[data-bm]');if(!b)return;const k=b.dataset.bm,row=b.closest('.bmr'),q=row&&SCR.bms.find(x=>x.key===row.dataset.k);
+   if(k==='add'){scrBmAdd();return;}if(!q)return;
+   if(k==='go'){cancelAnimationFrame(SCR.raf);SCR.ty=-(q.s.pg*scrStep()+q.s.a[0]-40)*SCR.z;scrClamp();scrPlace();scrUpdate();scrPosSave();scrPopsClose();}
+   else if(k==='col'){const c=txGet(q.sid,q.key,false),h0=c?c.h:'',ix=SCR_BMC.findIndex(v=>v[0]===q.s.c);q.s.c=SCR_BMC[(ix+1)%SCR_BMC.length][0];scrSet(q,h0,scrObjH(q.s));scrIndex();scrInk();scrBarDraw();}
+   else if(k==='ren'){SCR.bmEdit=SCR.bmEdit===q.key?null:q.key;scrBmList();}
+   else if(k==='del'){SCR.sel={key:q.key,sid:q.sid};scrDelSel();}});
+  p.addEventListener('keydown',e=>{e.stopPropagation();if(!e.target.classList.contains('bmn'))return;if(e.key==='Enter'){e.preventDefault();scrBmName(e.target.closest('.bmr').dataset.k,e.target.value);}else if(e.key==='Escape'){e.preventDefault();SCR.bmEdit=null;scrBmList();}});
+  p.addEventListener('focusout',e=>{if(e.target.classList.contains('bmn')&&SCR.bmEdit){const k=e.target.closest('.bmr').dataset.k,v=e.target.value;setTimeout(()=>{if(SCR.bmEdit===k&&document.getElementById('scrPopB'))scrBmName(k,v);},0);}});}
+ scrBmList();scrPopAt(p,document.querySelector('#scrBar [data-scr="bm"]'));}
+/* ----- the size of the pen, the highlighter, the type: a slider ----- */
+function scrSizeLabel(){const b=document.getElementById('scrWb'),g=scrWGrp(SCR.tool);if(!b||!g)return;const w=SCR.w[g],d=g==='tx'?0:Math.max(3,Math.min(18,g==='hl'?w*.8:w*2.6));b.innerHTML=(g==='tx'?'<b>A</b>':`<i style="width:${d}px;height:${d}px"></i>`)+`<span>${g==='pen'?w.toFixed(1):Math.round(w)}</span>`;}
+function scrSizePop(){let p=document.getElementById('scrPopS');if(p){scrPopsClose();return;}scrPopsClose();const g=scrWGrp(SCR.tool);if(!g)return;const R=SCR_WR[g];p=document.createElement('div');p.id='scrPopS';p.setAttribute('role','dialog');p.setAttribute('aria-label','Size');
+ p.innerHTML=`<input type="range" id="scrW" min="${R[0]}" max="${R[1]}" step="${R[2]}" value="${SCR.w[g]}" aria-label="${g==='tx'?'Type size, in points':'Thickness, in points'}"><output id="scrWo"></output>`;document.getElementById('scrView').appendChild(p);
+ const out=()=>{p.querySelector('#scrWo').textContent=(g==='pen'?SCR.w[g].toFixed(1):Math.round(SCR.w[g]))+' pt';};out();
+ p.querySelector('#scrW').addEventListener('input',e=>{SCR.w[g]=+e.target.value;out();scrSizeLabel();scrToolSave();});scrPopAt(p,document.getElementById('scrWb'));}
+function scrFingerTap(e){if(P.ui.scrFinger)return;const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep(),q=i>=0&&i<SCR.n?scrHit(i,X,y):null,now=performance.now();scrMenuClose();
+ if(q){SCR.lastEmpty=0;scrTapObj(q);return;}if(SCR.sel){SCR.sel=null;scrObj();scrBarDraw();}
+ if(now-SCR.lastEmpty<420){SCR.lastEmpty=0;scrFit();}else SCR.lastEmpty=now;}
+function scrBind(st){const touches=new Map();let gest=null,zoomed=false,fingerT=0,vel=[],tap0=null;
+ const own=e=>e.target.closest&&e.target.closest('#scrMsg button,#scrEd,#scrPopM');
+ const gestInit=()=>{const T=[...touches.values()];vel=[];gest=T.length===1?{n:1,x:T[0].x,y:T[0].y}:T.length>=2?{n:2,cx:(T[0].x+T[1].x)/2,cy:(T[0].y+T[1].y)/2,d:Math.hypot(T[0].x-T[1].x,T[0].y-T[1].y)||1}:null;};
+ const fake=t=>({pointerId:'t'+t.identifier,clientX:t.clientX,clientY:t.clientY,pointerType:'pen',pressure:t.force||0});
+ st.addEventListener('pointerdown',e=>{if(own(e))return;scrPopsClose();cancelAnimationFrame(SCR.raf);
+  if(e.pointerType!=='touch'){if(e.pointerType==='mouse'&&e.button!==0)return;
+   if(e.pointerType==='pen'){if(SCR.drawSrc==='t')return;SCR.penDown=true;if(touches.size){touches.clear();gest=null;}if(SCR.drawId!=null)scrFinish();} /* an open stroke is kept, never dropped */
+   if(SCR.drawId!=null)return;if(!scrBegin(e)){if(SCR.tool==='tx'||SCR.tool==='nt')e.preventDefault();return;}e.preventDefault();try{st.setPointerCapture(e.pointerId);}catch(x){}return;}
+  if(SCR.penDown||performance.now()-SCR.penLast<350)return;                       /* a hand resting on the glass while the Pencil writes */
+  e.preventDefault();try{st.setPointerCapture(e.pointerId);}catch(x){}
+  if(SCR.edit){scrEdDone();return;}scrMenuClose();
+  if(!P.ui.scrFinger&&!touches.size&&SCR.drawId==null&&SCR.sel&&scrBeginSel(e,true))return;  /* a finger on the chosen piece moves it */
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});tap0=touches.size===1?{x:e.clientX,y:e.clientY,t:performance.now(),id:e.pointerId}:null;
+  if(P.ui.scrFinger&&touches.size===1&&SCR.drawId==null){fingerT=performance.now();if(scrBegin(e))return;}
+  if(P.ui.scrFinger&&SCR.drawId!=null&&touches.has(SCR.drawId)){if(performance.now()-fingerT<250&&SCR.cur&&!SCR.cur.erase){SCR.cur=null;SCR.drawId=null;SCR.drawSrc=null;scrInk();}else return;} /* a second finger straight away: a zoom, not a stroke */
+  gestInit();});
+ st.addEventListener('pointermove',e=>{
+  if(e.pointerId===SCR.drawId){e.preventDefault();scrExtend(e);return;}
+  const t=touches.get(e.pointerId);if(!t||!gest)return;t.x=e.clientX;t.y=e.clientY;const T=[...touches.values()],r=st.getBoundingClientRect();
+  if(T.length===1&&gest.n===1){SCR.tx+=T[0].x-gest.x;SCR.ty+=T[0].y-gest.y;gest.x=T[0].x;gest.y=T[0].y;vel.push([performance.now(),T[0].x,T[0].y]);if(vel.length>12)vel.shift();}
+  else if(T.length>=2&&gest.n===2){const cx=(T[0].x+T[1].x)/2,cy=(T[0].y+T[1].y)/2,d=Math.hypot(T[0].x-T[1].x,T[0].y-T[1].y)||1;
+   scrZoomAt(SCR.z*d/gest.d,gest.cx-r.left,gest.cy-r.top);SCR.tx+=cx-gest.cx;SCR.ty+=cy-gest.cy;gest.cx=cx;gest.cy=cy;gest.d=d;zoomed=true;}
+  scrClamp();scrPlace();scrUpdate();});
+ const up=e=>{
+  if(e.pointerId===SCR.drawId){if(e.pointerType==='pen'){SCR.penDown=false;SCR.penLast=performance.now();}touches.delete(e.pointerId);scrFinish();return;}
+  if(e.pointerType==='pen'){SCR.penDown=false;SCR.penLast=performance.now();return;}
+  if(!touches.delete(e.pointerId))return;const was=gest,V=vel,now=performance.now();gestInit();
+  if(!touches.size){const t0=tap0;tap0=null;
+   if(zoomed){zoomed=false;scrRaster();}
+   else if(t0&&t0.id===e.pointerId&&e.type==='pointerup'&&now-t0.t<350&&Math.hypot(e.clientX-t0.x,e.clientY-t0.y)<10)scrFingerTap(e);
+   else if(was&&was.n===1&&V.length>1){ /* a flick: the speed of the last tenth of a second carries the page on */
+    const b=V[V.length-1];let a=V[0];for(const s of V)if(b[0]-s[0]<=100){a=s;break;}const dt=b[0]-a[0];
+    if(dt>8&&now-b[0]<90){const vy=(b[2]-a[2])/dt,vx=(b[1]-a[1])/dt;if(Math.abs(vy)>.12||Math.abs(vx)>.12)scrFling(Math.abs(vx)>Math.abs(vy)*.6?vx:0,vy);}}
+   scrPosSave();}};
+ st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+ st.addEventListener('wheel',e=>{if(own(e))return;e.preventDefault();cancelAnimationFrame(SCR.raf);const r=st.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey){scrZoomAt(SCR.z*Math.exp(-e.deltaY*.01),e.clientX-r.left,e.clientY-r.top);clearTimeout(st._z);st._z=setTimeout(scrRaster,160);}else{SCR.tx-=e.deltaX;SCR.ty-=e.deltaY;}
+  scrClamp();scrPlace();scrUpdate();clearTimeout(st._p);st._p=setTimeout(scrPosSave,400);},{passive:false});
+ /* iPad Safari can swallow the pointer events of quick Pencil strokes (its Scribble and double-tap watchers hold them back). Refusing the
+    touch events their default is the cure; and a Pencil stroke that still arrives with no pointer events is drawn from the touch events. */
+ st.addEventListener('touchstart',e=>{if(own(e))return;e.preventDefault();for(const t of e.changedTouches){if(t.touchType!=='stylus')continue;SCR.penDown=true;
+  if(SCR.drawId!=null&&SCR.drawSrc==='p'&&performance.now()-SCR.t0<40)continue;if(SCR.drawId!=null)scrFinish();if(touches.size){touches.clear();gest=null;}scrBegin(fake(t),'t');}},{passive:false});
+ st.addEventListener('touchmove',e=>{if(own(e))return;e.preventDefault();if(SCR.drawSrc!=='t')return;for(const t of e.changedTouches)if('t'+t.identifier===SCR.drawId)scrExtend(fake(t));},{passive:false});
+ const tEnd=e=>{if(own(e))return;e.preventDefault();for(const t of e.changedTouches){if(t.touchType!=='stylus')continue;SCR.penDown=false;SCR.penLast=performance.now();
+  if(SCR.drawSrc==='t'&&'t'+t.identifier===SCR.drawId)scrFinish();else if(SCR.drawSrc==='p'){const c=SCR.cur;setTimeout(()=>{if(SCR.cur&&SCR.cur===c)scrFinish();},60);}}};
+ st.addEventListener('touchend',tEnd,{passive:false});st.addEventListener('touchcancel',tEnd,{passive:false});
+ for(const ev of ['gesturestart','gesturechange','gestureend'])st.addEventListener(ev,e=>e.preventDefault());
+ st.addEventListener('contextmenu',e=>{if(!own(e))e.preventDefault();});}
+/* a flick keeps the page moving, and slows the way a page does under a finger */
+function scrFling(vx,vy){cancelAnimationFrame(SCR.raf);const cap=6;vx=Math.max(-cap,Math.min(cap,vx));vy=Math.max(-cap,Math.min(cap,vy));let last=performance.now();const step=t=>{const dt=Math.min(40,Math.max(1,t-last));last=t;const y0=SCR.ty+vy*dt,x0=SCR.tx+vx*dt;SCR.ty=y0;SCR.tx=x0;scrClamp();scrPlace();scrUpdate();
+  const k=Math.pow(.9978,dt);vy*=k;vx*=k;if(SCR.ty!==y0)vy=0;if(SCR.tx!==x0)vx=0;if(Math.abs(vy)<.03&&Math.abs(vx)<.03){SCR.raf=0;scrPosSave();return;}SCR.raf=requestAnimationFrame(step);};SCR.raf=requestAnimationFrame(step);}
+function scrKey(e){const st=scrStage(),h=(st&&st.clientHeight)||600,k=e.key;
+ if((e.metaKey||e.ctrlKey)&&k.toLowerCase()==='z'){scrUndo(e.shiftKey);return true;}
+ if((e.metaKey||e.ctrlKey)&&k.toLowerCase()==='f'){scrFindOpen();return true;}
+ if(e.metaKey||e.ctrlKey||e.altKey)return false;
+ if((k==='Delete'||k==='Backspace')&&SCR.sel)return scrDelSel();
+ if(k==='Escape'){if(document.getElementById('scrPopM')){scrMenuClose();return true;}if(document.getElementById('scrPopS')||document.getElementById('scrPopB')){scrPopsClose();return true;}if(SCR.find){scrFindClose();return true;}if(SCR.sel){SCR.sel=null;scrObj();scrBarDraw();return true;}return false;}
+ if(k==='PageDown'||(k===' '&&!e.shiftKey)){scrScrollBy(h*.9);return true;}if(k==='PageUp'||(k===' '&&e.shiftKey)){scrScrollBy(-h*.9);return true;}
+ if(k==='ArrowDown'){scrScrollBy(70);return true;}if(k==='ArrowUp'){scrScrollBy(-70);return true;}
+ if(k==='Home'){scrScrollBy(-1e9);return true;}if(k==='End'){scrScrollBy(1e9);return true;}return false;}
+function scrDom(){if(document.getElementById('scrView'))return;const v=document.createElement('div');v.id='scrView';v.hidden=true;
+ v.innerHTML='<div id="scrBar"></div><div id="scrStage" aria-label="The script’s pages. Write on them with the Pencil."><div id="scrWorld"></div><canvas id="scrPdfV" hidden></canvas><canvas id="scrInkV"></canvas><canvas id="scrObjV"></canvas><div id="scrMsg"></div></div>';$('#main').appendChild(v);
+ scrBind(v.querySelector('#scrStage'));const bar=v.querySelector('#scrBar');let hold=0,held=false;
+ /* a long press on a symbol says its name */
+ bar.addEventListener('pointerdown',e=>{held=false;clearTimeout(hold);const b=e.target.closest('button[aria-label]');if(!b||e.pointerType==='mouse')return;hold=setTimeout(()=>{held=true;toast(b.getAttribute('aria-label'));},550);});
+ for(const ev of ['pointerup','pointercancel','pointerleave'])bar.addEventListener(ev,()=>clearTimeout(hold));
+ bar.addEventListener('click',e=>{if(held){held=false;e.preventDefault();return;}const b=e.target.closest('[data-scr]');if(!b)return;const k=b.dataset.scr;
+  if(k.startsWith('t:')){if(SCR.edit)scrEdDone();scrMenuClose();scrPopsClose();SCR.tool=k.slice(2);if(SCR.tool!=='sel'&&SCR.sel){SCR.sel=null;scrObj();}}
+  else if(k.startsWith('c:')){SCR.color[scrGrp(SCR.tool)]=k.slice(2);scrToolSave();}
+  else if(k==='undo')scrUndo(false);else if(k==='redo')scrUndo(true);else if(k==='scene')scrGoScene(scene());else if(k==='more'){scrPopsClose();scrInfoDialog();return;}
+  else if(k==='size'){scrSizePop();return;}else if(k==='bm'){scrBmPop();return;}else if(k==='find'){scrFindOpen();return;}
+  else if(k==='fprev'){scrFindStep(-1);return;}else if(k==='fnext'){scrFindStep(1);return;}else if(k==='fdone'){scrFindClose();return;}
+  scrBarDraw();});
+ let ft=0;bar.addEventListener('input',e=>{if(e.target.id==='scrFq'){const v=e.target.value;clearTimeout(ft);ft=setTimeout(()=>scrFindRun(v),220);}});
+ bar.addEventListener('keydown',e=>{const t=e.target;if(t.id==='scrFq'){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();if(SCR.find&&SCR.find.q!==t.value){clearTimeout(ft);scrFindRun(t.value);}else scrFindStep(e.shiftKey?-1:1);}else if(e.key==='Escape'){e.preventDefault();scrFindClose();}}
+  else if(t.id==='scrSc'){e.stopPropagation();if(e.key==='Enter'){e.preventDefault();if(scrGoNum(t.value)){t.value='';t.blur();}}else if(e.key==='Escape'){t.value='';t.blur();}}});
+ v.querySelector('#scrMsg').addEventListener('click',e=>{const b=e.target.closest('[data-scr]');if(!b)return;if(b.dataset.scr==='add')scrAdd();else if(b.dataset.scr==='retry')scrLoad();});
+ let rs=0;addEventListener('resize',()=>{if(!scrOn)return;clearTimeout(rs);rs=setTimeout(()=>{if(SCR.state==='ok'){scrClamp();scrPlace();scrRaster();scrUpdate();scrInk();}},150);});}
+function scrBarDraw(){const el=document.getElementById('scrBar');if(!el)return;const ok=SCR.state==='ok',sc=SCR.sc,tl=SCR.tool,s=scene(),st=document.getElementById('scrStage');if(st)st.dataset.tool=tl;let h;
+ if(!ok)h=`<b class="scrnm">${sc?esc(sc.name):'Script'}</b>`;
+ else if(SCR.find)h=`<span class="scrfi">${scrIc('find')}</span><input id="scrFq" type="search" placeholder="Find in the script" aria-label="Find in the script" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><span id="scrFn" aria-live="polite"></span><button class="scric" data-scr="fprev" aria-label="Previous" title="Previous">${scrIc('prev')}</button><button class="scric" data-scr="fnext" aria-label="Next" title="Next">${scrIc('next')}</button><span class="sp"></span><button data-scr="fdone">Done</button>`;
+ else{const g=scrGrp(tl),set=tl==='er'||tl==='sel'?null:SCR_COLORS[g],cur=SCR.color[g],wg=scrWGrp(tl),go=s.number?'Go to Scene '+s.number:'Go to This Scene';
+  h=`<div class="scrtl" role="toolbar" aria-label="Tools">${SCR_TOOLS.map(t=>t?`<button class="scric${tl===t[0]?' on':''}" data-scr="t:${t[0]}" aria-label="${t[1]}" title="${t[1]}" aria-pressed="${tl===t[0]}">${scrIc(t[0])}</button>`:'<i class="scrsep"></i>').join('')}</div>
+   <div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-scr="c:${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>
+   <button id="scrWb" data-scr="size" aria-label="Size" title="Size"${wg?'':' style="visibility:hidden"'}></button>
+   <button class="scric" data-scr="undo" aria-label="Undo" title="Undo"${SCR.undo.length?'':' disabled'}>${scrIc('undo')}</button><button class="scric" data-scr="redo" aria-label="Redo" title="Redo"${SCR.redo.length?'':' disabled'}>${scrIc('redo')}</button><span class="sp"></span>
+   <button class="scric" data-scr="find" aria-label="Find in the script" title="Find in the script">${scrIc('find')}</button><button class="scric" data-scr="bm" aria-label="Bookmarks" title="Bookmarks">${scrIc('bm')}</button>
+   <input id="scrSc" placeholder="Sc." aria-label="Go to a scene: type its number, then Return" title="Go to a scene: type its number, then Return" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" maxlength="12"><button class="scric" data-scr="scene" aria-label="${esc(go)}" title="${esc(go)}">${scrIc('here')}</button>
+   <span id="scrPg"></span><button class="scric" data-scr="more" aria-label="Script…" title="Script…">${scrIc('more')}</button>`;}
+ if(h===SCR.bar)return;const keep=document.activeElement&&document.activeElement.id==='scrSc'?document.activeElement.value:null;SCR.bar=h;el.innerHTML=h;scrPgLabel();scrSizeLabel();if(keep!=null){const i=document.getElementById('scrSc');if(i){i.value=keep;i.focus();}}}
 function scrB64(u8){let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return btoa(s);}
 function scrAttach(f,buf,name,scenes){const u8=new Uint8Array(buf),parts=[];for(let i=0;i<u8.length;i+=SCR_PART)parts.push(addImage('data:application/x-nb-pdf;base64,'+scrB64(u8.subarray(i,i+SCR_PART))));
  f.script={id:uid(),name:String(name||'Script').replace(/\.pdf$/i,''),at:Date.now(),size:u8.length,parts,marks:(scenes||[]).filter(q=>q.pos).map(q=>({n:q.num||'',h:q.heading||'',p:q.pos[0],y:q.pos[1]}))};return f.script;}
@@ -6802,17 +7185,10 @@ function scrBytes(sc){let n=0;const bin=[];for(const id of sc.parts){const d=ima
 function scrOf(s){const fid=sFolder(s);if(!fid)return null;for(const f of fPath(fid).slice().reverse())if(f.script&&Array.isArray(f.script.parts)&&f.script.parts.length)return {f,sc:f.script};return null;}
 const scrNorm=v=>String(v||'').toUpperCase().replace(/[^A-Z0-9]+/g,' ').trim();
 /* each scene start in the pages, matched to a scene of the folder: by number, or, without one, by heading (the second INT. STUDIO to the second) */
-function scrMarks(f,sc){const S=folderScenes(f.id).filter(x=>!x.scout),byN=new Map(),byH=new Map(),seen=new Map();
- for(const x of S){const n=scrNorm(x.number);if(n&&!byN.has(n))byN.set(n,x);const h=scrNorm(x.heading);if(h){if(!byH.has(h))byH.set(h,[]);byH.get(h).push(x);}}
- return (sc.marks||[]).map(m=>{const h=scrNorm(m.h),k=seen.get(h)||0;seen.set(h,k+1);const x=(m.n&&byN.get(scrNorm(m.n)))||(byH.get(h)||[])[k]||null;return {p:m.p-1,y:m.y,s:x};}).sort((a,b)=>a.p-b.p||a.y-b.y);}
 function scrSceneAt(pi,y){const M=SCR.marks||[];let hit=null;for(const m of M){if(m.p<pi||(m.p===pi&&m.y<=y+4)){if(m.s)hit=m.s;}else break;}if(hit)return hit;const nx=M.find(m=>m.s);if(nx)return nx.s;return folderScenes(SCR.f.id).filter(x=>!x.scout)[0]||null;}
 /* a stroke's points, small: tenths of a point, each one the step from the one before, then its pressure 0 to 9 */
 function scrEnc(p){let o='',px=0,py=0;for(const q of p){const x=Math.round(q[0]*10),y=Math.round(q[1]*10);o+=(o?' ':'')+(x-px)+' '+(y-py)+' '+Math.round(Math.min(1,Math.max(0,q[2]))*9);px=x;py=y;}return o;}
 function scrDec(d){const a=String(d||'').split(' '),p=[];let x=0,y=0;for(let i=0;i+2<a.length;i+=3){x+=+a[i]||0;y+=+a[i+1]||0;p.push([x/10,y/10,(+a[i+2]||0)/9]);}return p;}
-function scrParse(c){const q=scrCache.get(c);if(q&&q.h===c.h)return q.s;let s=null;try{const o=JSON.parse(c.h);s={pg:o.p|0,t:o.t==='hl'?'hl':'pen',c:/^#[0-9a-f]{6}$/i.test(o.c)?o.c:'#1d1d1f',w:Math.min(40,Math.max(.3,+o.w||1.5)),p:scrDec(o.d)};if(!s.p.length)s=null;}catch(e){}scrCache.set(c,{h:c.h,s});return s;}
-function scrIndex(dry){const idx=new Map(),pre=SCR.id+'.';let n=0,mx=0;
- for(const sid in P.text||{}){const ink=P.text[sid]&&P.text[sid].ink;if(!ink)continue;for(const k in ink){if(!k.startsWith(pre))continue;const c=ink[k];if(!c)continue;mx=Math.max(mx,c.t||0);if(c.del||!c.h)continue;n++;if(dry)continue;const s=scrParse(c);if(!s)continue;let L=idx.get(s.pg);if(!L)idx.set(s.pg,L=[]);L.push({key:'ink.'+k,sid,t:c.t||0,s});}}
- const sig=n+':'+mx;if(dry)return sig;for(const L of idx.values())L.sort((a,b)=>a.t-b.t);SCR.idx=idx;SCR.sig=sig;return sig;}
 function scrCellPut(sid,key,h){const c=txGet(sid,key,true);c.h=h;delete c.del;txBump(sid,key,c);scrDirty();}
 function scrCellDel(sid,key){const c=txGet(sid,key,false);if(!c)return;c.h='';c.del=1;txBump(sid,key,c);scrDirty();}
 function scrDirty(){const now=Date.now();if(!SCR.saveT0)SCR.saveT0=now;clearTimeout(SCR.saveT);SCR.saveT=setTimeout(scrInkFlush,now-SCR.saveT0>10000?0:2000);}
@@ -6832,16 +7208,7 @@ function scrVGeom(){const st=document.getElementById('scrStage'),w=st?st.clientW
 function scrVSize(c,G){if(c.width!==G.W||c.height!==G.H){c.width=G.W;c.height=G.H;}c.style.top=-G.oy+'px';c.style.width=G.w+'px';c.style.height=(G.h+2*G.oy)+'px';}
 function scrVFollow(c,v){if(!c||!v)return;const k=SCR.z/v.z;c.style.transform=(k===1&&SCR.tx===v.tx&&SCR.ty===v.ty)?'':`translate(${SCR.tx-v.tx*k}px,${SCR.ty-v.ty*k+v.oy*(1-k)}px) scale(${k})`;}
 const scrBaseR=()=>Math.max(1,Math.min(Math.sqrt(4.6e6/(SCR.pw*SCR.ph)),SCR.z*(window.devicePixelRatio||1)));
-function scrInkDraw(){const c=document.getElementById('scrInkV');cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;clearTimeout(SCR.inkT);if(!c||SCR.state!=='ok'||!scrOn)return;const G=scrVGeom();if(!G.w||!G.h)return;scrVSize(c,G);
- const g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,G.W,G.H);
- const k=SCR.z*G.s,a=Math.max(0,Math.floor((-SCR.ty-G.oy)/SCR.z/scrStep())),b=Math.min(SCR.n-1,Math.floor((-SCR.ty+G.h+G.oy)/SCR.z/scrStep()));
- for(let i=a;i<=b;i++){const L=SCR.idx.get(i)||[],cur=SCR.cur&&SCR.cur.p&&SCR.cur.pg===i?SCR.cur:null;if(!L.length&&!cur)continue;
-  g.save();g.setTransform(k,0,0,k,SCR.tx*G.s,(SCR.ty+G.oy+i*scrStep()*SCR.z)*G.s);g.beginPath();g.rect(0,0,SCR.pw,SCR.ph);g.clip();
-  for(const q of L)if(q.s.t==='hl')scrStroke(g,q.s);for(const q of L)if(q.s.t!=='hl')scrStroke(g,q.s);if(cur)scrStroke(g,cur);g.restore();}
- SCR.inkView={tx:SCR.tx,ty:SCR.ty,z:SCR.z,oy:G.oy,s:G.s};SCR.inkAt=performance.now();c.style.transform='';}
-function scrInk(){if(!SCR.inkQ)SCR.inkQ=requestAnimationFrame(scrInkDraw);}
 /* the view moved: the ink goes with it at once, and is redrawn sharp a moment later (and at most every 70 ms while it keeps moving) */
-function scrInkMove(){const c=document.getElementById('scrInkV');if(!c)return;scrVFollow(c,SCR.inkView);if(SCR.inkQ)return;const d=performance.now()-(SCR.inkAt||0);if(d>70)scrInk();else{clearTimeout(SCR.inkT);SCR.inkT=setTimeout(scrInkDraw,75-d);}}
 /* the pages on screen, drawn again at the screen's resolution when the page canvases cannot reach it */
 function scrDetailOff(){clearTimeout(SCR.dT);SCR.dSeq=(SCR.dSeq||0)+1;if(SCR.dTask){try{SCR.dTask.cancel();}catch(e){}SCR.dTask=null;}const c=document.getElementById('scrPdfV');if(c&&!c.hidden){c.hidden=true;c.width=0;c.height=0;}SCR.pdfView=null;}
 function scrDetailMove(){const c=document.getElementById('scrPdfV');if(!c)return;if(SCR.state!=='ok'||!scrOn){scrDetailOff();return;}const G=scrVGeom();
@@ -6869,11 +7236,9 @@ function scrClamp(){const st=scrStage();if(!st)return;const w=st.clientWidth,h=s
 function scrFit(){const st=scrStage();if(!st||!st.clientWidth)return;const top=(12-SCR.ty)/SCR.z;SCR.z=Math.max(.3,Math.min(2.4,(st.clientWidth-24)/SCR.pw));SCR.ty=12-top*SCR.z;scrClamp();scrPlace();scrRaster();scrUpdate();}
 function scrZoomAt(z2,px,py){z2=Math.min(5,Math.max(.3,z2));SCR.tx=px-(px-SCR.tx)*(z2/SCR.z);SCR.ty=py-(py-SCR.ty)*(z2/SCR.z);SCR.z=z2;}
 function scrPgNow(){const st=scrStage();if(!st||!SCR.n)return 0;return Math.max(0,Math.min(SCR.n-1,Math.floor((-SCR.ty+st.clientHeight*.35)/SCR.z/scrStep())));}
-function scrPgLabel(){const e=document.getElementById('scrPg');if(e)e.textContent=SCR.state==='ok'&&SCR.n?`Page ${scrPgNow()+1} of ${SCR.n}`:'';}
 function scrMount(i){const el=document.createElement('div');el.className='scrpg';el.dataset.pg=i;el.style.cssText=`top:${i*scrStep()}px;width:${SCR.pw}px;height:${SCR.ph}px`;
  document.getElementById('scrWorld').appendChild(el);SCR.mounted.set(i,{el,cv:null,r:0,busy:0,task:null});scrRenderPdf(i);}
 function scrUnmount(i){const m=SCR.mounted.get(i);if(!m)return;if(m.task){try{m.task.cancel();}catch(e){}}if(m.cv)m.cv.width=0;m.el.remove();SCR.mounted.delete(i);}
-function scrFree(){for(const i of [...SCR.mounted.keys()])scrUnmount(i);cancelAnimationFrame(SCR.raf);cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;clearTimeout(SCR.inkT);SCR.inkView=null;scrDetailOff();const c=document.getElementById('scrInkV');if(c){c.width=0;c.height=0;}}
 function scrUpdate(){const st=scrStage();if(!st||SCR.state!=='ok'||!scrOn)return;const h=st.clientHeight,a=Math.floor((-SCR.ty)/SCR.z/scrStep()),b=Math.floor((-SCR.ty+h)/SCR.z/scrStep()),lo=Math.max(0,a-1),hi=Math.min(SCR.n-1,b+1);
  for(const i of [...SCR.mounted.keys()])if(i<lo||i>hi)scrUnmount(i);for(let i=lo;i<=hi;i++)if(!SCR.mounted.has(i))scrMount(i);}
 function scrRaster(){const R=scrBaseR();if(Math.abs(R-SCR.R)<.01)return;SCR.R=R;for(const i of SCR.mounted.keys())scrRenderPdf(i);}
@@ -6883,7 +7248,7 @@ async function scrRenderPdf(i){const m=SCR.mounted.get(i),doc=SCR.doc;if(!m||!do
   if(m.task){try{m.task.cancel();}catch(e){}}const task=m.task=pg.render({canvasContext:g,viewport:vp});await task.promise;if(m.task===task)m.task=null;
   if(SCR.mounted.get(i)!==m||SCR.doc!==doc){c.width=0;return;}if(m.cv){m.cv.width=0;m.cv.remove();}m.cv=c;m.el.insertBefore(c,m.el.firstChild);m.r=R;m.busy=0;if(SCR.R!==R)scrRenderPdf(i);}
  catch(e){if(SCR.mounted.get(i)===m){m.busy=0;if(SCR.R!==R)scrRenderPdf(i);}}}
-async function scrLoad(){const seq=++SCR.loadSeq,sc=SCR.sc;SCR.state='load';SCR.doc=null;scrMsg();
+async function scrLoad(){const seq=++SCR.loadSeq,sc=SCR.sc;SCR.state='load';SCR.doc=null;if(SCR.edit){try{SCR.edit.ta.remove();}catch(e){}SCR.edit=null;}scrMenuClose();scrPopsClose();SCR.txt=new Map();SCR.find=null;SCR.sel=null;SCR.bar='';scrMsg();
  const u8=scrBytes(sc);
  if(!u8){SCR.state='wait';scrMsg();try{for(const id of sc.parts)if(!images[id])imgTry[id]=0;imgPull();}catch(e){}clearTimeout(SCR.waitT);SCR.waitT=setTimeout(()=>{if(scrOn&&SCR.state==='wait'&&SCR.sc===sc)scrLoad();},2500);return;}
  try{const lib=await loadPdfJs(),doc=await lib.getDocument({data:u8}).promise;if(seq!==SCR.loadSeq||!scrOn){try{doc.destroy();}catch(e){}if(seq===SCR.loadSeq)SCR.state='';return;}
@@ -6902,96 +7267,13 @@ function scrPt(e){const r=scrStage().getBoundingClientRect();return [(e.clientX-
 /* the stroke in hand is drawn straight onto the ink's canvas, inside its page; whoever asks for it gives it back with restore() */
 function scrLive(){const c=document.getElementById('scrInkV'),cur=SCR.cur;if(!c||!cur)return null;let v=SCR.inkView;if(!v||v.tx!==SCR.tx||v.ty!==SCR.ty||v.z!==SCR.z||!c.width){scrInkDraw();v=SCR.inkView;if(!v)return null;}
  const g=c.getContext('2d'),k=SCR.z*v.s;g.save();g.setTransform(k,0,0,k,SCR.tx*v.s,(SCR.ty+v.oy+cur.pg*scrStep()*SCR.z)*v.s);g.beginPath();g.rect(0,0,SCR.pw,SCR.ph);g.clip();return g;}
-function scrBegin(e,src){if(SCR.state!=='ok')return false;const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n||y>SCR.ph||X<0||X>SCR.pw)return false;
- const pen=e.pointerType==='pen',pr=pen&&e.pressure>0?e.pressure:.5;SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
- if(SCR.tool==='er'){SCR.cur={erase:[],pg:i};scrErase(X,y);return true;}
- SCR.cur={pg:i,t:SCR.tool==='hl'?'hl':'pen',c:SCR.color[SCR.tool==='hl'?'hl':'pen'],w:(SCR.tool==='hl'?SCR_HLW:SCR_PENW)[SCR.size],p:[[X,y,pr]]};const g=scrLive();if(g){scrStyle(g,SCR.cur);scrSeg(g,SCR.cur,0);g.restore();}return true;}
-function scrExtend(e){const cur=SCR.cur;if(!cur)return;const L=e.getCoalescedEvents?e.getCoalescedEvents():[],ev=L.length?L:[e],pen=e.pointerType==='pen',g=cur.p?scrLive():null;if(g)scrStyle(g,cur);
- for(const q of ev){const [X,Y]=scrPt(q),y=Y-cur.pg*scrStep();if(cur.erase){scrErase(X,y);continue;}
-  const P_=cur.p,l=P_[P_.length-1];if(Math.hypot(X-l[0],y-l[1])<.25/SCR.z)continue;P_.push([X,y,pen&&q.pressure>0?q.pressure:.5]);if(g)scrSeg(g,cur,P_.length-1);}if(g)g.restore();}
 function scrThin(p){if(p.length<3)return p;const o=[p[0]];for(let i=1;i<p.length-1;i++){const l=o[o.length-1];if(Math.hypot(p[i][0]-l[0],p[i][1]-l[1])>=.45)o.push(p[i]);}o.push(p[p.length-1]);return o;}
-function scrFinish(){const cur=SCR.cur;SCR.cur=null;SCR.drawId=null;SCR.drawSrc=null;if(!cur)return;
- if(cur.erase){if(cur.erase.length){SCR.undo.push({a:'del',items:cur.erase});SCR.redo=[];}scrBarDraw();return;}
- cur.p=scrThin(cur.p);const sc=scrSceneAt(cur.pg,cur.p[0][1]);
- if(!sc){toast('Add a scene to this folder first, so your marks have somewhere to be kept.');scrInk(cur.pg);return;}
- const key='ink.'+SCR.id+'.'+uid(),h=JSON.stringify({p:cur.pg,t:cur.t,c:cur.c,w:cur.w,d:scrEnc(cur.p)});scrCellPut(sc.id,key,h);SCR.undo.push({a:'add',items:[{sid:sc.id,key,h}]});SCR.redo=[];if(SCR.undo.length>300)SCR.undo.shift();
- scrIndex();scrInk(cur.pg);scrBarDraw();}
-function scrErase(X,y){const cur=SCR.cur,L=SCR.idx.get(cur.pg)||[],r=9/SCR.z;let hit=false;
- for(let i=L.length-1;i>=0;i--){const q=L[i],rr=r+q.s.w/2;if(q.s.p.some(p=>Math.hypot(p[0]-X,p[1]-y)<=rr)){const c=txGet(q.sid,q.key,false);cur.erase.push({sid:q.sid,key:q.key,h:c?c.h:''});scrCellDel(q.sid,q.key);L.splice(i,1);hit=true;}}
- if(hit){SCR.sig=scrIndex(true);scrInk(cur.pg);}}
-function scrUndo(redo){const a=(redo?SCR.redo:SCR.undo).pop();if(!a)return;const put=(a.a==='add')===!!redo;
- for(const it of a.items){if(put)scrCellPut(it.sid,it.key,it.h);else scrCellDel(it.sid,it.key);}
- (redo?SCR.undo:SCR.redo).push(a);scrIndex();for(const i of SCR.mounted.keys())scrInk(i);scrBarDraw();}
 
 /* ----- Pencil, mouse and fingers on the pages ----- */
-function scrBind(st){const touches=new Map();let gest=null,zoomed=false,fingerT=0,vel=[];
- const gestInit=()=>{const T=[...touches.values()];vel=[];gest=T.length===1?{n:1,x:T[0].x,y:T[0].y}:T.length>=2?{n:2,cx:(T[0].x+T[1].x)/2,cy:(T[0].y+T[1].y)/2,d:Math.hypot(T[0].x-T[1].x,T[0].y-T[1].y)||1}:null;};
- const fake=t=>({pointerId:'t'+t.identifier,clientX:t.clientX,clientY:t.clientY,pointerType:'pen',pressure:t.force||0});
- st.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#scrMsg button'))return;cancelAnimationFrame(SCR.raf);
-  if(e.pointerType!=='touch'){if(e.pointerType==='mouse'&&e.button!==0)return;
-   if(e.pointerType==='pen'){if(SCR.drawSrc==='t')return;SCR.penDown=true;if(touches.size){touches.clear();gest=null;}if(SCR.drawId!=null)scrFinish();} /* an open stroke is kept, never dropped */
-   if(SCR.drawId!=null)return;if(!scrBegin(e))return;e.preventDefault();try{st.setPointerCapture(e.pointerId);}catch(x){}return;}
-  if(SCR.penDown||performance.now()-SCR.penLast<350)return;                       /* a hand resting on the glass while the Pencil writes */
-  e.preventDefault();try{st.setPointerCapture(e.pointerId);}catch(x){}
-  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  if(P.ui.scrFinger&&touches.size===1&&SCR.drawId==null){fingerT=performance.now();if(scrBegin(e))return;}
-  if(P.ui.scrFinger&&SCR.drawId!=null&&touches.has(SCR.drawId)){if(performance.now()-fingerT<250&&SCR.cur&&!SCR.cur.erase){const pg=SCR.cur.pg;SCR.cur=null;SCR.drawId=null;SCR.drawSrc=null;scrInk(pg);}else return;} /* a second finger straight away: a zoom, not a stroke */
-  gestInit();});
- st.addEventListener('pointermove',e=>{
-  if(e.pointerId===SCR.drawId){e.preventDefault();scrExtend(e);return;}
-  const t=touches.get(e.pointerId);if(!t||!gest)return;t.x=e.clientX;t.y=e.clientY;const T=[...touches.values()],r=st.getBoundingClientRect();
-  if(T.length===1&&gest.n===1){SCR.tx+=T[0].x-gest.x;SCR.ty+=T[0].y-gest.y;gest.x=T[0].x;gest.y=T[0].y;vel.push([performance.now(),T[0].x,T[0].y]);if(vel.length>6)vel.shift();}
-  else if(T.length>=2&&gest.n===2){const cx=(T[0].x+T[1].x)/2,cy=(T[0].y+T[1].y)/2,d=Math.hypot(T[0].x-T[1].x,T[0].y-T[1].y)||1;
-   scrZoomAt(SCR.z*d/gest.d,gest.cx-r.left,gest.cy-r.top);SCR.tx+=cx-gest.cx;SCR.ty+=cy-gest.cy;gest.cx=cx;gest.cy=cy;gest.d=d;zoomed=true;}
-  scrClamp();scrPlace();scrUpdate();});
- const up=e=>{
-  if(e.pointerId===SCR.drawId){if(e.pointerType==='pen'){SCR.penDown=false;SCR.penLast=performance.now();}touches.delete(e.pointerId);scrFinish();return;}
-  if(e.pointerType==='pen'){SCR.penDown=false;SCR.penLast=performance.now();return;}
-  if(!touches.delete(e.pointerId))return;const was=gest;gestInit();
-  if(!touches.size){if(zoomed){zoomed=false;scrRaster();}else if(was&&was.n===1&&vel.length>1){const a=vel[0],b=vel[vel.length-1],dt=b[0]-a[0];if(dt>0&&performance.now()-b[0]<80){const vy=(b[2]-a[2])/dt,vx=(b[1]-a[1])/dt;if(Math.abs(vy)>.15||Math.abs(vx)>.15)scrFling(vx,vy);}}scrPosSave();}};
- st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
- st.addEventListener('wheel',e=>{e.preventDefault();cancelAnimationFrame(SCR.raf);const r=st.getBoundingClientRect();
-  if(e.ctrlKey||e.metaKey){scrZoomAt(SCR.z*Math.exp(-e.deltaY*.01),e.clientX-r.left,e.clientY-r.top);clearTimeout(st._z);st._z=setTimeout(scrRaster,160);}else{SCR.tx-=e.deltaX;SCR.ty-=e.deltaY;}
-  scrClamp();scrPlace();scrUpdate();clearTimeout(st._p);st._p=setTimeout(scrPosSave,400);},{passive:false});
- /* iPad Safari can swallow the pointer events of quick Pencil strokes (its Scribble and double-tap watchers hold them back). Refusing the
-    touch events their default is the cure; and a Pencil stroke that still arrives with no pointer events is drawn from the touch events. */
- st.addEventListener('touchstart',e=>{if(e.target.closest&&e.target.closest('#scrMsg button'))return;e.preventDefault();for(const t of e.changedTouches){if(t.touchType!=='stylus')continue;SCR.penDown=true;
-  if(SCR.drawId!=null&&SCR.drawSrc==='p'&&performance.now()-SCR.t0<40)continue;if(SCR.drawId!=null)scrFinish();if(touches.size){touches.clear();gest=null;}scrBegin(fake(t),'t');}},{passive:false});
- st.addEventListener('touchmove',e=>{e.preventDefault();if(SCR.drawSrc!=='t')return;for(const t of e.changedTouches)if('t'+t.identifier===SCR.drawId)scrExtend(fake(t));},{passive:false});
- const tEnd=e=>{if(e.target.closest&&e.target.closest('#scrMsg button'))return;e.preventDefault();for(const t of e.changedTouches){if(t.touchType!=='stylus')continue;SCR.penDown=false;SCR.penLast=performance.now();
-  if(SCR.drawSrc==='t'&&'t'+t.identifier===SCR.drawId)scrFinish();else if(SCR.drawSrc==='p'){const c=SCR.cur;setTimeout(()=>{if(SCR.cur&&SCR.cur===c)scrFinish();},60);}}};
- st.addEventListener('touchend',tEnd,{passive:false});st.addEventListener('touchcancel',tEnd,{passive:false});
- for(const ev of ['gesturestart','gesturechange','gestureend'])st.addEventListener(ev,e=>e.preventDefault());
- st.addEventListener('contextmenu',e=>e.preventDefault());}
 /* a flick keeps the page moving, and slows */
-function scrFling(vx,vy){cancelAnimationFrame(SCR.raf);let last=performance.now();const step=t=>{const dt=Math.min(40,Math.max(1,t-last));last=t;const y0=SCR.ty+vy*dt,x0=SCR.tx+vx*dt;SCR.ty=y0;SCR.tx=x0;scrClamp();scrPlace();scrUpdate();
-  const k=Math.pow(.9965,dt);vy*=k;vx*=k;if(SCR.ty!==y0)vy=0;if(SCR.tx!==x0)vx=0;if(Math.abs(vy)<.02&&Math.abs(vx)<.02){scrPosSave();return;}SCR.raf=requestAnimationFrame(step);};SCR.raf=requestAnimationFrame(step);}
 function scrScrollBy(dy){cancelAnimationFrame(SCR.raf);SCR.ty-=dy;scrClamp();scrPlace();scrUpdate();}
-function scrKey(e){const st=scrStage(),h=(st&&st.clientHeight)||600,k=e.key;
- if((e.metaKey||e.ctrlKey)&&k.toLowerCase()==='z'){scrUndo(e.shiftKey);return true;}
- if(e.metaKey||e.ctrlKey||e.altKey)return false;
- if(k==='PageDown'||(k===' '&&!e.shiftKey)){scrScrollBy(h*.9);return true;}if(k==='PageUp'||(k===' '&&e.shiftKey)){scrScrollBy(-h*.9);return true;}
- if(k==='ArrowDown'){scrScrollBy(70);return true;}if(k==='ArrowUp'){scrScrollBy(-70);return true;}
- if(k==='Home'){scrScrollBy(-1e9);return true;}if(k==='End'){scrScrollBy(1e9);return true;}return false;}
 
 /* ----- the view, its bar, and the ways in ----- */
-function scrDom(){if(document.getElementById('scrView'))return;const v=document.createElement('div');v.id='scrView';v.hidden=true;
- v.innerHTML='<div id="scrBar"></div><div id="scrStage" aria-label="The script’s pages. Write on them with the Pencil."><div id="scrWorld"></div><canvas id="scrPdfV" hidden></canvas><canvas id="scrInkV"></canvas><div id="scrMsg"></div></div>';$('#main').appendChild(v);
- scrBind(v.querySelector('#scrStage'));
- v.querySelector('#scrBar').addEventListener('click',e=>{const b=e.target.closest('[data-scr]');if(!b)return;const k=b.dataset.scr;
-  if(k.startsWith('t:')){SCR.tool=k.slice(2);}else if(k.startsWith('c:')){SCR.color[SCR.tool==='hl'?'hl':'pen']=k.slice(2);}
-  else if(k==='undo')scrUndo(false);else if(k==='redo')scrUndo(true);else if(k==='scene')scrGoScene(scene());else if(k==='fit')scrFit();else if(k==='more'){scrInfoDialog();return;}scrBarDraw();});
- v.querySelector('#scrBar').addEventListener('change',e=>{if(e.target.id==='scrSz'){SCR.size=+e.target.value;scrBarDraw();}});
- v.querySelector('#scrMsg').addEventListener('click',e=>{const b=e.target.closest('[data-scr]');if(!b)return;if(b.dataset.scr==='add')scrAdd();else if(b.dataset.scr==='retry')scrLoad();});
- let rs=0;addEventListener('resize',()=>{if(!scrOn)return;clearTimeout(rs);rs=setTimeout(()=>{if(SCR.state==='ok'){scrClamp();scrPlace();scrRaster();scrUpdate();}},150);});}
-function scrBarDraw(){const el=document.getElementById('scrBar');if(!el)return;const ok=SCR.state==='ok',sc=SCR.sc,tl=SCR.tool,set=tl==='er'?null:SCR_COLORS[tl==='hl'?'hl':'pen'],cur=SCR.color[tl==='hl'?'hl':'pen'],s=scene();
- const h=!ok?`<b class="scrnm">${sc?esc(sc.name):'Script'}</b>`:
-  `<b class="scrnm" title="${esc(sc.name)}">${esc(sc.name)}</b><div class="seg" role="group" aria-label="Tool">${[['pen','Pen'],['hl','Highlighter'],['er','Eraser']].map(([k,l])=>`<button data-scr="t:${k}"${tl===k?' class="on" aria-pressed="true"':' aria-pressed="false"'}>${l}</button>`).join('')}</div>
-   <div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-scr="c:${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>
-   <select id="scrSz" aria-label="Thickness"${set?'':' style="visibility:hidden"'}>${['Fine','Medium','Bold'].map((l,i)=>`<option value="${i}"${SCR.size===i?' selected':''}>${l}</option>`).join('')}</select>
-   <button class="scric" data-scr="undo" aria-label="Undo" title="Undo"${SCR.undo.length?'':' disabled'}><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button class="scric" data-scr="redo" aria-label="Redo" title="Redo"${SCR.redo.length?'':' disabled'}><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button><span class="sp"></span>
-   <button data-scr="scene">${esc(s.number?'Go to Scene '+s.number:'Go to This Scene')}</button><span id="scrPg"></span><button data-scr="fit">Fit Width</button><button data-scr="more">Script…</button>`;
- if(h===SCR.bar)return;SCR.bar=h;el.innerHTML=h;scrPgLabel();}
 function scrMsg(){const el=document.getElementById('scrMsg');if(!el)return;const s=scene(),fid=sFolder(s),f=fid&&fById(fid);let h='';
  if(SCR.state==='none')h=f?`<div class="scrcard"><b>No script pages for ${esc(f.name)} yet</b><p>Add the script’s PDF. Its pages appear here to read, and to mark up with the Pencil. They are kept with your work, on every device you sign in on.</p><button class="pri" data-scr="add">Add the Script’s PDF…</button></div>`
    :`<div class="scrcard"><b>This scene isn’t in a folder</b><p>A script belongs to an episode or a film. Put this scene in a folder, then add the script’s PDF here.</p></div>`;
@@ -7001,9 +7283,9 @@ function scrMsg(){const el=document.getElementById('scrMsg');if(!el)return;const
  el.innerHTML=h;el.hidden=!h;}
 function scrTabs(){const b=document.getElementById('mSc');if(!b)return;b.classList.toggle('on',scrOn);document.querySelectorAll('#setSw [data-ssw]').forEach(q=>q.classList.toggle('on',(q.dataset.ssw==='script')===scrOn));for(const [id,m] of [['#mDia','diagram'],['#mList','list'],['#mNb','nb'],['#mSt','st']])$(id).classList.toggle('on',!scrOn&&mode===m);}
 function scrOpen(){if(scoutOn||scrOn)return;if(txTimer)txFlush();closePop();closeDocPop();endTool();scrDom();scrOn=true;P.ui.scr=1;$('#app').classList.add('scr-on');document.getElementById('scrView').hidden=false;scrTabs();SCR.bar='';scrSync(true);saveLocal();try{phDraw();}catch(e){}if(setOn)renderSet();}
-function scrClose(keep){if(!scrOn)return;try{if(SCR.drawId!=null)scrFinish();scrInkFlush();scrPosSave();}catch(e){}scrOn=false;if(!keep)delete P.ui.scr;$('#app').classList.remove('scr-on');const v=document.getElementById('scrView');if(v)v.hidden=true;scrFree();scrTabs();saveLocal();try{phDraw();}catch(e){}if(setOn)renderSet();requestAnimationFrame(()=>{try{fit();}catch(e){}});}
+function scrClose(keep){if(!scrOn)return;try{if(SCR.edit)scrEdDone();scrMenuClose();scrPopsClose();SCR.find=null;SCR.sel=null;if(SCR.drawId!=null)scrFinish();scrInkFlush();scrPosSave();}catch(e){}scrOn=false;if(!keep)delete P.ui.scr;$('#app').classList.remove('scr-on');const v=document.getElementById('scrView');if(v)v.hidden=true;scrFree();scrTabs();saveLocal();try{phDraw();}catch(e){}if(setOn)renderSet();requestAnimationFrame(()=>{try{fit();}catch(e){}});}
 /* called whenever the app redraws: a new scene, a new script, or marks that came in from the other device */
-function scrSync(force){if(!scrOn)return;const s=scene(),o=scrOf(s);
+function scrSync(force){if(!scrOn)return;const s=scene(),o=scrOf(s);{const st=scrStage(),w=st?st.clientWidth:0;if(w!==SCR.stW){SCR.stW=w;scrPopsClose();scrMenuClose();}}
  if(!o){if(SCR.state!=='none'||force){scrFree();SCR.loadSeq++;SCR.id=null;SCR.sc=null;SCR.doc=null;SCR.state='none';}SCR.f=sFolder(s)?fById(sFolder(s)):null;scrBarDraw();scrMsg();return;}
  if(o.sc.id!==SCR.id||(!SCR.doc&&SCR.state==='')){scrFree();SCR.id=o.sc.id;SCR.sc=o.sc;SCR.f=o.f;SCR.undo=[];SCR.redo=[];SCR.idx=new Map();SCR.sig='';SCR.lastScene=null;scrBarDraw();scrLoad();return;}
  SCR.f=o.f;SCR.sc=o.sc;scrBarDraw();if(SCR.state!=='ok')return;SCR.marks=scrMarks(o.f,o.sc);
@@ -7022,8 +7304,9 @@ async function scrAddFile(fid,fl){const f=fById(fid);if(!f)return;if(fl.size>40e
 function scrInfoDialog(){const sc=SCR.sc,f=SCR.f;if(!sc||!f)return;const mb=sc.size>=1e6?(sc.size/1e6).toFixed(1)+' MB':Math.max(1,Math.round(sc.size/1000))+' KB',n=scrIndex(true).split(':')[0];
  modal(`<h3>Script Pages</h3><p><b>${esc(sc.name)}</b><br><span class="mut">${SCR.n?plural(SCR.n,'page')+' · ':''}${mb} · added ${new Date(sc.at).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})} · for ${esc(f.name)}${+n?' · '+plural(+n,'mark'):''}</span></p>
   <label class="imopt"><input type="checkbox" id="scrFg"${P.ui.scrFinger?' checked':''}> Draw with a finger <span class="mut">· for an iPad without a Pencil. Two fingers then move and zoom the page.</span></label>
-  <div class="btns"><button class="danger" id="scrRm">Remove the Script…</button></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,card=>{
+  <div class="btns"><button id="scrFitB">Fit the Page to the Width</button><button class="danger" id="scrRm">Remove the Script…</button></div><div class="btns end"><button class="pri" data-x>Done</button></div>`,card=>{
   card.querySelector('#scrFg').onchange=e=>{if(e.target.checked)P.ui.scrFinger=1;else delete P.ui.scrFinger;saveLocal();};
+  card.querySelector('#scrFitB').onclick=()=>{closeModal();scrFit();};
   card.querySelector('#scrRm').onclick=()=>{kidNext();confirmBox('Remove the script from '+f.name+'?','Its pages and the marks on them come off this folder. Undo brings them back.','Remove',()=>{delete f.script;commit();});};});}
 /* ---------- the blocking as a video ---------- */
 let vidStop=false;
