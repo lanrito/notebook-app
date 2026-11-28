@@ -221,7 +221,8 @@ details.oth{margin-top:12px}details.oth summary{font-size:12.5px;font-weight:650
 #scrPg{font-size:12.5px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
 #scrStage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #scrWorld{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
-.scrpg{position:absolute;left:0;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.2)}.scrpg canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}.scrink{mix-blend-mode:multiply}
+.scrpg{position:absolute;left:0;background:#fff;box-shadow:0 1px 8px rgba(0,0,0,.2)}.scrpg canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}#scrPdfV,#scrInkV{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none}#scrInkV{mix-blend-mode:multiply}
+#scrBar>button.scric{width:38px;padding:0;display:inline-flex;align-items:center;justify-content:center}#scrBar .scric svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #scrMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;cursor:default}#scrMsg[hidden]{display:none}
 .scrcard{max-width:440px;text-align:center;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:26px 24px}.scrcard b{display:block;font-size:18px;margin-bottom:8px}.scrcard p{margin:0 0 16px;color:var(--mut);line-height:1.5;font-size:14.5px}.scrcard p:last-child{margin-bottom:0}
 .scrcard button{min-height:42px;padding:0 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-weight:600;font-size:15px}
@@ -865,7 +866,7 @@ table.sl thead th.cdr{box-shadow:inset -4px 0 0 var(--accent)}
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
-<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261127234246';
+<script>window.BB_FIREBASE={"apiKey": "AIzaSyCUtzGFruu67J2nWs10NDhq_s8FtmrL1-A", "authDomain": "blocking-board.firebaseapp.com", "projectId": "blocking-board", "storageBucket": "blocking-board.firebasestorage.app", "messagingSenderId": "913569047735", "appId": "1:913569047735:web:30a6b22fb34e1abe7c5932"};window.BB_JSPDF='vendor/jspdf.umd.min.js';window.BB_UNIFONT='vendor/nb-uni';window.BB_PDFJS='vendor/pdf.min.js';window.BB_PDFWORKER='vendor/pdf.worker.min.js';window.BB_VERSION='20261128005719';
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});}).catch(()=>{}));</script>
 <script>
 (()=>{'use strict';
@@ -5072,9 +5073,10 @@ function renderTop(){
 const libTouch=()=>/iPad|iPhone|Android/.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent));
 const libNarrow=()=>innerWidth<1000;
 /* open on a computer, hidden on a tablet, until you choose; then each device remembers (an automated browser starts hidden, so the test suite sees the plain layout unless it asks) */
-function libOn(){return P.ui.lib!=null?!!P.ui.lib:(!libTouch()&&innerWidth>=1100&&!navigator.webdriver);}
+let libSetOn=false; /* the Library in Set: only when asked, closed again on entering Set and after a pick */
+function libOn(){if(setOn)return libSetOn;return P.ui.lib!=null?!!P.ui.lib:(!libTouch()&&innerWidth>=1100&&!navigator.webdriver);}
 let libQ='',libHtml=null;
-function libSet(on,focus){P.ui.lib=!!on;saveLocal();renderLib();if(on&&focus){const i=$('#libq');if(i&&matchMedia('(pointer:fine)').matches){i.focus();i.select();}}}
+function libSet(on,focus){if(setOn)libSetOn=!!on;else{P.ui.lib=!!on;saveLocal();}renderLib();if(on&&focus){const i=$('#libq');if(i&&matchMedia('(pointer:fine)').matches){i.focus();i.select();}}}
 const libAuto=()=>new Set(fPath(sFolder(scene())).map(f=>f.id));
 function libIsOpen(id,auto){const o=(P.ui.libOpen||{})[id];return o!=null?!!o:auto.has(id);}
 function libRowS(s,depth,sub){const cur=s.id===P.sceneId,top=s.number?'Sc. '+s.number:(s.scout?'Place':''),name=(s.title||s.heading||'Untitled').toUpperCase();
@@ -5089,13 +5091,13 @@ function libList(){const q=libQ.trim().toLowerCase();
  const tree=libTree(null,0,libAuto()),loose=fScenes(null);
  return tree+(loose.length?`<div class="lbh" data-ldrop="root">${tree?'Not in a folder':'Scenes'}</div>`+loose.map(s=>libRowS(s,0)).join(''):'')+(tree||loose.length?'':'<div class="lbe">No scenes yet.</div>')
   +'<div class="lbsep"></div><button class="lbx" data-la="sample">Sample Scene…</button><button class="lbx" data-la="tpls">Templates</button><button class="lbx" data-la="trash">Trash</button>';}
-function renderLib(){const a=$('#app'),el=$('#lib');if(!el)return;const on=libOn()&&!setOn;a.classList.toggle('lib-on',on);
+function renderLib(){const a=$('#app'),el=$('#lib');if(!el)return;const on=libOn();a.classList.toggle('lib-on',on);
  const sb=$('#sceneBtn');if(sb)sb.setAttribute('aria-expanded',on?'true':'false');if(!on)return;
  if(!el.firstChild){el.innerHTML='<div class="lbtop"><b>Library</b><button id="libHide" aria-label="Hide the Library" title="Hide the Library">‹</button></div><div class="lbb"><button class="pri" data-la="new">New Scene</button><button data-la="newfolder">New Folder</button></div><div class="lbq"><input id="libq" type="search" placeholder="Search scenes" aria-label="Search scenes" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="lbtopdrop" data-ldrop="root"><span class="ds">Drop here to take it out of its folder</span><span class="df">Drop here for the top level</span></div></div><div id="libL"></div>';libHtml=null;}
  const h=libList();if(h!==libHtml){$('#libL').innerHTML=h;libHtml=h;}}
 function libPick(id){const t=P.scenes.find(s=>s.id===id);if(!t)return;
  if(id!==P.sceneId){const o=P.ui.libOpen=P.ui.libOpen||{};for(const f of fPath(sFolder(t)))o[f.id]=true;try{flushNotes();if(txTimer)txFlush();}catch(e){}openScene(id);}
- if(libNarrow())libSet(false);}
+ if(libNarrow()||setOn)libSet(false);}
 function libNewFolder(){libName('New folder','','Add',v=>{P.folders.push({id:uid(),name:v,parent:null});commit();toast(`Folder “${v}” created. Drag scenes onto it, or drag it onto another folder.`);},v=>fTaken(v,null)?fDupMsg(v):'');}
 /* show where the open scene lives: its folders opened, the row scrolled into view and flashed */
 function libCurSeen(){const r=$('#libL .lbs.cur'),L=$('#libL');if(!r||!L)return false;const a=r.getBoundingClientRect(),b=L.getBoundingClientRect();return a.top>=b.top-2&&a.bottom<=b.bottom+2;}
@@ -5184,19 +5186,19 @@ $('#lib').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.target.id==='lib
 $('#sceneBtn').onclick=()=>sceneDrop();
 /* the scene button's list: the scenes of the folder you are in, and the way to the Library */
 function sceneDrop(){const b=$('#sceneBtn'),was=document.querySelector('#drop.scn');closePop();closeDrop();if(was)return;
- const c=scene(),fid=sFolder(c),fo=fid?fById(fid):null,list=(c.tpl?[]:fScenes(fid)).filter(x=>!setOn||!x.scout),on=libOn()&&!setOn;
+ const c=scene(),fid=sFolder(c),fo=fid?fById(fid):null,list=(c.tpl?[]:fScenes(fid)).filter(x=>!setOn||!x.scout),on=libOn();
  const row=x=>{const top=x.number?'Sc. '+x.number:(x.scout?'Place':''),name=(x.title||x.heading||'Untitled').toUpperCase(),me=x.id===c.id;
   return `<button class="sdr${me?' cur':''}" data-sd="${x.id}"${me?' aria-current="true"':''} title="${esc(sceneLabel(x))}">${top?`<b>${esc(top)}</b>`:''}<span>${esc(name)}</span>${me?'<i class="sdk">✓</i>':''}</button>`;};
  const d=document.createElement('div');d.id='drop';d.className='mm scn';
- d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf${setOn||scoutOn?'':' two'}">${setOn||scoutOn?'':'<button id="sdNew">New Scene</button>'}<button id="sdLib">${setOn?'All Scenes…':on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
+ d.innerHTML=`<h4>${esc(c.tpl?'Template':fo?fo.name:'Not in a folder')}</h4><div class="sdl">${list.map(row).join('')||'<div class="pnote">Templates are kept in the Library.</div>'}</div><div class="sdf two"><button id="sdNew">New Scene</button><button id="sdLib">${on?'Hide Scene Library':'Show Scene Library'}</button></div>`;
  document.body.appendChild(d);const r=b.getBoundingClientRect();d.style.top=(r.bottom+6)+'px';d.style.maxHeight=Math.max(200,innerHeight-r.bottom-16)+'px';d.style.minWidth=Math.min(Math.max(300,r.width),innerWidth-16)+'px';d.style.left=Math.max(8,Math.min(innerWidth-d.offsetWidth-8,r.left))+'px';
  const me=d.querySelector('.sdr.cur');if(me)me.scrollIntoView({block:'nearest'});
  d.addEventListener('click',e=>{const x=e.target.closest('[data-sd]');if(x){closeDrop();libPick(x.dataset.sd);return;}
   if(e.target.closest('#sdNew')){closeDrop();newScene();return;}
-  if(e.target.closest('#sdLib')){closeDrop();if(setOn)openBrowser();else if(libOn())libSet(false);else{libSet(true);libReveal();}}});
+  if(e.target.closest('#sdLib')){closeDrop();if(libOn())libSet(false);else{libSet(true);libReveal();}}});
  setTimeout(()=>addEventListener('pointerdown',dropOut,true),0);}
 const newHome=()=>{const f=sFolder(scene()),fo=f?fById(f):null;return fo&&fo.sample?null:f;};
-function newScene(folder){if(acctWall())return;if(folder===undefined)folder=newHome();const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
+function newScene(folder){if(acctWall())return;if(setOn||scoutOn)setView('prep'); /* a new scene is built in Prep */if(folder===undefined)folder=newHome();const n=fScenes(folder).reduce((m,s)=>Math.max(m,parseInt(s.number,10)||0),0)+1;const s=blankScene(n);if(folder)s.folder=folder;P.scenes.push(s);noteRecent(s.id);P.sceneId=s.id;sel=null;msel=null;inspOpen=false;endTool();commit();fit();sceneInfo();}
 /* ---------- scene browser: folders, search, recent, trash ---------- */
 function natCmp(a,b){return String(a||'').localeCompare(String(b||''),undefined,{numeric:true,sensitivity:'base'});}
 function liveScenes(){return P.scenes.filter(s=>!s.trashed&&!s.tpl);}
@@ -5860,7 +5862,7 @@ function renderScout(){const el=$('#scoutPanel');if(!el)return;$('#app').classLi
  <div class="snav" style="flex-wrap:wrap"><button data-sc="link">Use This Place…</button>${loose&&base?`<button data-sc="attach">Attach to ${esc(scName(base))}</button>`:''}</div>
  <button class="sm danger" data-sc="del" style="align-self:flex-start">Delete This Place…</button>`;}
 /* Prep, Scout, Set */
-function setView(v){const was=setOn?'set':scoutOn?'scout':'prep';
+function setView(v){const was=setOn?'set':scoutOn?'scout':'prep';if(v==='set'&&was!=='set')libSetOn=false;
  if(v===was){render();return;}const wasSc=scrOn;
  if(was==='scout'&&scene().scout&&P.ui.prevScene&&P.scenes.some(x=>x.id===P.ui.prevScene&&!x.trashed&&!x.scout)){P.sceneId=P.ui.prevScene;sel=null;}
  phPlan=false;setOn=v==='set';scoutOn=v==='scout';if(setOn)P.ui.setOn=true;else delete P.ui.setOn;if(v==='prep')delete P.ui.vm;else P.ui.vm=v;
@@ -6825,27 +6827,56 @@ function scrSeg(g,s,i){const P_=s.p;if(i===0){g.beginPath();g.arc(P_[0][0],P_[0]
  const a=P_[i-1],b=P_[i],m1=i>1?[(P_[i-2][0]+a[0])/2,(P_[i-2][1]+a[1])/2]:a,m2=[(a[0]+b[0])/2,(a[1]+b[1])/2];g.lineWidth=(scrWid(s,a)+scrWid(s,b))/2;g.beginPath();g.moveTo(m1[0],m1[1]);g.quadraticCurveTo(a[0],a[1],m2[0],m2[1]);g.stroke();}
 function scrTail(g,s){const P_=s.p,n=P_.length;if(n<2)return;const a=P_[n-2],b=P_[n-1];g.lineWidth=scrWid(s,b);g.beginPath();g.moveTo((a[0]+b[0])/2,(a[1]+b[1])/2);g.lineTo(b[0],b[1]);g.stroke();}
 function scrStroke(g,s){scrStyle(g,s);for(let i=0;i<s.p.length;i++)scrSeg(g,s,i);scrTail(g,s);}
-function scrInk(i){const m=SCR.mounted.get(i);if(!m)return;const c=m.ink,w=Math.round(SCR.pw*SCR.R),h=Math.round(SCR.ph*SCR.R);if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
- const g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,w,h);g.setTransform(SCR.R,0,0,SCR.R,0,0);
- const L=SCR.idx.get(i)||[];for(const q of L)if(q.s.t==='hl')scrStroke(g,q.s);for(const q of L)if(q.s.t!=='hl')scrStroke(g,q.s);if(SCR.cur&&SCR.cur.p&&SCR.cur.pg===i)scrStroke(g,SCR.cur);}
+/* the sharp layers. The window's size in device pixels, with a little above and below so a scroll has ink and page to show at once */
+function scrVGeom(){const st=document.getElementById('scrStage'),w=st?st.clientWidth:0,h=st?st.clientHeight:0,oy=Math.round(h*.15),dpr=window.devicePixelRatio||1,s=Math.min(dpr,Math.sqrt(9e6/((w*(h+2*oy))||1)));return {w,h,oy,s,W:Math.round(w*s),H:Math.round((h+2*oy)*s)};}
+function scrVSize(c,G){if(c.width!==G.W||c.height!==G.H){c.width=G.W;c.height=G.H;}c.style.top=-G.oy+'px';c.style.width=G.w+'px';c.style.height=(G.h+2*G.oy)+'px';}
+function scrVFollow(c,v){if(!c||!v)return;const k=SCR.z/v.z;c.style.transform=(k===1&&SCR.tx===v.tx&&SCR.ty===v.ty)?'':`translate(${SCR.tx-v.tx*k}px,${SCR.ty-v.ty*k+v.oy*(1-k)}px) scale(${k})`;}
+const scrBaseR=()=>Math.max(1,Math.min(Math.sqrt(4.6e6/(SCR.pw*SCR.ph)),SCR.z*(window.devicePixelRatio||1)));
+function scrInkDraw(){const c=document.getElementById('scrInkV');cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;clearTimeout(SCR.inkT);if(!c||SCR.state!=='ok'||!scrOn)return;const G=scrVGeom();if(!G.w||!G.h)return;scrVSize(c,G);
+ const g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,G.W,G.H);
+ const k=SCR.z*G.s,a=Math.max(0,Math.floor((-SCR.ty-G.oy)/SCR.z/scrStep())),b=Math.min(SCR.n-1,Math.floor((-SCR.ty+G.h+G.oy)/SCR.z/scrStep()));
+ for(let i=a;i<=b;i++){const L=SCR.idx.get(i)||[],cur=SCR.cur&&SCR.cur.p&&SCR.cur.pg===i?SCR.cur:null;if(!L.length&&!cur)continue;
+  g.save();g.setTransform(k,0,0,k,SCR.tx*G.s,(SCR.ty+G.oy+i*scrStep()*SCR.z)*G.s);g.beginPath();g.rect(0,0,SCR.pw,SCR.ph);g.clip();
+  for(const q of L)if(q.s.t==='hl')scrStroke(g,q.s);for(const q of L)if(q.s.t!=='hl')scrStroke(g,q.s);if(cur)scrStroke(g,cur);g.restore();}
+ SCR.inkView={tx:SCR.tx,ty:SCR.ty,z:SCR.z,oy:G.oy,s:G.s};SCR.inkAt=performance.now();c.style.transform='';}
+function scrInk(){if(!SCR.inkQ)SCR.inkQ=requestAnimationFrame(scrInkDraw);}
+/* the view moved: the ink goes with it at once, and is redrawn sharp a moment later (and at most every 70 ms while it keeps moving) */
+function scrInkMove(){const c=document.getElementById('scrInkV');if(!c)return;scrVFollow(c,SCR.inkView);if(SCR.inkQ)return;const d=performance.now()-(SCR.inkAt||0);if(d>70)scrInk();else{clearTimeout(SCR.inkT);SCR.inkT=setTimeout(scrInkDraw,75-d);}}
+/* the pages on screen, drawn again at the screen's resolution when the page canvases cannot reach it */
+function scrDetailOff(){clearTimeout(SCR.dT);SCR.dSeq=(SCR.dSeq||0)+1;if(SCR.dTask){try{SCR.dTask.cancel();}catch(e){}SCR.dTask=null;}const c=document.getElementById('scrPdfV');if(c&&!c.hidden){c.hidden=true;c.width=0;c.height=0;}SCR.pdfView=null;}
+function scrDetailMove(){const c=document.getElementById('scrPdfV');if(!c)return;if(SCR.state!=='ok'||!scrOn){scrDetailOff();return;}const G=scrVGeom();
+ if(!G.w||SCR.z*G.s<=scrBaseR()*1.03){scrDetailOff();return;}
+ if(SCR.pdfView&&!c.hidden)scrVFollow(c,SCR.pdfView);clearTimeout(SCR.dT);SCR.dT=setTimeout(scrDetail,140);}
+async function scrDetail(){const c=document.getElementById('scrPdfV'),doc=SCR.doc;if(!c||!doc||SCR.state!=='ok'||!scrOn)return;const seq=SCR.dSeq=(SCR.dSeq||0)+1;if(SCR.dTask){try{SCR.dTask.cancel();}catch(e){}SCR.dTask=null;}
+ const G=scrVGeom();if(!G.w||!G.h)return;if(SCR.z*G.s<=scrBaseR()*1.03){scrDetailOff();return;}
+ const v={tx:SCR.tx,ty:SCR.ty,z:SCR.z,oy:G.oy,s:G.s},k=v.z*G.s,a=Math.max(0,Math.floor((-v.ty-G.oy)/v.z/scrStep())),b=Math.min(SCR.n-1,Math.floor((-v.ty+G.h+G.oy)/v.z/scrStep()));
+ const tmp=document.createElement('canvas');tmp.width=G.W;tmp.height=G.H;const tg=tmp.getContext('2d');let sl=null;const drop=()=>{tmp.width=0;if(sl)sl.width=0;};
+ try{for(let i=a;i<=b;i++){const px=v.tx*G.s,py=(v.ty+G.oy+i*scrStep()*v.z)*G.s,x0=Math.max(0,Math.floor(px)),y0=Math.max(0,Math.floor(py)),x1=Math.min(G.W,Math.ceil(px+SCR.pw*k)),y1=Math.min(G.H,Math.ceil(py+SCR.ph*k));if(x1<=x0||y1<=y0)continue;
+   const pg=await doc.getPage(i+1);if(seq!==SCR.dSeq){drop();return;}
+   const v1=pg.getViewport({scale:1}),kk=Math.min(SCR.pw/v1.width,SCR.ph/v1.height)*k;
+   sl=document.createElement('canvas');sl.width=x1-x0;sl.height=y1-y0;const sg=sl.getContext('2d');sg.fillStyle='#fff';sg.fillRect(0,0,sl.width,sl.height);
+   const task=SCR.dTask=pg.render({canvasContext:sg,viewport:pg.getViewport({scale:kk}),transform:[1,0,0,1,px-x0,py-y0]});await task.promise;if(SCR.dTask===task)SCR.dTask=null;if(seq!==SCR.dSeq){drop();return;}
+   tg.drawImage(sl,x0,y0);sl.width=0;sl=null;}
+  scrVSize(c,G);const g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,G.W,G.H);g.drawImage(tmp,0,0);tmp.width=0;SCR.pdfView=v;c.hidden=false;scrVFollow(c,v);}
+ catch(e){drop();}}
 
 /* ----- the pages: only those near the window are drawn ----- */
 const scrStage=()=>document.getElementById('scrStage');
 const scrStep=()=>SCR.ph+SCR_GAP;
-function scrPlace(){const w=document.getElementById('scrWorld');if(w)w.style.transform=`translate(${SCR.tx}px,${SCR.ty}px) scale(${SCR.z})`;scrPgLabel();}
+function scrPlace(){const w=document.getElementById('scrWorld');if(w)w.style.transform=`translate(${SCR.tx}px,${SCR.ty}px) scale(${SCR.z})`;scrPgLabel();scrInkMove();scrDetailMove();}
 function scrClamp(){const st=scrStage();if(!st)return;const w=st.clientWidth,h=st.clientHeight,pw=SCR.pw*SCR.z,th=(SCR.n*scrStep()-SCR_GAP)*SCR.z,m=60;
  SCR.tx=pw<w?(w-pw)/2:Math.min(m,Math.max(w-pw-m,SCR.tx));SCR.ty=th+24<h?12:Math.min(12,Math.max(h-th-12,SCR.ty));}
 function scrFit(){const st=scrStage();if(!st||!st.clientWidth)return;const top=(12-SCR.ty)/SCR.z;SCR.z=Math.max(.3,Math.min(2.4,(st.clientWidth-24)/SCR.pw));SCR.ty=12-top*SCR.z;scrClamp();scrPlace();scrRaster();scrUpdate();}
 function scrZoomAt(z2,px,py){z2=Math.min(5,Math.max(.3,z2));SCR.tx=px-(px-SCR.tx)*(z2/SCR.z);SCR.ty=py-(py-SCR.ty)*(z2/SCR.z);SCR.z=z2;}
 function scrPgNow(){const st=scrStage();if(!st||!SCR.n)return 0;return Math.max(0,Math.min(SCR.n-1,Math.floor((-SCR.ty+st.clientHeight*.35)/SCR.z/scrStep())));}
 function scrPgLabel(){const e=document.getElementById('scrPg');if(e)e.textContent=SCR.state==='ok'&&SCR.n?`Page ${scrPgNow()+1} of ${SCR.n}`:'';}
-function scrMount(i){const el=document.createElement('div');el.className='scrpg';el.dataset.pg=i;el.style.cssText=`top:${i*scrStep()}px;width:${SCR.pw}px;height:${SCR.ph}px`;const ink=document.createElement('canvas');ink.className='scrink';el.appendChild(ink);
- document.getElementById('scrWorld').appendChild(el);SCR.mounted.set(i,{el,ink,cv:null,r:0,busy:0,task:null});scrInk(i);scrRenderPdf(i);}
-function scrUnmount(i){const m=SCR.mounted.get(i);if(!m)return;if(m.task){try{m.task.cancel();}catch(e){}}if(m.cv)m.cv.width=0;m.ink.width=0;m.el.remove();SCR.mounted.delete(i);}
-function scrFree(){for(const i of [...SCR.mounted.keys()])scrUnmount(i);cancelAnimationFrame(SCR.raf);}
+function scrMount(i){const el=document.createElement('div');el.className='scrpg';el.dataset.pg=i;el.style.cssText=`top:${i*scrStep()}px;width:${SCR.pw}px;height:${SCR.ph}px`;
+ document.getElementById('scrWorld').appendChild(el);SCR.mounted.set(i,{el,cv:null,r:0,busy:0,task:null});scrRenderPdf(i);}
+function scrUnmount(i){const m=SCR.mounted.get(i);if(!m)return;if(m.task){try{m.task.cancel();}catch(e){}}if(m.cv)m.cv.width=0;m.el.remove();SCR.mounted.delete(i);}
+function scrFree(){for(const i of [...SCR.mounted.keys()])scrUnmount(i);cancelAnimationFrame(SCR.raf);cancelAnimationFrame(SCR.inkQ);SCR.inkQ=0;clearTimeout(SCR.inkT);SCR.inkView=null;scrDetailOff();const c=document.getElementById('scrInkV');if(c){c.width=0;c.height=0;}}
 function scrUpdate(){const st=scrStage();if(!st||SCR.state!=='ok'||!scrOn)return;const h=st.clientHeight,a=Math.floor((-SCR.ty)/SCR.z/scrStep()),b=Math.floor((-SCR.ty+h)/SCR.z/scrStep()),lo=Math.max(0,a-1),hi=Math.min(SCR.n-1,b+1);
  for(const i of [...SCR.mounted.keys()])if(i<lo||i>hi)scrUnmount(i);for(let i=lo;i<=hi;i++)if(!SCR.mounted.has(i))scrMount(i);}
-function scrRaster(){const dpr=window.devicePixelRatio||1,cap=Math.sqrt(4.6e6/(SCR.pw*SCR.ph)),R=Math.max(1,Math.min(cap,SCR.z*dpr));if(Math.abs(R-SCR.R)<.01)return;SCR.R=R;for(const i of SCR.mounted.keys()){scrInk(i);scrRenderPdf(i);}}
+function scrRaster(){const R=scrBaseR();if(Math.abs(R-SCR.R)<.01)return;SCR.R=R;for(const i of SCR.mounted.keys())scrRenderPdf(i);}
 async function scrRenderPdf(i){const m=SCR.mounted.get(i),doc=SCR.doc;if(!m||!doc)return;const R=SCR.R;if(m.r===R||m.busy===R)return;m.busy=R;
  try{const pg=await doc.getPage(i+1),v1=pg.getViewport({scale:1}),k=Math.min(SCR.pw/v1.width,SCR.ph/v1.height)*R,vp=pg.getViewport({scale:k});
   const c=document.createElement('canvas');c.className='scrpdf';c.width=Math.round(SCR.pw*R);c.height=Math.round(SCR.ph*R);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);
@@ -6868,14 +6899,16 @@ function scrGoScene(s,quiet){const m=(SCR.marks||[]).find(q=>q.s&&q.s.id===s.id)
 
 /* ----- a stroke ----- */
 function scrPt(e){const r=scrStage().getBoundingClientRect();return [(e.clientX-r.left-SCR.tx)/SCR.z,(e.clientY-r.top-SCR.ty)/SCR.z];}
-function scrLive(){const m=SCR.cur&&SCR.mounted.get(SCR.cur.pg);if(!m)return null;const g=m.ink.getContext('2d');g.setTransform(SCR.R,0,0,SCR.R,0,0);return g;}
+/* the stroke in hand is drawn straight onto the ink's canvas, inside its page; whoever asks for it gives it back with restore() */
+function scrLive(){const c=document.getElementById('scrInkV'),cur=SCR.cur;if(!c||!cur)return null;let v=SCR.inkView;if(!v||v.tx!==SCR.tx||v.ty!==SCR.ty||v.z!==SCR.z||!c.width){scrInkDraw();v=SCR.inkView;if(!v)return null;}
+ const g=c.getContext('2d'),k=SCR.z*v.s;g.save();g.setTransform(k,0,0,k,SCR.tx*v.s,(SCR.ty+v.oy+cur.pg*scrStep()*SCR.z)*v.s);g.beginPath();g.rect(0,0,SCR.pw,SCR.ph);g.clip();return g;}
 function scrBegin(e,src){if(SCR.state!=='ok')return false;const [X,Y]=scrPt(e),i=Math.floor(Y/scrStep()),y=Y-i*scrStep();if(i<0||i>=SCR.n||y>SCR.ph||X<0||X>SCR.pw)return false;
  const pen=e.pointerType==='pen',pr=pen&&e.pressure>0?e.pressure:.5;SCR.drawId=e.pointerId;SCR.drawSrc=src||'p';SCR.t0=performance.now();cancelAnimationFrame(SCR.raf);
  if(SCR.tool==='er'){SCR.cur={erase:[],pg:i};scrErase(X,y);return true;}
- SCR.cur={pg:i,t:SCR.tool==='hl'?'hl':'pen',c:SCR.color[SCR.tool==='hl'?'hl':'pen'],w:(SCR.tool==='hl'?SCR_HLW:SCR_PENW)[SCR.size],p:[[X,y,pr]]};const g=scrLive();if(g){scrStyle(g,SCR.cur);scrSeg(g,SCR.cur,0);}return true;}
+ SCR.cur={pg:i,t:SCR.tool==='hl'?'hl':'pen',c:SCR.color[SCR.tool==='hl'?'hl':'pen'],w:(SCR.tool==='hl'?SCR_HLW:SCR_PENW)[SCR.size],p:[[X,y,pr]]};const g=scrLive();if(g){scrStyle(g,SCR.cur);scrSeg(g,SCR.cur,0);g.restore();}return true;}
 function scrExtend(e){const cur=SCR.cur;if(!cur)return;const L=e.getCoalescedEvents?e.getCoalescedEvents():[],ev=L.length?L:[e],pen=e.pointerType==='pen',g=cur.p?scrLive():null;if(g)scrStyle(g,cur);
  for(const q of ev){const [X,Y]=scrPt(q),y=Y-cur.pg*scrStep();if(cur.erase){scrErase(X,y);continue;}
-  const P_=cur.p,l=P_[P_.length-1];if(Math.hypot(X-l[0],y-l[1])<.25/SCR.z)continue;P_.push([X,y,pen&&q.pressure>0?q.pressure:.5]);if(g)scrSeg(g,cur,P_.length-1);}}
+  const P_=cur.p,l=P_[P_.length-1];if(Math.hypot(X-l[0],y-l[1])<.25/SCR.z)continue;P_.push([X,y,pen&&q.pressure>0?q.pressure:.5]);if(g)scrSeg(g,cur,P_.length-1);}if(g)g.restore();}
 function scrThin(p){if(p.length<3)return p;const o=[p[0]];for(let i=1;i<p.length-1;i++){const l=o[o.length-1];if(Math.hypot(p[i][0]-l[0],p[i][1]-l[1])>=.45)o.push(p[i]);}o.push(p[p.length-1]);return o;}
 function scrFinish(){const cur=SCR.cur;SCR.cur=null;SCR.drawId=null;SCR.drawSrc=null;if(!cur)return;
  if(cur.erase){if(cur.erase.length){SCR.undo.push({a:'del',items:cur.erase});SCR.redo=[];}scrBarDraw();return;}
@@ -6943,7 +6976,7 @@ function scrKey(e){const st=scrStage(),h=(st&&st.clientHeight)||600,k=e.key;
 
 /* ----- the view, its bar, and the ways in ----- */
 function scrDom(){if(document.getElementById('scrView'))return;const v=document.createElement('div');v.id='scrView';v.hidden=true;
- v.innerHTML='<div id="scrBar"></div><div id="scrStage" aria-label="The script’s pages. Write on them with the Pencil."><div id="scrWorld"></div><div id="scrMsg"></div></div>';$('#main').appendChild(v);
+ v.innerHTML='<div id="scrBar"></div><div id="scrStage" aria-label="The script’s pages. Write on them with the Pencil."><div id="scrWorld"></div><canvas id="scrPdfV" hidden></canvas><canvas id="scrInkV"></canvas><div id="scrMsg"></div></div>';$('#main').appendChild(v);
  scrBind(v.querySelector('#scrStage'));
  v.querySelector('#scrBar').addEventListener('click',e=>{const b=e.target.closest('[data-scr]');if(!b)return;const k=b.dataset.scr;
   if(k.startsWith('t:')){SCR.tool=k.slice(2);}else if(k.startsWith('c:')){SCR.color[SCR.tool==='hl'?'hl':'pen']=k.slice(2);}
@@ -6956,7 +6989,7 @@ function scrBarDraw(){const el=document.getElementById('scrBar');if(!el)return;c
   `<b class="scrnm" title="${esc(sc.name)}">${esc(sc.name)}</b><div class="seg" role="group" aria-label="Tool">${[['pen','Pen'],['hl','Highlighter'],['er','Eraser']].map(([k,l])=>`<button data-scr="t:${k}"${tl===k?' class="on" aria-pressed="true"':' aria-pressed="false"'}>${l}</button>`).join('')}</div>
    <div class="scrcol" role="group" aria-label="Color"${set?'':' style="visibility:hidden"'}>${(set||SCR_COLORS.pen).map(([v,n])=>`<button data-scr="c:${v}" style="background:${v}" aria-label="${n}"${cur===v?' class="on" aria-pressed="true"':' aria-pressed="false"'}></button>`).join('')}</div>
    <select id="scrSz" aria-label="Thickness"${set?'':' style="visibility:hidden"'}>${['Fine','Medium','Bold'].map((l,i)=>`<option value="${i}"${SCR.size===i?' selected':''}>${l}</option>`).join('')}</select>
-   <button data-scr="undo"${SCR.undo.length?'':' disabled'}>Undo</button><button data-scr="redo"${SCR.redo.length?'':' disabled'}>Redo</button><span class="sp"></span>
+   <button class="scric" data-scr="undo" aria-label="Undo" title="Undo"${SCR.undo.length?'':' disabled'}><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button><button class="scric" data-scr="redo" aria-label="Redo" title="Redo"${SCR.redo.length?'':' disabled'}><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button><span class="sp"></span>
    <button data-scr="scene">${esc(s.number?'Go to Scene '+s.number:'Go to This Scene')}</button><span id="scrPg"></span><button data-scr="fit">Fit Width</button><button data-scr="more">Script…</button>`;
  if(h===SCR.bar)return;SCR.bar=h;el.innerHTML=h;scrPgLabel();}
 function scrMsg(){const el=document.getElementById('scrMsg');if(!el)return;const s=scene(),fid=sFolder(s),f=fid&&fById(fid);let h='';
